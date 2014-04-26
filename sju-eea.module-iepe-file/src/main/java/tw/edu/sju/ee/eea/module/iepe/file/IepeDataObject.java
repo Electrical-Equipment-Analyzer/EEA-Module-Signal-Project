@@ -17,9 +17,11 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.file;
 
+import java.awt.Color;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import org.netbeans.core.spi.multiview.MultiViewElement;
-import org.netbeans.core.spi.multiview.text.MultiViewEditorElement;
+import java.io.InputStream;
+import org.jfree.chart.plot.ValueMarker;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
@@ -29,9 +31,9 @@ import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
-import org.openide.util.Lookup;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
-import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.module.iepe.cookie.PlayStreamCookie;
 
 @Messages({
     "LBL_Iepe_LOADER=Files of Iepe"
@@ -99,16 +101,40 @@ import org.openide.windows.TopComponent;
             position = 1400
     )
 })
-public class IepeDataObject extends MultiDataObject {
+public class IepeDataObject extends MultiDataObject implements PlayStreamCookie {
+
+    protected ValueMarker cursor;
+    private long pos;
+    private InputStream stream;
 
     public IepeDataObject(FileObject pf, MultiFileLoader loader) throws DataObjectExistsException, IOException {
         super(pf, loader);
         registerEditor("application/iepe", true);
+        init();
     }
 
     @Override
     protected int associateLookup() {
         return 1;
+    }
+
+    private void init() {
+        cursor = new ValueMarker(0);
+        cursor.setPaint(Color.black);
+    }
+
+    @Override
+    public void initStream() throws FileNotFoundException, IOException {
+        pos = (long) (cursor.getValue() * 16 * 8);
+        stream = getPrimaryFile().getInputStream();
+        stream.skip(pos);
+    }
+
+    @Override
+    public int readStream(byte[] b) throws IOException {
+        pos += b.length;
+        cursor.setValue(pos / 16 / 8);
+        return stream.read(b);
     }
 
 //    @MultiViewElement.Registration(
@@ -123,5 +149,4 @@ public class IepeDataObject extends MultiDataObject {
 //    public static MultiViewEditorElement createEditor(Lookup lkp) {
 //        return new MultiViewEditorElement(lkp);
 //    }
-
 }

@@ -1,3 +1,4 @@
 Manifest-Version: 1.0
-OpenIDE-Module-Localizing-Bundle: tw/edu/sju/ee/eea/module/sound/Bundle.properties
+OpenIDE-Module-Layer: tw/edu/sju/ee/eea/module/iepe/file/layer.xml
+OpenIDE-Module-Localizing-Bundle: tw/edu/sju/ee/eea/module/iepe/file/Bundle.properties
 OpenIDE-Module-Requires: org.openide.windows.WindowManager

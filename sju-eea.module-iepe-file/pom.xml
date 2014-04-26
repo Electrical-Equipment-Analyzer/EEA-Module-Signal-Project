@@ -106,6 +106,7 @@
             <groupId>tw.edu.sju.ee.eea.jni</groupId>
             <artifactId>jni-mps</artifactId>
             <version>1.0</version>
+            <type>jar</type>
         </dependency>
     </dependencies>
 
