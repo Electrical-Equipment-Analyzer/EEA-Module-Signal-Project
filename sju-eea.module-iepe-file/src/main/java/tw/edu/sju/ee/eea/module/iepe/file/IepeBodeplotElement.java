@@ -17,105 +17,39 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.file;
 
-import java.io.Closeable;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
-import org.jfree.chart.ChartMouseEvent;
-import org.jfree.chart.ChartMouseListener;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.event.ChartProgressEvent;
-import org.jfree.chart.event.ChartProgressListener;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
 import org.openide.awt.UndoRedo;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
-import tw.edu.sju.ee.eea.ui.chart.SampledChart;
-import tw.edu.sju.ee.eea.util.iepe.VoltageInputStream;
 
 @MultiViewElement.Registration(
-        displayName = "#LBL_Iepe_VISUAL",
+        displayName = "#LBL_Iepe_BodePlot",
         iconBase = "tw/edu/sju/ee/eea/module/iepe/file/iepe.png",
         mimeType = "application/iepe",
         persistenceType = TopComponent.PERSISTENCE_NEVER,
         preferredID = "IepeVisual",
-        position = 2000
+        position = 3000
 )
-@Messages("LBL_Iepe_VISUAL=Visual")
-public final class IepeVisualElement extends JPanel implements MultiViewElement, Closeable {
+@Messages("LBL_Iepe_BodePlot=BodePlot")
+public final class IepeBodeplotElement extends JPanel implements MultiViewElement {
 
     private IepeDataObject obj;
     private JToolBar toolbar = new JToolBar();
     private transient MultiViewElementCallback callback;
-//    private ValueMarker cursor;
-    private boolean chartMouseClicked;
 
-    public IepeVisualElement(Lookup lkp) {
+    public IepeBodeplotElement(Lookup lkp) {
         obj = lkp.lookup(IepeDataObject.class);
         assert obj != null;
         initComponents();
-        ((ChartPanel) chartPanel).addChartMouseListener(new ChartMouseListener() {
-
-            @Override
-            public void chartMouseClicked(ChartMouseEvent event) {
-                chartMouseClicked = true;
-            }
-
-            @Override
-            public void chartMouseMoved(ChartMouseEvent event) {
-            }
-        });
     }
 
-    public JFreeChart createChart() {
-
-        XYSeries series = new XYSeries("Ch_0");
-
-        try {
-            VoltageInputStream vi = new VoltageInputStream(obj.getPrimaryFile().getInputStream());
-            for (int i = 0; i < 100000; i++) {
-                double value = vi.readVoltage();
-                vi.skip(8 * 15);
-                series.add(i, value);
-            }
-
-        } catch (FileNotFoundException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (IOException ex) {
-        }
-
-        XYSeriesCollection collection = new XYSeriesCollection();
-        collection.addSeries(series);
-
-        SampledChart sampledChart = new SampledChart("PlotTitle");
-        sampledChart.addData(0, collection);
-
-//        cursor = new ValueMarker(500);
-//        cursor.setPaint(Color.black);
-        sampledChart.addMarker(obj.getCursor());
-        sampledChart.addProgressListener(new ChartProgressListener() {
-
-            @Override
-            public void chartProgress(ChartProgressEvent event) {
-                if (chartMouseClicked && event.getType() == ChartProgressEvent.DRAWING_FINISHED) {
-                    obj.setCursor(event.getChart().getXYPlot().getDomainCrosshairValue());
-                    chartMouseClicked = false;
-                }
-            }
-        });
-
-        return sampledChart;
-    }
 
     @Override
     public String getName() {
@@ -130,7 +64,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        chartPanel = new ChartPanel(createChart());
+        chartPanel = obj.getBodeplotPanel();
 
         javax.swing.GroupLayout chartPanelLayout = new javax.swing.GroupLayout(chartPanel);
         chartPanel.setLayout(chartPanelLayout);
@@ -166,6 +100,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
     // End of variables declaration//GEN-END:variables
     @Override
     public JComponent getVisualRepresentation() {
+        System.out.println("getVisual");
         return this;
     }
 
@@ -194,6 +129,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
 
     @Override
     public void componentShowing() {
+        System.out.println("Show");
     }
 
     @Override
@@ -223,8 +159,4 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
         return CloseOperationState.STATE_OK;
     }
 
-    @Override
-    public void close() throws IOException {
-        System.out.println("close");
-    }
 }
