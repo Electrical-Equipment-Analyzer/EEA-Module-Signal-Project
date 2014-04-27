@@ -114,15 +114,15 @@ import tw.edu.sju.ee.eea.util.iepe.VoltageInputStream;
 })
 public class IepeDataObject extends MultiDataObject implements PlayStreamCookie {
 
-    private long pos;
-    private ValueMarker cursor;
+    private long index;
+//    private ValueMarker cursor;
     private InputStream stream;
     private ChartPanel bodePlot;
 
     public IepeDataObject(FileObject pf, MultiFileLoader loader) throws DataObjectExistsException, IOException {
         super(pf, loader);
         registerEditor("application/iepe", true);
-        init();
+//        init();
         this.bodePlot = new ChartPanel(createChart());
         Thread thread = new Thread() {
 
@@ -149,17 +149,16 @@ public class IepeDataObject extends MultiDataObject implements PlayStreamCookie 
         return 1;
     }
 
-    private void init() {
-        cursor = new ValueMarker(0);
-        cursor.setPaint(Color.black);
-    }
-
+//    private void init() {
+//        cursor = new ValueMarker(0);
+//        cursor.setPaint(Color.black);
+//    }
     private JFreeChart createChart() {
         XYSeries series = new XYSeries("Ch_0");
 
         try {
             VoltageInputStream vi = new VoltageInputStream(getPrimaryFile().getInputStream());
-            vi.skip(pos / 8);
+            vi.skip(index / 8);
             double[] value = new double[1024 * 16];
             for (int i = 0; i < value.length; i++) {
                 value[i] = vi.readVoltage();
@@ -199,21 +198,27 @@ public class IepeDataObject extends MultiDataObject implements PlayStreamCookie 
         return bodePlot;
     }
 
-    protected ValueMarker getCursor() {
-        return cursor;
-    }
-
-    protected void setCursor(double value) {
-        cursor.setValue(value);
-        pos = (long) (value * 16 * 8);
+//    protected ValueMarker getCursor() {
+//        return cursor;
+//    }
+//    protected void setCursor(double value) {
+//        cursor.setValue(value);
+//        pos = (long) (value * 16 * 8);
+//    }
+    void setIndex(long index) {
+        this.index = index;
         try {
             stream = getPrimaryFile().getInputStream();
-            stream.skip(pos);
+            stream.skip(index);
         } catch (FileNotFoundException ex) {
             Exceptions.printStackTrace(ex);
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
+    }
+
+    long getIndex() {
+        return this.index;
     }
 
     @Override
@@ -222,8 +227,7 @@ public class IepeDataObject extends MultiDataObject implements PlayStreamCookie 
 
     @Override
     public int readStream(byte[] b) throws IOException {
-        pos += b.length;
-        cursor.setValue(pos / 16 / 8);
+        index += b.length;
         return stream.read(b);
     }
 

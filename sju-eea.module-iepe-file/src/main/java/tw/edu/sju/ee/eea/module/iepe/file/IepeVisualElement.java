@@ -17,11 +17,16 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.file;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -33,6 +38,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
+import org.jfree.chart.plot.ValueMarker;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
@@ -69,7 +75,8 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    obj.setCursor(0);
+                    setCursorValue(0);
+                    fallowCursor();
                 }
             });
             this.add(head);
@@ -78,7 +85,8 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    obj.setCursor(len);
+                    setCursorValue(total);
+                    fallowCursor();
                 }
             });
             this.add(tail);
@@ -88,10 +96,10 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    double tmp = obj.getCursor().getValue();
-                    pos += (int) ((tmp - pos) / 2);
+                    double tmp = cursor.getValue();
+                    index += (int) ((tmp - index) / 2);
                     length /= 2;
-                    repaintChart();
+                    scrollLength();
                 }
             });
             this.add(zoomIn);
@@ -100,10 +108,10 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    double tmp = obj.getCursor().getValue();
-                    pos -= (int) ((tmp - pos) * 2);
+                    double tmp = cursor.getValue();
+                    index -= (int) (tmp - index);
                     length *= 2;
-                    repaintChart();
+                    scrollLength();
                 }
             });
             this.add(zoomOut);
@@ -115,20 +123,24 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
     private IepeDataObject obj;
     private JToolBar toolbar = new IepeVisualToolBar();
     private transient MultiViewElementCallback callback;
-//    private ValueMarker cursor;
+    private ValueMarker cursor;
+    private boolean update;
     private boolean chartMouseClicked;
-    private int pos;
+    private boolean chartScroll;
+    private int index;
     private int length;
-    private int len = 62500;
+    private int total = 62500;
 
     public IepeVisualElement(Lookup lkp) {
         obj = lkp.lookup(IepeDataObject.class);
         assert obj != null;
 
-        pos = 0;
+        index = 0;
         length = 10000;
 
         initComponents();
+        scrollBar.setMaximum(total);
+        scrollLength();
         ((ChartPanel) chartPanel).addChartMouseListener(new ChartMouseListener() {
 
             @Override
@@ -140,30 +152,57 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
             public void chartMouseMoved(ChartMouseEvent event) {
             }
         });
+        scrollBar.addAdjustmentListener(new AdjustmentListener() {
+
+            @Override
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                System.out.println("adjustmentValueChanged" + chartScroll);
+                if (!chartScroll) {
+                    return;
+                }
+                length = e.getAdjustable().getVisibleAmount();
+                index = e.getAdjustable().getValue();
+                repaintChart();
+            }
+        });
+        Thread thread = new Thread() {
+
+            @Override
+            public void run() {
+                while (true) {
+                    updateCursor(obj.getIndex() / 8 / 16);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                }
+            }
+
+        };
+        thread.start();
     }
 
     public JFreeChart createChart() {
 
         SampledChart sampledChart = new SampledChart("PlotTitle");
         try {
-            sampledChart.addData(0, SampledChart.createSampledSeriesCollection("Ch_0", obj.getPrimaryFile().getInputStream(), pos, 16000, length));
+            sampledChart.addData(0, SampledChart.createSampledSeriesCollection("Ch_0", obj.getPrimaryFile().getInputStream(), index, 16000, length));
         } catch (FileNotFoundException ex) {
             Exceptions.printStackTrace(ex);
         }
-        sampledChart.addMarker(obj.getCursor());
+        cursor = new ValueMarker(0);
+        cursor.setPaint(Color.black);
+        sampledChart.addMarker(cursor);
         sampledChart.addProgressListener(new ChartProgressListener() {
 
             @Override
             public void chartProgress(ChartProgressEvent event) {
                 if (event.getType() == ChartProgressEvent.DRAWING_FINISHED) {
                     if (chartMouseClicked) {
-                        obj.setCursor(event.getChart().getXYPlot().getDomainCrosshairValue());
+                        double domainCrosshairValue = event.getChart().getXYPlot().getDomainCrosshairValue();
+                        setCursorValue(domainCrosshairValue);
                         chartMouseClicked = false;
-                    }
-                    double tmp = obj.getCursor().getValue() - pos;
-                    if (tmp < 0 || tmp > length) {
-                        pos = (int) (obj.getCursor().getValue() - (length / 20));
-                        repaintChart();
                     }
                 }
             }
@@ -171,16 +210,46 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
         return sampledChart;
     }
 
-    public void repaintChart() {
+    private void setCursorValue(double cursor) {
+        this.cursor.setValue(cursor);
+        obj.setIndex((long) (cursor * 16 * 8));
+    }
+
+    void updateCursor(double cursor) {
+        this.cursor.setValue(cursor);
+        fallowCursor();
+    }
+
+    private void fallowCursor() {
+        double tmp = cursor.getValue() - index;
+        if (tmp < 0 || tmp > length) {
+            index = (int) (cursor.getValue() - (length * 0.05));
+            scrollIndex();
+        }
+    }
+
+    private void scrollLength() {
+        length = (length > total ? total : length);
+        chartScroll = false;
+        scrollBar.setVisibleAmount(length);
+        scrollIndex();
+    }
+
+    private void scrollIndex() {
+        System.out.println("si");
+        index = (index > (total - length) ? total - length : index);
+        index = (index < 0 ? 0 : index);
+        chartScroll = false;
+        scrollBar.setValue(index);
+        repaintChart();
+    }
+
+    private void repaintChart() {
+        System.out.println("rech");
         JFreeChart chart = ((ChartPanel) chartPanel).getChart();
         chart = null;
-        length = (length > len ? len : length);
-        pos = (pos > (len - length) ? len - length : pos);
-        pos = (pos < 0 ? 0 : pos);
         ((ChartPanel) chartPanel).setChart(createChart());
-        scrollBar.setMaximum(len - length);
-        scrollBar.setVisibleAmount(length);
-        scrollBar.setValue(pos);
+        chartScroll = true;
     }
 
     @Override
