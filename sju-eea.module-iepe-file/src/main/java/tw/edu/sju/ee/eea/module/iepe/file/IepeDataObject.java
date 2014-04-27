@@ -129,6 +129,8 @@ public class IepeDataObject extends MultiDataObject implements PlayStreamCookie 
             @Override
             public void run() {
                 while (true) {
+                    JFreeChart chart = bodePlot.getChart();
+                    chart = null;
                     bodePlot.setChart(createChart());
                     try {
                         Thread.sleep(500);
@@ -204,19 +206,24 @@ public class IepeDataObject extends MultiDataObject implements PlayStreamCookie 
     protected void setCursor(double value) {
         cursor.setValue(value);
         pos = (long) (value * 16 * 8);
+        try {
+            stream = getPrimaryFile().getInputStream();
+            stream.skip(pos);
+        } catch (FileNotFoundException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     @Override
     public void initStream() throws FileNotFoundException, IOException {
-        pos = (long) (cursor.getValue() * 16 * 8);
-        stream = getPrimaryFile().getInputStream();
-        stream.skip(pos);
     }
 
     @Override
     public int readStream(byte[] b) throws IOException {
         pos += b.length;
-        setCursor(pos / 16 / 8);
+        cursor.setValue(pos / 16 / 8);
         return stream.read(b);
     }
 
@@ -232,5 +239,4 @@ public class IepeDataObject extends MultiDataObject implements PlayStreamCookie 
 //    public static MultiViewEditorElement createEditor(Lookup lkp) {
 //        return new MultiViewEditorElement(lkp);
 //    }
-
 }
