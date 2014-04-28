@@ -114,39 +114,64 @@ import tw.edu.sju.ee.eea.util.iepe.VoltageInputStream;
 })
 public class IepeDataObject extends MultiDataObject implements PlayStreamCookie {
 
-    private long index;
+//    private long index;
 //    private ValueMarker cursor;
+    private IepeCursor cursor;
+    int data_bytes = 8;
     private InputStream stream;
     private ChartPanel bodePlot;
 
     public IepeDataObject(FileObject pf, MultiFileLoader loader) throws DataObjectExistsException, IOException {
         super(pf, loader);
         registerEditor("application/iepe", true);
-//        init();
-        this.bodePlot = new ChartPanel(createChart());
-        Thread thread = new Thread() {
+
+        cursor = new IepeCursor();
+        cursor.addIepeCursorListener(new IepeCursorListener() {
 
             @Override
-            public void run() {
-                while (true) {
-                    JFreeChart chart = bodePlot.getChart();
-                    chart = null;
-                    bodePlot.setChart(createChart());
+            public void cursorMoved(IepeCursorEvent e) {
+                System.out.println("cursorMoved " + e.getType());
+                if (e.getType() == IepeCursorEvent.MOVE) {
                     try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException ex) {
+                        stream = getPrimaryFile().getInputStream();
+                        stream.skip(e.getIndex());
+                    } catch (FileNotFoundException ex) {
+                        Exceptions.printStackTrace(ex);
+                    } catch (IOException ex) {
                         Exceptions.printStackTrace(ex);
                     }
                 }
             }
-
-        };
-        thread.start();
+        });
+//        init();
+        this.bodePlot = new ChartPanel(createChart());
+//        Thread thread = new Thread() {
+//
+//            @Override
+//            public void run() {
+//                while (true) {
+//                    JFreeChart chart = bodePlot.getChart();
+//                    chart = null;
+//                    bodePlot.setChart(createChart());
+//                    try {
+//                        Thread.sleep(500);
+//                    } catch (InterruptedException ex) {
+//                        Exceptions.printStackTrace(ex);
+//                    }
+//                }
+//            }
+//
+//        };
+//        thread.start();
     }
 
     @Override
     protected int associateLookup() {
         return 1;
+    }
+
+    IepeCursor getCursor() {
+        return cursor;
     }
 
 //    private void init() {
@@ -158,7 +183,7 @@ public class IepeDataObject extends MultiDataObject implements PlayStreamCookie 
 
         try {
             VoltageInputStream vi = new VoltageInputStream(getPrimaryFile().getInputStream());
-            vi.skip(index / 8);
+//            vi.skip(index / 8);
             double[] value = new double[1024 * 16];
             for (int i = 0; i < value.length; i++) {
                 value[i] = vi.readVoltage();
@@ -205,29 +230,27 @@ public class IepeDataObject extends MultiDataObject implements PlayStreamCookie 
 //        cursor.setValue(value);
 //        pos = (long) (value * 16 * 8);
 //    }
-    void setIndex(long index) {
-        this.index = index;
-        try {
-            stream = getPrimaryFile().getInputStream();
-            stream.skip(index);
-        } catch (FileNotFoundException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-    }
-
-    long getIndex() {
-        return this.index;
-    }
-
+//    void setIndex(long index) {
+//        this.index = index;
+//        try {
+//            stream = getPrimaryFile().getInputStream();
+//            stream.skip(index);
+//        } catch (FileNotFoundException ex) {
+//            Exceptions.printStackTrace(ex);
+//        } catch (IOException ex) {
+//            Exceptions.printStackTrace(ex);
+//        }
+//    }
+//    long getIndex() {
+//        return this.index;
+//    }
     @Override
     public void initStream() throws FileNotFoundException, IOException {
     }
 
     @Override
     public int readStream(byte[] b) throws IOException {
-        index += b.length;
+        cursor.increase(b.length);
         return stream.read(b);
     }
 

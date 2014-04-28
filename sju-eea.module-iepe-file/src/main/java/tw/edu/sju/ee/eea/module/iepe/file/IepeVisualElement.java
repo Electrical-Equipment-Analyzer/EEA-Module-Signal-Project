@@ -76,7 +76,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     setCursorValue(0);
-                    fallowCursor();
+//                    fallowCursor();
                 }
             });
             this.add(head);
@@ -86,7 +86,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     setCursorValue(total);
-                    fallowCursor();
+//                    fallowCursor();
                 }
             });
             this.add(tail);
@@ -138,6 +138,8 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
         index = 0;
         length = 10000;
 
+        cursor = new ValueMarker(0);
+        cursor.setPaint(Color.black);
         initComponents();
         scrollBar.setMaximum(total);
         scrollLength();
@@ -165,22 +167,30 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
                 repaintChart();
             }
         });
-        Thread thread = new Thread() {
+        obj.getCursor().addIepeCursorListener(new IepeCursorListener() {
 
             @Override
-            public void run() {
-                while (true) {
-                    updateCursor(obj.getIndex() / 8 / 16);
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
-                }
+            public void cursorMoved(IepeCursorEvent e) {
+                System.out.println("cursorMoved " + e.getType());
+                updateCursor(e.getIndex() / 8 / 16);
             }
-
-        };
-        thread.start();
+        });
+//        Thread thread = new Thread() {
+//
+//            @Override
+//            public void run() {
+//                while (true) {
+//                    updateCursor(obj.getIndex() / 8 / 16);
+//                    try {
+//                        Thread.sleep(500);
+//                    } catch (InterruptedException ex) {
+//                        Exceptions.printStackTrace(ex);
+//                    }
+//                }
+//            }
+//
+//        };
+//        thread.start();
     }
 
     public JFreeChart createChart() {
@@ -191,8 +201,6 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
         } catch (FileNotFoundException ex) {
             Exceptions.printStackTrace(ex);
         }
-        cursor = new ValueMarker(0);
-        cursor.setPaint(Color.black);
         sampledChart.addMarker(cursor);
         sampledChart.addProgressListener(new ChartProgressListener() {
 
@@ -211,8 +219,9 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
     }
 
     private void setCursorValue(double cursor) {
-        this.cursor.setValue(cursor);
-        obj.setIndex((long) (cursor * 16 * 8));
+//        this.cursor.setValue(cursor);
+//        obj.setIndex((long) (cursor * 16 * 8));
+        obj.getCursor().move((long) (cursor * 16 * 8));
     }
 
     void updateCursor(double cursor) {
