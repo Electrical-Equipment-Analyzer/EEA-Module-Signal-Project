@@ -61,6 +61,7 @@ public final class IepeBodeplotElement extends JPanel implements MultiViewElemen
     public IepeBodeplotElement(Lookup lkp) {
         obj = lkp.lookup(IepeDataObject.class);
         assert obj != null;
+        toolbar.setFloatable(false);
         initComponents();
         new Thread(this).start();
         obj.getCursor().addIepeCursorListener(new IepeCursorListener() {

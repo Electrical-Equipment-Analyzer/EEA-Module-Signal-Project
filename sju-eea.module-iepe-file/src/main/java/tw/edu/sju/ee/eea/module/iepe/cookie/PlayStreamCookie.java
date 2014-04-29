@@ -26,7 +26,5 @@ import org.openide.nodes.Node;
  */
 public interface PlayStreamCookie extends Node.Cookie {
 
-    public void initStream() throws IOException;
-
     public int readStream(byte b[]) throws IOException;
 }

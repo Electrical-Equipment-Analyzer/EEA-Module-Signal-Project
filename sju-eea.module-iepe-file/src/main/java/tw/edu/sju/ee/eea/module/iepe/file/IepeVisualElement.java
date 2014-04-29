@@ -56,7 +56,7 @@ import tw.edu.sju.ee.eea.ui.chart.SampledChart;
         position = 2000
 )
 @Messages("LBL_Iepe_VISUAL=Visual")
-public final class IepeVisualElement extends JPanel implements MultiViewElement, Closeable {
+public final class IepeVisualElement extends JPanel implements MultiViewElement {
 
     private class IepeVisualToolBar extends JToolBar {
 
@@ -327,16 +327,12 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement,
     @Override
     public void setMultiViewCallback(MultiViewElementCallback callback) {
         this.callback = callback;
+        callback.getTopComponent().setDisplayName(obj.getPrimaryFile().getNameExt());
     }
 
     @Override
     public CloseOperationState canCloseElement() {
         return CloseOperationState.STATE_OK;
-    }
-
-    @Override
-    public void close() throws IOException {
-        System.out.println("close");
     }
 
 }

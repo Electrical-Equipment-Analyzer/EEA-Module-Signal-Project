@@ -48,10 +48,6 @@ public final class PlaySoundAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent ev) {
-        // TODO use context
-        System.out.println("Play");
-        System.out.println(context.getClass().getName());
-//            context.edit();
 
         Thread thread = new Thread() {
 
@@ -60,15 +56,10 @@ public final class PlaySoundAction implements ActionListener {
                 IEPEPlayer audio = null;
                 try {
                     audio = new IEPEPlayer();
-                    context.initStream();
                     audio.startPlay();
-
                     OutputStream out = audio.getOutputStream();
-                    
-                        byte[] buffer = new byte[1024];
+                    byte[] buffer = new byte[1024];
                     while (context.readStream(buffer) > 0) {
-//                        int len = context.readStream(buffer);
-//                        System.out.println(len);
                         out.write(buffer, 0, buffer.length);
                     }
 
