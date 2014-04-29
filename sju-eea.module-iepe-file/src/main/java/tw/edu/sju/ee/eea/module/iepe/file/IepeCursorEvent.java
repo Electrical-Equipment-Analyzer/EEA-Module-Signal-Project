@@ -26,7 +26,7 @@ import java.util.EventObject;
 public class IepeCursorEvent extends EventObject {
 
     public static final int INCREASE = 0;
-    public static final int MOVE = 1;
+    public static final int SET = 1;
 
     private int type;
 
@@ -41,6 +41,10 @@ public class IepeCursorEvent extends EventObject {
 
     public long getIndex() {
         return ((IepeCursor) source).getIndex();
+    }
+
+    public int getTime() {
+        return ((IepeCursor) source).getTime();
     }
 
 }

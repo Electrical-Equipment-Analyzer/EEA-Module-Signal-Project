@@ -17,8 +17,6 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.file;
 
-import java.awt.event.ActionListener;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
 /**
@@ -35,14 +33,23 @@ public class IepeCursor {
         return index;
     }
 
+    public int getTime() {
+        return (int) (index / 8 / 16);
+    }
+
     public void increase(long index) {
         this.index += index;
         CursorPerformed(new IepeCursorEvent(this, IepeCursorEvent.INCREASE));
     }
 
-    public void move(long index) {
+    public void setIndex(long index) {
         this.index = index;
-        CursorPerformed(new IepeCursorEvent(this, IepeCursorEvent.MOVE));
+        CursorPerformed(new IepeCursorEvent(this, IepeCursorEvent.SET));
+    }
+
+    public void setTime(int ms) {
+        this.index = ms * 16 * 8;
+        CursorPerformed(new IepeCursorEvent(this, IepeCursorEvent.SET));
     }
 
     protected void CursorPerformed(IepeCursorEvent e) {

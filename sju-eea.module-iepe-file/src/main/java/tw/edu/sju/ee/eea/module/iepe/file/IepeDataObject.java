@@ -130,7 +130,7 @@ public class IepeDataObject extends MultiDataObject implements PlayStreamCookie 
 
             @Override
             public void cursorMoved(IepeCursorEvent e) {
-                if (e.getType() == IepeCursorEvent.MOVE) {
+                if (e.getType() == IepeCursorEvent.SET) {
                     try {
                         stream = getPrimaryFile().getInputStream();
                         stream.skip(e.getIndex());
