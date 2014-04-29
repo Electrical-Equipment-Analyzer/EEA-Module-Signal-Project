@@ -36,7 +36,7 @@
   <SubComponents>
     <Container class="javax.swing.JPanel" name="chartPanel">
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="obj.getBodeplotPanel()"/>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new ChartPanel(createChart())"/>
       </AuxValues>
 
       <Layout>

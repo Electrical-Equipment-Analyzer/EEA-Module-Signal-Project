@@ -17,17 +17,31 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.file;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
+import org.apache.commons.math3.complex.Complex;
+import org.apache.commons.math3.complex.ComplexUtils;
+import org.apache.commons.math3.transform.DftNormalization;
+import org.apache.commons.math3.transform.FastFourierTransformer;
+import org.apache.commons.math3.transform.TransformType;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
 import org.openide.awt.UndoRedo;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.ui.workspace.plot.BodePlot;
+import tw.edu.sju.ee.eea.util.iepe.VoltageInputStream;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_Iepe_BodePlot",
@@ -38,7 +52,7 @@ import org.openide.windows.TopComponent;
         position = 3000
 )
 @Messages("LBL_Iepe_BodePlot=BodePlot")
-public final class IepeBodeplotElement extends JPanel implements MultiViewElement {
+public final class IepeBodeplotElement extends JPanel implements MultiViewElement, Runnable {
 
     private IepeDataObject obj;
     private JToolBar toolbar = new JToolBar();
@@ -48,12 +62,70 @@ public final class IepeBodeplotElement extends JPanel implements MultiViewElemen
         obj = lkp.lookup(IepeDataObject.class);
         assert obj != null;
         initComponents();
-    }
+        new Thread(this).start();
+        obj.getCursor().addIepeCursorListener(new IepeCursorListener() {
 
+            @Override
+            public void cursorMoved(IepeCursorEvent e) {
+                synchronized (IepeBodeplotElement.this) {
+                    IepeBodeplotElement.this.notify();
+                }
+            }
+        });
+    }
 
     @Override
     public String getName() {
         return "IepeVisualElement";
+    }
+
+    @Override
+    public void run() {
+        System.out.println("start");
+        while (true) {
+            try {
+                synchronized (IepeBodeplotElement.this) {
+                    IepeBodeplotElement.this.wait();
+                }
+            } catch (InterruptedException ex) {
+            }
+            ((ChartPanel) chartPanel).setChart(createChart());
+        }
+    }
+
+    private JFreeChart createChart() {
+        XYSeries series = new XYSeries("Ch_0");
+
+        try {
+            VoltageInputStream vi = new VoltageInputStream(obj.getPrimaryFile().getInputStream());
+            vi.skip(obj.getCursor().getIndex() / 8);
+            double[] value = new double[1024 * 16];
+            for (int i = 0; i < value.length; i++) {
+                value[i] = vi.readVoltage();
+            }
+
+            FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
+            Complex[] data = ComplexUtils.convertToComplex(value);
+            Complex[] transform = fft.transform(data, TransformType.FORWARD);
+            int max = transform.length / 2 + 1;
+            for (int i = 1; i < max; i++) {
+                double f = i * 16000.0 / transform.length;
+                series.add(f, transform[i].abs());
+            }
+
+        } catch (FileNotFoundException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (IOException ex) {
+        }
+
+        XYSeriesCollection collection = new XYSeriesCollection();
+        collection.addSeries(series);
+
+        BodePlot bodePlot = new BodePlot("Ti");
+        bodePlot.addData(0, "Magnitude(dB)", collection);
+        bodePlot.getXYPlot().getRangeAxis().setRange(0, 500);
+        bodePlot.getXYPlot().getDomainAxis().setRange(0.5, 10000);
+        return bodePlot;
     }
 
     /**
@@ -64,7 +136,7 @@ public final class IepeBodeplotElement extends JPanel implements MultiViewElemen
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        chartPanel = obj.getBodeplotPanel();
+        chartPanel = new ChartPanel(createChart());
 
         javax.swing.GroupLayout chartPanelLayout = new javax.swing.GroupLayout(chartPanel);
         chartPanel.setLayout(chartPanelLayout);

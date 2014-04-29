@@ -119,18 +119,17 @@ public class IepeDataObject extends MultiDataObject implements PlayStreamCookie 
     private IepeCursor cursor;
     int data_bytes = 8;
     private InputStream stream;
-    private ChartPanel bodePlot;
+//    private ChartPanel bodePlot;
 
     public IepeDataObject(FileObject pf, MultiFileLoader loader) throws DataObjectExistsException, IOException {
         super(pf, loader);
         registerEditor("application/iepe", true);
-
+        stream = getPrimaryFile().getInputStream();
         cursor = new IepeCursor();
         cursor.addIepeCursorListener(new IepeCursorListener() {
 
             @Override
             public void cursorMoved(IepeCursorEvent e) {
-                System.out.println("cursorMoved " + e.getType());
                 if (e.getType() == IepeCursorEvent.MOVE) {
                     try {
                         stream = getPrimaryFile().getInputStream();
@@ -144,7 +143,7 @@ public class IepeDataObject extends MultiDataObject implements PlayStreamCookie 
             }
         });
 //        init();
-        this.bodePlot = new ChartPanel(createChart());
+//        this.bodePlot = new ChartPanel(createChart());
 //        Thread thread = new Thread() {
 //
 //            @Override
@@ -178,51 +177,9 @@ public class IepeDataObject extends MultiDataObject implements PlayStreamCookie 
 //        cursor = new ValueMarker(0);
 //        cursor.setPaint(Color.black);
 //    }
-    private JFreeChart createChart() {
-        XYSeries series = new XYSeries("Ch_0");
-
-        try {
-            VoltageInputStream vi = new VoltageInputStream(getPrimaryFile().getInputStream());
-//            vi.skip(index / 8);
-            double[] value = new double[1024 * 16];
-            for (int i = 0; i < value.length; i++) {
-                value[i] = vi.readVoltage();
-            }
-
-//        double fre = cursor.getValue() /5;
-//        System.out.println(fre);
-//            double[] buf = new double[1024];
-//            for (int x = 0; x < buf.length; x++) {
-//            buf[x] = Math.sin(x / 16000.0 * 2 * Math.PI * fre) * 5;
-//            }
-            FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
-            Complex[] data = ComplexUtils.convertToComplex(value);
-            Complex[] transform = fft.transform(data, TransformType.FORWARD);
-            int max = transform.length / 2 + 1;
-            for (int i = 1; i < max; i++) {
-                double f = i * 16000.0 / transform.length;
-                series.add(f, transform[i].abs());
-            }
-
-        } catch (FileNotFoundException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (IOException ex) {
-        }
-
-        XYSeriesCollection collection = new XYSeriesCollection();
-        collection.addSeries(series);
-
-        BodePlot bodePlot = new BodePlot("Ti");
-        bodePlot.addData(0, "Magnitude(dB)", collection);
-        bodePlot.getXYPlot().getRangeAxis().setRange(0, 500);
-        bodePlot.getXYPlot().getDomainAxis().setRange(0.5, 10000);
-        return bodePlot;
-    }
-
-    public ChartPanel getBodeplotPanel() {
-        return bodePlot;
-    }
-
+//    public ChartPanel getBodeplotPanel() {
+//        return bodePlot;
+//    }
 //    protected ValueMarker getCursor() {
 //        return cursor;
 //    }
