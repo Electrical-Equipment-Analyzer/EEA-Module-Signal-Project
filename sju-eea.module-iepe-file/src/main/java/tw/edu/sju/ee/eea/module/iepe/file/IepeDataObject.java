@@ -99,7 +99,7 @@ import tw.edu.sju.ee.eea.module.iepe.cookie.PlayStreamCookie;
             position = 1400
     )
 })
-public class IepeDataObject extends MultiDataObject implements PlayStreamCookie {
+public class IepeDataObject extends MultiDataObject implements IepeDataInfo, PlayStreamCookie {
 
     private IepeCursor cursor;
     private InputStream stream;
@@ -132,7 +132,8 @@ public class IepeDataObject extends MultiDataObject implements PlayStreamCookie 
         return 1;
     }
 
-    IepeCursor getCursor() {
+    @Override
+    public IepeCursor getCursor() {
         return cursor;
     }
 
@@ -140,6 +141,21 @@ public class IepeDataObject extends MultiDataObject implements PlayStreamCookie 
     public int readStream(byte[] b) throws IOException {
         cursor.increase(b.length);
         return stream.read(b);
+    }
+
+    @Override
+    public String getDisplayName() {
+        return getPrimaryFile().getNameExt();
+    }
+
+    @Override
+    public InputStream getInputStream() {
+        try {
+            return getPrimaryFile().getInputStream();
+        } catch (FileNotFoundException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return null;
     }
 
 }

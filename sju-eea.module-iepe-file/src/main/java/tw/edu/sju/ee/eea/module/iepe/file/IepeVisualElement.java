@@ -73,7 +73,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement 
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    obj.getCursor().setTime(0);
+                    info.getCursor().setTime(0);
                 }
             });
             this.add(head);
@@ -82,7 +82,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement 
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    obj.getCursor().setTime(total);
+                    info.getCursor().setTime(total);
                 }
             });
             this.add(tail);
@@ -116,7 +116,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement 
 
     }
 
-    private IepeDataObject obj;
+    private IepeDataInfo info;
     private JToolBar toolbar = new IepeVisualToolBar();
     private transient MultiViewElementCallback callback;
     private ValueMarker cursor;
@@ -127,8 +127,8 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement 
     private int total = 62500;
 
     public IepeVisualElement(Lookup lkp) {
-        obj = lkp.lookup(IepeDataObject.class);
-        assert obj != null;
+        info = lkp.lookup(IepeDataInfo.class);
+        assert info != null;
 
         index = 0;
         length = 10000;
@@ -160,7 +160,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement 
                 }
             }
         });
-        obj.getCursor().addIepeCursorListener(new IepeCursorListener() {
+        info.getCursor().addIepeCursorListener(new IepeCursorListener() {
 
             @Override
             public void cursorMoved(IepeCursorEvent e) {
@@ -177,11 +177,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement 
     public JFreeChart createChart() {
 
         SampledChart sampledChart = new SampledChart("PlotTitle");
-        try {
-            sampledChart.addData(0, SampledChart.createSampledSeriesCollection("Ch_0", obj.getPrimaryFile().getInputStream(), index, 16000, length));
-        } catch (FileNotFoundException ex) {
-            Exceptions.printStackTrace(ex);
-        }
+        sampledChart.addData(0, SampledChart.createSampledSeriesCollection("Ch_0", info.getInputStream(), index, 16000, length));
         sampledChart.addMarker(cursor);
         sampledChart.addProgressListener(new ChartProgressListener() {
 
@@ -189,7 +185,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement 
             public void chartProgress(ChartProgressEvent event) {
                 if (event.getType() == ChartProgressEvent.DRAWING_FINISHED) {
                     if (chartMouseClicked) {
-                        obj.getCursor().setTime((int) event.getChart().getXYPlot().getDomainCrosshairValue());
+                        info.getCursor().setTime((int) event.getChart().getXYPlot().getDomainCrosshairValue());
                         chartMouseClicked = false;
                     }
                 }
@@ -292,7 +288,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement 
 
     @Override
     public Lookup getLookup() {
-        return obj.getLookup();
+        return info.getLookup();
     }
 
     @Override
@@ -327,7 +323,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement 
     @Override
     public void setMultiViewCallback(MultiViewElementCallback callback) {
         this.callback = callback;
-        callback.getTopComponent().setDisplayName(obj.getPrimaryFile().getNameExt());
+        callback.getTopComponent().setDisplayName(info.getDisplayName());
     }
 
     @Override

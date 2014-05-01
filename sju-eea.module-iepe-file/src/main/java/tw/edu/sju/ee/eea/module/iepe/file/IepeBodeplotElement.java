@@ -54,17 +54,17 @@ import tw.edu.sju.ee.eea.util.iepe.VoltageInputStream;
 @Messages("LBL_Iepe_BodePlot=BodePlot")
 public final class IepeBodeplotElement extends JPanel implements MultiViewElement, Runnable {
 
-    private IepeDataObject obj;
+    private IepeDataInfo info;
     private JToolBar toolbar = new JToolBar();
     private transient MultiViewElementCallback callback;
 
     public IepeBodeplotElement(Lookup lkp) {
-        obj = lkp.lookup(IepeDataObject.class);
-        assert obj != null;
+        info = lkp.lookup(IepeDataInfo.class);
+        assert info != null;
         toolbar.setFloatable(false);
         initComponents();
         new Thread(this).start();
-        obj.getCursor().addIepeCursorListener(new IepeCursorListener() {
+        info.getCursor().addIepeCursorListener(new IepeCursorListener() {
 
             @Override
             public void cursorMoved(IepeCursorEvent e) {
@@ -98,8 +98,8 @@ public final class IepeBodeplotElement extends JPanel implements MultiViewElemen
         XYSeries series = new XYSeries("Ch_0");
 
         try {
-            VoltageInputStream vi = new VoltageInputStream(obj.getPrimaryFile().getInputStream());
-            vi.skip(obj.getCursor().getIndex() / 8);
+            VoltageInputStream vi = new VoltageInputStream(info.getInputStream());
+            vi.skip(info.getCursor().getIndex() / 8);
             double[] value = new double[1024 * 16];
             for (int i = 0; i < value.length; i++) {
                 value[i] = vi.readVoltage();
@@ -189,7 +189,7 @@ public final class IepeBodeplotElement extends JPanel implements MultiViewElemen
 
     @Override
     public Lookup getLookup() {
-        return obj.getLookup();
+        return info.getLookup();
     }
 
     @Override
