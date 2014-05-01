@@ -17,32 +17,94 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.nodes;
 
+import java.awt.Image;
 import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.Serializable;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.netbeans.core.api.multiview.MultiViews;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
+import org.openide.util.Exceptions;
+import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
+import org.openide.util.lookup.ProxyLookup;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.module.iepe.file.IepeCursor;
+import tw.edu.sju.ee.eea.module.iepe.file.IepeDataInfo;
 
 /**
  *
  * @author Leo
  */
-public class IepeRealtimeNode extends AbstractNode implements Serializable, Lookup.Provider {
+public class IepeRealtimeNode extends AbstractNode {
+
+    private IepeCursor cursor;
 
     public IepeRealtimeNode(Children children) {
         super(Children.LEAF, Lookups.singleton(children));
+        cursor = new IepeCursor();
     }
 
     @Override
     public Action[] getActions(boolean arg0) {
-        Action[] nodeActions = new Action[1];
-        nodeActions[0] = new OpenFarmDetailsAction();
-        return nodeActions;
+        return new Action[]{
+            new OpenFarmDetailsAction()
+        };
+    }
+
+    @Override
+    public Action getPreferredAction() {
+        return new OpenFarmDetailsAction();
+    }
+
+    @Override
+    public Image getIcon(int type) {
+        return ImageUtilities.loadImage("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
+    }
+
+    @Override
+    public Image getOpenedIcon(int type) {
+        return getIcon(type);
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "Real-time";
+    }
+
+    private class AA implements IepeDataInfo, Serializable, Lookup.Provider {
+
+        @Override
+        public IepeCursor getCursor() {
+            return cursor;
+        }
+
+        @Override
+        public InputStream getInputStream() {
+            try {
+                return new FileInputStream(new File("C:\\Users\\Leo\\Documents\\rec.iepe"));
+            } catch (FileNotFoundException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+            return null;
+        }
+
+        @Override
+        public String getDisplayName() {
+        return "Real-time";
+        }
+
+        @Override
+        public Lookup getLookup() {
+//            ProxyLookup proxyLookup = new ProxyLookup(new Lookup[]{Lookups.singleton(this), IepeRealtimeNode.this.getLookup()});
+            return Lookups.singleton(this);
+        }
     }
 
     private final class OpenFarmDetailsAction extends AbstractAction {
@@ -53,10 +115,10 @@ public class IepeRealtimeNode extends AbstractNode implements Serializable, Look
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            TopComponent tc = MultiViews.createMultiView("application/iepe-realtime", IepeRealtimeNode.this);
+            TopComponent tc = MultiViews.createMultiView("application/iepe", new AA());
             tc.open();
             tc.requestActive();
         }
-
+        
     }
 }
