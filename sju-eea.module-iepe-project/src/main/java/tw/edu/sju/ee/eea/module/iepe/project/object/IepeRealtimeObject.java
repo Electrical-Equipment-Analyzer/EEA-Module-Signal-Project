@@ -17,7 +17,6 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.object;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -33,11 +32,8 @@ import org.openide.util.lookup.Lookups;
 import tw.edu.sju.ee.eea.jni.mps.MPS140801IEPE;
 import tw.edu.sju.ee.eea.module.iepe.file.IepeCursor;
 import tw.edu.sju.ee.eea.module.iepe.file.IepeDataInfo;
-import tw.edu.sju.ee.eea.module.iepe.project.nodes.IepeRealtimeNode;
-import tw.edu.sju.ee.eea.module.iepe.project.window.IepeWriter;
 import tw.edu.sju.ee.eea.util.iepe.IEPEException;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
-import tw.edu.sju.ee.eea.util.iepe.io.IEPEInputStream;
 import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
 
 /**
@@ -77,7 +73,7 @@ public class IepeRealtimeObject extends Thread implements IepeDataInfo, Serializ
         FileInputStream fi = null;
         try {
             fi = new FileInputStream(new File("C:\\Users\\Leo\\Documents\\rec.iepe"));
-            IEPEInputStream iepeStreams = iepe.getIepeStreams(0);
+            IepeInputStream iepeStreams = iepe.getIepeStreams(0);
 //            VoltageInputStream vi = new VoltageInputStream(iepe.getIepeStreams(0));
 //            DataOutputStream dos = new DataOutputStream(screen);
             while (true) {
