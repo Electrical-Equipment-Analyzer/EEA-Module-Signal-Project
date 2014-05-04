@@ -17,13 +17,9 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.window;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.Calendar;
@@ -32,15 +28,9 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
-import org.jfree.chart.ChartMouseEvent;
-import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.event.ChartProgressEvent;
-import org.jfree.chart.event.ChartProgressListener;
-import org.jfree.chart.plot.ValueMarker;
-import org.jfree.data.time.Millisecond;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.netbeans.core.spi.multiview.CloseOperationState;
@@ -51,9 +41,6 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
-import tw.edu.sju.ee.eea.module.iepe.file.IepeCursorEvent;
-import tw.edu.sju.ee.eea.module.iepe.file.IepeCursorListener;
-import tw.edu.sju.ee.eea.module.iepe.file.IepeDataInfo;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
 import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
@@ -126,21 +113,21 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
 
         }
 
+        @Override
+        public void setEnabled(boolean b) {
+            this.head.setEnabled(b);
+            this.tail.setEnabled(b);
+            this.zoomIn.setEnabled(b);
+            this.zoomOut.setEnabled(b);
+        }
+
     }
 
-//    private IepeDataInfo info;
     private Lookup lkp;
     private IepeRealtimeObject rt;
     private JToolBar toolbar = new IepeVisualToolBar();
     private transient MultiViewElementCallback callback;
-//    private ValueMarker cursor;
-//    private boolean chartMouseClicked;
-//    private boolean chartScroll;
-//    private int index;
-//    private int length;
-//    private int total = 62500;
 
-    private PipedOutputStream po;
     private PipedInputStream pi;
 
     public IepeRealtimeVisualElement(Lookup lkp) {
@@ -148,68 +135,12 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         this.rt = lkp.lookup(IepeRealtimeObject.class);
         assert rt != null;
 
-//        index = 0;
-//        length = 10000;
-
-//        cursor = new ValueMarker(0);
-//        cursor.setPaint(Color.black);
         initComponents();
-//        scrollBar.setMaximum(total);
-//        scrollLength();
-//        ((ChartPanel) chartPanel).addChartMouseListener(new ChartMouseListener() {
-//
-//            @Override
-//            public void chartMouseClicked(ChartMouseEvent event) {
-//                chartMouseClicked = true;
-//            }
-//
-//            @Override
-//            public void chartMouseMoved(ChartMouseEvent event) {
-//            }
-//        });
-//        scrollBar.addAdjustmentListener(new AdjustmentListener() {
-//
-//            @Override
-//            public void adjustmentValueChanged(AdjustmentEvent e) {
-//                if (chartScroll) {
-//                    index = e.getAdjustable().getValue();
-//                    length = e.getAdjustable().getVisibleAmount();
-//                    repaintChart();
-//                }
-//            }
-//        });
-//        info.getCursor().addIepeCursorListener(new IepeCursorListener() {
-//
-//            @Override
-//            public void cursorMoved(IepeCursorEvent e) {
-//                cursor.setValue(e.getTime());
-//                double tmp = cursor.getValue() - index;
-//                if (tmp < 0 || tmp > length) {
-//                    index = (int) (cursor.getValue() - (length * 0.05));
-//                    scrollIndex();
-//                }
-//            }
-//        });
-//        IepeWriter iepeWriter = new IepeWriter() {
-//
-//            @Override
-//            public void write(double[] data) {
-//                double tmp = 0;
-//                double max = series.getMaxX();
-//                for (int i = 0; i < data.length; i++) {
-//                    tmp = Math.max(tmp, data[i]);
-//                    if (i % 16 == 0) {
-//                        series.add(max++, (i % 32 == 0 ? -tmp : tmp));
-//                    }
-//                }
-//            }
-//        };
-//        rt.setScreen(iepeWriter);
+        toolbar.setEnabled(false);
 
         try {
             pi = new PipedInputStream(19200);
-            po = new PipedOutputStream(pi);
-            rt.setScreen(po);
+            rt.setScreen(new PipedOutputStream(pi));
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -219,8 +150,7 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
             @Override
             public void run() {
                 long t = Calendar.getInstance().getTimeInMillis();
-                IepeInputStream vi = new IepeInputStream(pi);
-                SampledStream sr = new SampledStream(vi, 1600);
+                SampledStream sr = new SampledStream(new IepeInputStream(pi), 1600);
                 while (true) {
                     try {
                         series.add(t, sr.readSampled());
@@ -228,11 +158,6 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
                         Exceptions.printStackTrace(ex);
                     }
                     t += 100;
-//                    try {
-//                        Thread.sleep(10);
-//                    } catch (InterruptedException ex) {
-//                        Exceptions.printStackTrace(ex);
-//                    }
                 }
             }
 
@@ -242,45 +167,16 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
 
     private XYSeries series;
 
-//    private XYSeriesCollection createSampledSeriesCollection(String name) {
-//        series = new XYSeries(name);
-//        XYSeriesCollection collection = new XYSeriesCollection();
-//        collection.addSeries(series);
-//        return collection;
-//    }
-
-    public JFreeChart createChart() {
+    private JFreeChart createChart() {
         SampledChart sampledChart = new SampledChart("PlotTitle");
         sampledChart.addData(0, SampledChart.createSampledSeriesCollection("Ch_0"));
         ValueAxis axis = sampledChart.getXYPlot().getDomainAxis();
         axis.setAutoRange(true);
         axis.setFixedAutoRange(60000.0);  // 60 seconds
-        
+
         series = ((XYSeriesCollection) sampledChart.getXYPlot().getDataset()).getSeries(0);
         return sampledChart;
     }
-
-//    private void scrollLength() {
-//        length = (length > total ? total : length);
-//        chartScroll = false;
-//        scrollBar.setVisibleAmount(length);
-//        scrollIndex();
-//    }
-//
-//    private void scrollIndex() {
-//        index = (index > (total - length) ? total - length : index);
-//        index = (index < 0 ? 0 : index);
-//        chartScroll = false;
-//        scrollBar.setValue(index);
-//        repaintChart();
-//    }
-//
-//    private void repaintChart() {
-//        JFreeChart chart = ((ChartPanel) chartPanel).getChart();
-//        chart = null;
-//        ((ChartPanel) chartPanel).setChart(createChart());
-//        chartScroll = true;
-//    }
 
     @Override
     public String getName() {
