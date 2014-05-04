@@ -22,8 +22,13 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.netbeans.core.api.multiview.MultiViews;
@@ -33,10 +38,16 @@ import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
-import org.openide.util.lookup.ProxyLookup;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.jni.mps.MPS140801IEPE;
 import tw.edu.sju.ee.eea.module.iepe.file.IepeCursor;
 import tw.edu.sju.ee.eea.module.iepe.file.IepeDataInfo;
+import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
+import tw.edu.sju.ee.eea.module.iepe.project.window.IepeWriter;
+import tw.edu.sju.ee.eea.util.iepe.IEPEException;
+import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
+import tw.edu.sju.ee.eea.util.iepe.io.IEPEInputStream;
+import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
 
 /**
  *
@@ -44,11 +55,8 @@ import tw.edu.sju.ee.eea.module.iepe.file.IepeDataInfo;
  */
 public class IepeRealtimeNode extends AbstractNode {
 
-    private IepeCursor cursor;
-
     public IepeRealtimeNode(Children children) {
         super(Children.LEAF, Lookups.singleton(children));
-        cursor = new IepeCursor();
     }
 
     @Override
@@ -78,35 +86,6 @@ public class IepeRealtimeNode extends AbstractNode {
         return "Real-time";
     }
 
-    private class AA implements IepeDataInfo, Serializable, Lookup.Provider {
-
-        @Override
-        public IepeCursor getCursor() {
-            return cursor;
-        }
-
-        @Override
-        public InputStream getInputStream() {
-            try {
-                return new FileInputStream(new File("C:\\Users\\Leo\\Documents\\rec.iepe"));
-            } catch (FileNotFoundException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-            return null;
-        }
-
-        @Override
-        public String getDisplayName() {
-        return "Real-time";
-        }
-
-        @Override
-        public Lookup getLookup() {
-//            ProxyLookup proxyLookup = new ProxyLookup(new Lookup[]{Lookups.singleton(this), IepeRealtimeNode.this.getLookup()});
-            return Lookups.singleton(this);
-        }
-    }
-
     private final class OpenFarmDetailsAction extends AbstractAction {
 
         public OpenFarmDetailsAction() {
@@ -115,10 +94,10 @@ public class IepeRealtimeNode extends AbstractNode {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            TopComponent tc = MultiViews.createMultiView("application/iepe", new AA());
+            TopComponent tc = MultiViews.createMultiView("application/iepe-realtime", new IepeRealtimeObject());
             tc.open();
             tc.requestActive();
         }
-        
+
     }
 }
