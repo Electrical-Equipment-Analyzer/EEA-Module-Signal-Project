@@ -41,7 +41,7 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.ui.workspace.plot.BodePlot;
-import tw.edu.sju.ee.eea.util.iepe.VoltageInputStream;
+import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_Iepe_BodePlot",
@@ -98,11 +98,11 @@ public final class IepeBodeplotElement extends JPanel implements MultiViewElemen
         XYSeries series = new XYSeries("Ch_0");
 
         try {
-            VoltageInputStream vi = new VoltageInputStream(info.getInputStream());
+            IepeInputStream vi = new IepeInputStream(info.getInputStream());
             vi.skip(info.getCursor().getIndex() / 8);
             double[] value = new double[1024 * 16];
             for (int i = 0; i < value.length; i++) {
-                value[i] = vi.readVoltage();
+                value[i] = vi.readValue();
             }
 
             FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
