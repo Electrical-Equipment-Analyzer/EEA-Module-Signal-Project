@@ -17,15 +17,10 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.object;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
@@ -43,7 +38,6 @@ import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
 public class IepeRealtimeObject extends Thread implements IepeDataInfo, Serializable, Lookup.Provider {
 
     private IEPEInput iepe;
-//        private CircularFifoQueue<Double> buffer = new CircularFifoQueue<Double>(160000);
     private OutputStream screen;
 
     public IepeRealtimeObject() {
@@ -52,54 +46,27 @@ public class IepeRealtimeObject extends Thread implements IepeDataInfo, Serializ
 
     public void setScreen(OutputStream screen) {
         this.screen = screen;
-        System.out.println("set screen");
-        this.start();
-    }
-
-    @Override
-    public void start() {
         try {
             iepe.startIEPE();
+            this.start();
         } catch (IEPEException ex) {
             Exceptions.printStackTrace(ex);
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
-        super.start(); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void run() {
-        FileInputStream fi = null;
-        try {
-            fi = new FileInputStream(new File("C:\\Users\\Leo\\Documents\\rec.iepe"));
-            IepeInputStream iepeStreams = iepe.getIepeStreams(0);
-//            VoltageInputStream vi = new VoltageInputStream(iepe.getIepeStreams(0));
-//            DataOutputStream dos = new DataOutputStream(screen);
-            while (true) {
-                try {
-                    while (iepeStreams.available() < 128) {
-                        yield();
-                    }
-                    try {
-                        byte[] buffer = new byte[128];
-                        iepeStreams.read(buffer);
-                        screen.write(buffer);
-//                    dos.writeDouble(100.0 * Math.random());
-                    } catch (IOException ex) {
-                        Logger.getLogger(IepeRealtimeObject.class.getName()).log(Level.SEVERE, null, ex);
-//                } catch (NullPointerException ex) {
-
-                    }
-                } catch (IOException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
-            }
-        } catch (FileNotFoundException ex) {
-            Exceptions.printStackTrace(ex);
-        } finally {
+        IepeInputStream iepeStreams = iepe.getIepeStreams(0);
+        while (true) {
             try {
-                fi.close();
+                while (iepeStreams.available() < 128) {
+                    yield();
+                }
+                byte[] buffer = new byte[128];
+                iepeStreams.read(buffer);
+                screen.write(buffer);
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
