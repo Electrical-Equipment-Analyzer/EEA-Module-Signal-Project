@@ -104,10 +104,10 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    double tmp = cursor.getValue();
-                    index += (int) ((tmp - index) / 2);
-                    length /= 2;
-                    scrollLength();
+//                    double tmp = cursor.getValue();
+//                    index += (int) ((tmp - index) / 2);
+//                    length /= 2;
+//                    scrollLength();
                 }
             });
             this.add(zoomIn);
@@ -116,10 +116,10 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    double tmp = cursor.getValue();
-                    index -= (int) (tmp - index);
-                    length *= 2;
-                    scrollLength();
+//                    double tmp = cursor.getValue();
+//                    index -= (int) (tmp - index);
+//                    length *= 2;
+//                    scrollLength();
                 }
             });
             this.add(zoomOut);
@@ -133,12 +133,12 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
     private IepeRealtimeObject rt;
     private JToolBar toolbar = new IepeVisualToolBar();
     private transient MultiViewElementCallback callback;
-    private ValueMarker cursor;
-    private boolean chartMouseClicked;
-    private boolean chartScroll;
-    private int index;
-    private int length;
-    private int total = 62500;
+//    private ValueMarker cursor;
+//    private boolean chartMouseClicked;
+//    private boolean chartScroll;
+//    private int index;
+//    private int length;
+//    private int total = 62500;
 
     private PipedOutputStream po;
     private PipedInputStream pi;
@@ -148,36 +148,36 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         this.rt = lkp.lookup(IepeRealtimeObject.class);
         assert rt != null;
 
-        index = 0;
-        length = 10000;
+//        index = 0;
+//        length = 10000;
 
-        cursor = new ValueMarker(0);
-        cursor.setPaint(Color.black);
+//        cursor = new ValueMarker(0);
+//        cursor.setPaint(Color.black);
         initComponents();
-        scrollBar.setMaximum(total);
-        scrollLength();
-        ((ChartPanel) chartPanel).addChartMouseListener(new ChartMouseListener() {
-
-            @Override
-            public void chartMouseClicked(ChartMouseEvent event) {
-                chartMouseClicked = true;
-            }
-
-            @Override
-            public void chartMouseMoved(ChartMouseEvent event) {
-            }
-        });
-        scrollBar.addAdjustmentListener(new AdjustmentListener() {
-
-            @Override
-            public void adjustmentValueChanged(AdjustmentEvent e) {
-                if (chartScroll) {
-                    index = e.getAdjustable().getValue();
-                    length = e.getAdjustable().getVisibleAmount();
-                    repaintChart();
-                }
-            }
-        });
+//        scrollBar.setMaximum(total);
+//        scrollLength();
+//        ((ChartPanel) chartPanel).addChartMouseListener(new ChartMouseListener() {
+//
+//            @Override
+//            public void chartMouseClicked(ChartMouseEvent event) {
+//                chartMouseClicked = true;
+//            }
+//
+//            @Override
+//            public void chartMouseMoved(ChartMouseEvent event) {
+//            }
+//        });
+//        scrollBar.addAdjustmentListener(new AdjustmentListener() {
+//
+//            @Override
+//            public void adjustmentValueChanged(AdjustmentEvent e) {
+//                if (chartScroll) {
+//                    index = e.getAdjustable().getValue();
+//                    length = e.getAdjustable().getVisibleAmount();
+//                    repaintChart();
+//                }
+//            }
+//        });
 //        info.getCursor().addIepeCursorListener(new IepeCursorListener() {
 //
 //            @Override
@@ -242,43 +242,45 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
 
     private XYSeries series;
 
-    private XYSeriesCollection createSampledSeriesCollection(String name) {
-        series = new XYSeries(name);
-        XYSeriesCollection collection = new XYSeriesCollection();
-        collection.addSeries(series);
-        return collection;
-    }
+//    private XYSeriesCollection createSampledSeriesCollection(String name) {
+//        series = new XYSeries(name);
+//        XYSeriesCollection collection = new XYSeriesCollection();
+//        collection.addSeries(series);
+//        return collection;
+//    }
 
     public JFreeChart createChart() {
         SampledChart sampledChart = new SampledChart("PlotTitle");
-        sampledChart.addData(0, createSampledSeriesCollection("Ch_0"));
+        sampledChart.addData(0, SampledChart.createSampledSeriesCollection("Ch_0"));
         ValueAxis axis = sampledChart.getXYPlot().getDomainAxis();
         axis.setAutoRange(true);
         axis.setFixedAutoRange(60000.0);  // 60 seconds
+        
+        series = ((XYSeriesCollection) sampledChart.getXYPlot().getDataset()).getSeries(0);
         return sampledChart;
     }
 
-    private void scrollLength() {
-        length = (length > total ? total : length);
-        chartScroll = false;
-        scrollBar.setVisibleAmount(length);
-        scrollIndex();
-    }
-
-    private void scrollIndex() {
-        index = (index > (total - length) ? total - length : index);
-        index = (index < 0 ? 0 : index);
-        chartScroll = false;
-        scrollBar.setValue(index);
-        repaintChart();
-    }
-
-    private void repaintChart() {
-        JFreeChart chart = ((ChartPanel) chartPanel).getChart();
-        chart = null;
-        ((ChartPanel) chartPanel).setChart(createChart());
-        chartScroll = true;
-    }
+//    private void scrollLength() {
+//        length = (length > total ? total : length);
+//        chartScroll = false;
+//        scrollBar.setVisibleAmount(length);
+//        scrollIndex();
+//    }
+//
+//    private void scrollIndex() {
+//        index = (index > (total - length) ? total - length : index);
+//        index = (index < 0 ? 0 : index);
+//        chartScroll = false;
+//        scrollBar.setValue(index);
+//        repaintChart();
+//    }
+//
+//    private void repaintChart() {
+//        JFreeChart chart = ((ChartPanel) chartPanel).getChart();
+//        chart = null;
+//        ((ChartPanel) chartPanel).setChart(createChart());
+//        chartScroll = true;
+//    }
 
     @Override
     public String getName() {
