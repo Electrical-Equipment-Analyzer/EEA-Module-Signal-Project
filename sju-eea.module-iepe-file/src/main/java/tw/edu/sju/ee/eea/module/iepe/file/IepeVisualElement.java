@@ -37,6 +37,8 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
 import org.jfree.chart.plot.ValueMarker;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
@@ -210,9 +212,12 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement 
     }
 
     private void repaintChart() {
-        JFreeChart chart = ((ChartPanel) chartPanel).getChart();
-        chart = null;
-        ((ChartPanel) chartPanel).setChart(createChart());
+//        JFreeChart chart = ((ChartPanel) chartPanel).getChart();
+//        chart = null;
+//        ((ChartPanel) chartPanel).setChart(createChart());
+        XYSeriesCollection sc = ((XYSeriesCollection) ((ChartPanel) chartPanel).getChart().getXYPlot().getDataset());
+        sc.removeAllSeries();
+        sc.addSeries(SampledChart.series("Ch_0", info.getInputStream(), index, 16000, length));
         chartScroll = true;
     }
 
