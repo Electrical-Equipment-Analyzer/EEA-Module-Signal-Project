@@ -114,6 +114,8 @@ public class IepeRealtimeObject implements Runnable, IepeDataInfo, Serializable,
         return lkp;
     }
 
+    TopComponent tc;
+
     public Node createNodeDelegate() {
         return new AbstractNode(Children.LEAF, lkp) {
 
@@ -123,7 +125,9 @@ public class IepeRealtimeObject implements Runnable, IepeDataInfo, Serializable,
 
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        TopComponent tc = MultiViews.createMultiView("application/iepe-realtime", IepeRealtimeObject.this);
+                        if (tc == null) {
+                            tc = MultiViews.createMultiView("application/iepe-realtime", IepeRealtimeObject.this);
+                        }
                         tc.open();
                         tc.requestActive();
                     }
