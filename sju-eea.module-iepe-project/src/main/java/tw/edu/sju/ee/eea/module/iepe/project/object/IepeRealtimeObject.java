@@ -27,6 +27,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.netbeans.api.project.Project;
 import org.netbeans.core.api.multiview.MultiViews;
+import org.netbeans.spi.navigator.NavigatorLookupHint;
 import org.openide.loaders.DataNode;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
@@ -40,6 +41,7 @@ import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.jni.mps.MPS140801IEPE;
 import tw.edu.sju.ee.eea.module.iepe.file.IepeCursor;
 import tw.edu.sju.ee.eea.module.iepe.file.IepeDataInfo;
+import tw.edu.sju.ee.eea.module.iepe.project.window.IepeNavigatorPanel;
 import tw.edu.sju.ee.eea.util.iepe.IEPEException;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
 import tw.edu.sju.ee.eea.util.iepe.IEPEPlayer;
@@ -57,8 +59,9 @@ public class IepeRealtimeObject implements Runnable, IepeDataInfo, Serializable,
     private IEPEPlayer player;
 
     public IepeRealtimeObject(Project project) {
-        this.lkp = new ProxyLookup(new Lookup[]{Lookups.singleton(project), Lookups.singleton(this)});
+        this.lkp = Lookups.fixed(project, this, new IepeNavigatorHint());
         iepe = new IEPEInput(new MPS140801IEPE(0, 16000), new int[]{1}, 512);
+        
     }
 
     public void setScreen(OutputStream screen) {
@@ -152,4 +155,12 @@ public class IepeRealtimeObject implements Runnable, IepeDataInfo, Serializable,
         };
     }
 
+    private static final class IepeNavigatorHint implements NavigatorLookupHint {
+
+        @Override
+        public String getContentType() {
+            return "application/iepe-realtime"; // NOI18N
+        }
+
+    }
 }
