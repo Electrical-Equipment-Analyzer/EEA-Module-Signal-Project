@@ -17,38 +17,57 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.object;
 
+import java.awt.Image;
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import org.netbeans.api.project.Project;
+import org.netbeans.core.api.multiview.MultiViews;
+import org.openide.loaders.DataNode;
+import org.openide.nodes.AbstractNode;
+import org.openide.nodes.Children;
+import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
+import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
+import org.openide.util.lookup.ProxyLookup;
+import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.jni.mps.MPS140801IEPE;
 import tw.edu.sju.ee.eea.module.iepe.file.IepeCursor;
 import tw.edu.sju.ee.eea.module.iepe.file.IepeDataInfo;
 import tw.edu.sju.ee.eea.util.iepe.IEPEException;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
+import tw.edu.sju.ee.eea.util.iepe.IEPEPlayer;
 import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
 
 /**
  *
  * @author Leo
  */
-public class IepeRealtimeObject extends Thread implements IepeDataInfo, Serializable, Lookup.Provider {
+public class IepeRealtimeObject implements Runnable, IepeDataInfo, Serializable, Lookup.Provider {
 
+    private Lookup lkp;
     private IEPEInput iepe;
     private OutputStream screen;
+    private IEPEPlayer player;
 
-    public IepeRealtimeObject() {
+    public IepeRealtimeObject(Project project) {
+        this.lkp = new ProxyLookup(new Lookup[]{Lookups.singleton(project), Lookups.singleton(this)});
         iepe = new IEPEInput(new MPS140801IEPE(0, 16000), new int[]{1}, 512);
     }
 
     public void setScreen(OutputStream screen) {
         this.screen = screen;
         try {
+            player = new IEPEPlayer();
+            player.startPlay();
             iepe.startIEPE();
-            this.start();
+            new Thread(this).start();
         } catch (IEPEException ex) {
             Exceptions.printStackTrace(ex);
         } catch (IOException ex) {
@@ -59,14 +78,16 @@ public class IepeRealtimeObject extends Thread implements IepeDataInfo, Serializ
     @Override
     public void run() {
         IepeInputStream iepeStreams = iepe.getIepeStreams(0);
+        OutputStream po = player.getOutputStream();
         while (true) {
             try {
                 while (iepeStreams.available() < 128) {
-                    yield();
+                    Thread.yield();
                 }
                 byte[] buffer = new byte[128];
                 iepeStreams.read(buffer);
                 screen.write(buffer);
+                po.write(buffer);
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
@@ -90,7 +111,41 @@ public class IepeRealtimeObject extends Thread implements IepeDataInfo, Serializ
 
     @Override
     public Lookup getLookup() {
-        return Lookups.singleton(this);
+        return lkp;
+    }
+
+    public Node createNodeDelegate() {
+        return new AbstractNode(Children.LEAF, lkp) {
+
+            @Override
+            public Action getPreferredAction() {
+                return new AbstractAction() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        TopComponent tc = MultiViews.createMultiView("application/iepe-realtime", IepeRealtimeObject.this);
+                        tc.open();
+                        tc.requestActive();
+                    }
+                };
+            }
+
+            @Override
+            public Image getIcon(int type) {
+                return ImageUtilities.loadImage("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
+            }
+
+            @Override
+            public Image getOpenedIcon(int type) {
+                return getIcon(type);
+            }
+
+            @Override
+            public String getDisplayName() {
+                return "Real-time";
+            }
+
+        };
     }
 
 }

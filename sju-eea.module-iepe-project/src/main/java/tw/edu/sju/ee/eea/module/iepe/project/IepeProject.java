@@ -103,7 +103,7 @@ public class IepeProject implements Project {
         }
     }
 
-    private class IepeProjectLogicalView implements LogicalViewProvider {
+    public class IepeProjectLogicalView implements LogicalViewProvider {
 
         @Override
         public Node createLogicalView() {
@@ -132,7 +132,7 @@ public class IepeProject implements Project {
             public ProjectNode(Node node) throws DataObjectNotFoundException {
                 super(node, NodeFactorySupport.createCompositeChildren(
                         IepeProject.this,
-                        "Projects/org-customer-project/Nodes"),
+                        "Projects/edu-sju-iepe/Nodes"),
                         new ProxyLookup(new Lookup[]{Lookups.singleton(IepeProject.this), node.getLookup()}));
             }
 

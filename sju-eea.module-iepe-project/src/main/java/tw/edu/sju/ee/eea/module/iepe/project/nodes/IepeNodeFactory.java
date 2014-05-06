@@ -17,10 +17,15 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.nodes;
 
+import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.event.ChangeListener;
 import org.netbeans.api.project.Project;
+import org.netbeans.spi.project.ui.support.CommonProjectActions;
 import org.netbeans.spi.project.ui.support.NodeFactory;
 import org.netbeans.spi.project.ui.support.NodeList;
 import org.openide.filesystems.FileObject;
@@ -30,15 +35,24 @@ import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.nodes.Children;
 import org.openide.nodes.FilterNode;
 import org.openide.nodes.Node;
+import org.openide.nodes.NodeEvent;
+import org.openide.nodes.NodeListener;
+import org.openide.nodes.NodeMemberEvent;
+import org.openide.nodes.NodeReorderEvent;
 import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
+import org.openide.util.lookup.Lookups;
+import org.openide.util.lookup.ProxyLookup;
 import tw.edu.sju.ee.eea.module.iepe.file.IepeDataObject;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
+import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 
 /**
  *
  * @author Leo
  */
-@NodeFactory.Registration(projectType = "org-customer-project", position = 10)
-public class TextsNodeFactory implements NodeFactory {
+@NodeFactory.Registration(projectType = "edu-sju-iepe", position = 10)
+public class IepeNodeFactory implements NodeFactory {
 
     @Override
     public NodeList<?> createNodes(Project p) {
@@ -59,10 +73,10 @@ public class TextsNodeFactory implements NodeFactory {
             FileObject textsFolder = project.getProjectDirectory().getFileObject("texts");
             List<Node> result = new ArrayList<Node>();
             if (textsFolder != null) {
-                Node node = new FilterNode(Node.EMPTY);
-                node.setName("aaa");
-                
-                result.add(new IepeRealtimeNode(Children.LEAF));
+//                Node node = new FilterNode(Node.EMPTY, Children.LEAF, new ProxyLookup(new Lookup[]{Lookups.singleton(project)}));
+//                node.setName("aaa");
+//                result.add(node);
+                result.add(new IepeRealtimeObject(project).createNodeDelegate());
                 for (FileObject textsFolderFile : textsFolder.getChildren()) {
                     try {
                         result.add(DataObject.find(textsFolderFile).getNodeDelegate());
