@@ -66,7 +66,8 @@ public class IepeProject implements Project {
         if (lkp == null) {
             lkp = Lookups.fixed(new Object[]{
                 new Info(),
-                new IepeProjectLogicalView()
+                new IepeProjectLogicalView(),
+                new IepeCustomizerProvider(this)
             });
         }
         return lkp;
@@ -139,10 +140,8 @@ public class IepeProject implements Project {
             @Override
             public Action[] getActions(boolean arg0) {
                 return new Action[]{
-                    CommonProjectActions.newFileAction(),
-                    CommonProjectActions.copyProjectAction(),
-                    CommonProjectActions.deleteProjectAction(),
-                    CommonProjectActions.closeProjectAction()
+                    CommonProjectActions.closeProjectAction(),
+                    CommonProjectActions.customizeProjectAction()
                 };
             }
 
