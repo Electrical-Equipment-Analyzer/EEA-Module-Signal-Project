@@ -41,6 +41,7 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
 import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
@@ -137,10 +138,12 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
 
         initComponents();
         toolbar.setEnabled(false);
+        
+        IepeProject project = lkp.lookup(IepeProject.class);
 
         try {
             pi = new PipedInputStream(19200);
-            rt.setScreen(new PipedOutputStream(pi));
+            project.setRealtime(new PipedOutputStream(pi));
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
