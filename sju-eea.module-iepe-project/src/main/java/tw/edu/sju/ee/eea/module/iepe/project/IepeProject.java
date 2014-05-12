@@ -19,9 +19,6 @@ package tw.edu.sju.ee.eea.module.iepe.project;
 
 import java.awt.Image;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Arrays;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -44,10 +41,7 @@ import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
 import tw.edu.sju.ee.eea.jni.mps.MPS140801IEPE;
-import tw.edu.sju.ee.eea.util.iepe.IEPEException;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
-import tw.edu.sju.ee.eea.util.iepe.IEPEPlayer;
-import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
 
 /**
  *
@@ -59,15 +53,11 @@ public class IepeProject implements Project {
     private final ProjectState state;
     private Lookup lkp;
     private final IEPEInput iepe;
-//    private OutputStream realtime;
-//    private OutputStream player;
 
     public IepeProject(FileObject projectDirectory, ProjectState state) {
         this.projectDirectory = projectDirectory;
         this.state = state;
-
         iepe = new IEPEInput(new MPS140801IEPE(0, 16000), new int[]{1}, 512);
-
     }
 
     @Override
@@ -87,49 +77,9 @@ public class IepeProject implements Project {
         return lkp;
     }
 
-//    public void setRealtime(OutputStream realtime) {
-//        this.realtime = realtime;
-//    }
-//
-//    public void setPlayer(OutputStream player) {
-//        this.player = player;
-//    }
     public IEPEInput getIepe() {
         return iepe;
     }
-
-    
-    
-    
-//    public void run() {
-//        try {
-//            IEPEInput.IepeStream iepeStream = new IEPEInput.IepeStream();
-//            iepe.addStream(1, iepeStream);
-//            iepe.start();
-//            while (!Thread.interrupted()) {
-//                try {
-//                    while (iepeStream.available() < 128) {
-//                        Thread.yield();
-//                    }
-//                    byte[] buffer = new byte[128];
-//                    iepeStream.read(buffer);
-//                    this.realtime.write(buffer);
-//                    try {
-//                        this.player.write(buffer);
-//                    } catch (NullPointerException ex) {
-//                    }
-////                System.out.println(Arrays.toString(buffer));
-//                } catch (IOException ex) {
-//                    Exceptions.printStackTrace(ex);
-//                }
-//            }
-//            iepe.stop();
-//            System.out.println("stop");
-//        } catch (IOException ex) {
-//            Exceptions.printStackTrace(ex);
-//        } finally {
-//        }
-//    }
 
     private final class Info implements ProjectInformation {
 

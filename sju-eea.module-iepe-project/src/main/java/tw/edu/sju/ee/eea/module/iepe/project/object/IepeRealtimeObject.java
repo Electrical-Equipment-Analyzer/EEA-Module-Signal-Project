@@ -19,7 +19,6 @@ package tw.edu.sju.ee.eea.module.iepe.project.object;
 
 import java.awt.Image;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -28,24 +27,15 @@ import javax.swing.Action;
 import org.netbeans.api.project.Project;
 import org.netbeans.core.api.multiview.MultiViews;
 import org.netbeans.spi.navigator.NavigatorLookupHint;
-import org.openide.loaders.DataNode;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
-import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
-import org.openide.util.lookup.ProxyLookup;
 import org.openide.windows.TopComponent;
-import tw.edu.sju.ee.eea.jni.mps.MPS140801IEPE;
 import tw.edu.sju.ee.eea.module.iepe.file.IepeCursor;
 import tw.edu.sju.ee.eea.module.iepe.file.IepeDataInfo;
-import tw.edu.sju.ee.eea.module.iepe.project.window.IepeNavigatorPanel;
-import tw.edu.sju.ee.eea.util.iepe.IEPEException;
-import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
-import tw.edu.sju.ee.eea.util.iepe.IEPEPlayer;
-import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
 
 /**
  *

@@ -19,14 +19,11 @@ package tw.edu.sju.ee.eea.module.iepe.project.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeListener;
-import javax.swing.Action;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionRegistration;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.RequestProcessor;
 import org.openide.util.TaskListener;
@@ -65,21 +62,4 @@ public final class AcqAction implements  ActionListener {
         progr.start();
         task.schedule(0);
     }
-
-//    public void run() {
-//        try {
-//
-//            progr.start();
-//            Thread.sleep(5000);
-//            progr.progress("List prepared");
-//            Thread.sleep(5000);
-//            progr.progress("Objects loaded");
-//            Thread.sleep(5000);
-//            progr.progress("Objects structure built");
-//
-//            progr.finish();
-//        } catch (InterruptedException ex) {
-//        }
-//    }
-
 }
