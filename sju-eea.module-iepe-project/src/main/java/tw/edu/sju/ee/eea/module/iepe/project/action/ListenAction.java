@@ -34,6 +34,7 @@ import org.openide.util.TaskListener;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject.IepeProjectLogicalView;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
+import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
 import tw.edu.sju.ee.eea.util.iepe.IEPEPlayer;
 
 @ActionID(
@@ -46,26 +47,27 @@ import tw.edu.sju.ee.eea.util.iepe.IEPEPlayer;
 @ActionReference(path = "Menu/Analyzers", position = 400, separatorBefore = 350)
 @Messages("CTL_ListenAction=Listen")
 public final class ListenAction implements ActionListener {
-
+    
     private final IepeProject context;
     private final static RequestProcessor RP = new RequestProcessor("interruptible tasks", 1, true);
     private ProgressHandle progr;
-
+    
     public ListenAction(IepeProject context) {
         this.context = context;
     }
-
+    
     @Override
     public void actionPerformed(ActionEvent ev) {
         try {
             // TODO use context
             IEPEPlayer player = new IEPEPlayer();
-            context.getIepe().addStream(1, player.getOutputStream());
+            final IEPEInput.Stream stream = context.getIepe().addStream(1, player.getOutputStream());
             RequestProcessor.Task task = RP.create(player);
             progr = ProgressHandleFactory.createHandle("Play task", task);
             task.addTaskListener(new TaskListener() {
                 public void taskFinished(org.openide.util.Task task) {
                     System.out.println("fin");
+                    context.getIepe().removeStream(1, stream);
                     progr.finish();
                 }
             });
