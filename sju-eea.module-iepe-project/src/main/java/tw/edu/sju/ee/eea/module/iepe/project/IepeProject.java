@@ -53,21 +53,21 @@ import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
  *
  * @author Leo
  */
-public class IepeProject implements Project, Runnable {
+public class IepeProject implements Project {
 
     private final FileObject projectDirectory;
     private final ProjectState state;
     private Lookup lkp;
-    private IEPEInput iepe;
-    private OutputStream realtime;
-    private OutputStream player;
+    private final IEPEInput iepe;
+//    private OutputStream realtime;
+//    private OutputStream player;
 
     public IepeProject(FileObject projectDirectory, ProjectState state) {
         this.projectDirectory = projectDirectory;
         this.state = state;
 
         iepe = new IEPEInput(new MPS140801IEPE(0, 16000), new int[]{1}, 512);
-        
+
     }
 
     @Override
@@ -87,36 +87,49 @@ public class IepeProject implements Project, Runnable {
         return lkp;
     }
 
-    public void setRealtime(OutputStream realtime) {
-        this.realtime = realtime;
+//    public void setRealtime(OutputStream realtime) {
+//        this.realtime = realtime;
+//    }
+//
+//    public void setPlayer(OutputStream player) {
+//        this.player = player;
+//    }
+    public IEPEInput getIepe() {
+        return iepe;
     }
 
-    public void setPlayer(OutputStream player) {
-        this.player = player;
-    }
-
-    @Override
-    public void run() {
-        IepeInputStream iepeStreams = iepe.getIepeStreams(0);
-        while (!Thread.interrupted()) {
-            try {
-                while (iepeStreams.available() < 128) {
-                    Thread.yield();
-                }
-                byte[] buffer = new byte[128];
-                iepeStreams.read(buffer);
-                this.realtime.write(buffer);
-                try {
-                    this.player.write(buffer);
-                } catch (NullPointerException ex) {
-                }
-//                System.out.println(Arrays.toString(buffer));
-            } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-        }
-        System.out.println("stop");
-    }
+    
+    
+    
+//    public void run() {
+//        try {
+//            IEPEInput.IepeStream iepeStream = new IEPEInput.IepeStream();
+//            iepe.addStream(1, iepeStream);
+//            iepe.start();
+//            while (!Thread.interrupted()) {
+//                try {
+//                    while (iepeStream.available() < 128) {
+//                        Thread.yield();
+//                    }
+//                    byte[] buffer = new byte[128];
+//                    iepeStream.read(buffer);
+//                    this.realtime.write(buffer);
+//                    try {
+//                        this.player.write(buffer);
+//                    } catch (NullPointerException ex) {
+//                    }
+////                System.out.println(Arrays.toString(buffer));
+//                } catch (IOException ex) {
+//                    Exceptions.printStackTrace(ex);
+//                }
+//            }
+//            iepe.stop();
+//            System.out.println("stop");
+//        } catch (IOException ex) {
+//            Exceptions.printStackTrace(ex);
+//        } finally {
+//        }
+//    }
 
     private final class Info implements ProjectInformation {
 

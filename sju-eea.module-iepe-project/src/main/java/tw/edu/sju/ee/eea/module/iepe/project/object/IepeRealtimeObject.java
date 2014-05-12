@@ -54,48 +54,11 @@ import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
 public class IepeRealtimeObject implements IepeDataInfo, Serializable, Lookup.Provider {
 
     private Lookup lkp;
-//    private IEPEInput iepe;
     private OutputStream screen;
-//    private IEPEPlayer player;
 
     public IepeRealtimeObject(Project project) {
         this.lkp = Lookups.fixed(project, this, new IepeNavigatorHint());
-//        iepe = new IEPEInput(new MPS140801IEPE(0, 16000), new int[]{1}, 512);
-        
     }
-
-//    public void setScreen(OutputStream screen) {
-//        this.screen = screen;
-//        try {
-//            player = new IEPEPlayer();
-//            player.startPlay();
-//            iepe.startIEPE();
-//            new Thread(this).start();
-//        } catch (IEPEException ex) {
-//            Exceptions.printStackTrace(ex);
-//        } catch (IOException ex) {
-//            Exceptions.printStackTrace(ex);
-//        }
-//    }
-
-//    @Override
-//    public void run() {
-//        IepeInputStream iepeStreams = iepe.getIepeStreams(0);
-//        OutputStream po = player.getOutputStream();
-//        while (true) {
-//            try {
-//                while (iepeStreams.available() < 128) {
-//                    Thread.yield();
-//                }
-//                byte[] buffer = new byte[128];
-//                iepeStreams.read(buffer);
-//                screen.write(buffer);
-//                po.write(buffer);
-//            } catch (IOException ex) {
-//                Exceptions.printStackTrace(ex);
-//            }
-//        }
-//    }
 
     @Override
     public IepeCursor getCursor() {

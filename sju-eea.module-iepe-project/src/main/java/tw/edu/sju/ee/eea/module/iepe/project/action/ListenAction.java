@@ -60,9 +60,9 @@ public final class ListenAction implements ActionListener {
         try {
             // TODO use context
             IEPEPlayer player = new IEPEPlayer();
-            context.setPlayer(player.getOutputStream());
+            context.getIepe().addStream(1, player.getOutputStream());
             RequestProcessor.Task task = RP.create(player);
-            progr = ProgressHandleFactory.createHandle("Simple task", task);
+            progr = ProgressHandleFactory.createHandle("Play task", task);
             task.addTaskListener(new TaskListener() {
                 public void taskFinished(org.openide.util.Task task) {
                     System.out.println("fin");

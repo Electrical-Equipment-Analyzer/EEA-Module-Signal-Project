@@ -138,12 +138,12 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
 
         initComponents();
         toolbar.setEnabled(false);
-        
+
         IepeProject project = lkp.lookup(IepeProject.class);
 
         try {
             pi = new PipedInputStream(19200);
-            project.setRealtime(new PipedOutputStream(pi));
+            project.getIepe().addStream(1, new PipedOutputStream(pi));
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }

@@ -54,11 +54,11 @@ public final class AcqAction implements  ActionListener {
     @Override
     public void actionPerformed(ActionEvent ev) {
         // TODO use context
-        RequestProcessor.Task task = RP.create(context);
-        progr = ProgressHandleFactory.createHandle("Simple task", task);
+        RequestProcessor.Task task = RP.create(context.getIepe());
+        progr = ProgressHandleFactory.createHandle("Input task", task);
         task.addTaskListener(new TaskListener() {
             public void taskFinished(org.openide.util.Task task) {
-                System.out.println("fin");
+                System.out.println("input task finished");
                 progr.finish();
             }
         });
