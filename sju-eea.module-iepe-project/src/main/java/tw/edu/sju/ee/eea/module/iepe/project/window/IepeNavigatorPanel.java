@@ -19,30 +19,28 @@ package tw.edu.sju.ee.eea.module.iepe.project.window;
 
 import java.awt.BorderLayout;
 import java.awt.Image;
-import java.awt.datatransfer.Transferable;
-import java.awt.dnd.DnDConstants;
-import java.io.IOException;
-import java.util.List;
+import java.util.Collection;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.text.DefaultEditorKit;
 import org.netbeans.spi.navigator.NavigatorPanel;
-import org.openide.actions.NewAction;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
-import org.openide.nodes.NodeTransfer;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
+import org.openide.util.LookupEvent;
+import org.openide.util.LookupListener;
 import org.openide.util.NbBundle.Messages;
-import org.openide.util.actions.SystemAction;
-import org.openide.util.datatransfer.PasteType;
-import org.openide.util.lookup.Lookups;
+import org.openide.util.Utilities;
+import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.module.iepe.channel.ChannelNode;
+import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 
 /**
  * Top component which displays something.
@@ -52,24 +50,24 @@ import org.openide.util.lookup.Lookups;
     "CTL_NavigatorTopComponent=Navigator Window",
     "HINT_NavigatorTopComponent=This is a Navigator window"
 })
-public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, ExplorerManager.Provider {
+public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, ExplorerManager.Provider, LookupListener {
+
+    private Lookup.Result<IepeRealtimeObject> result = null;
 
     private ExplorerManager manager;
     private BeanTreeView listView;
     private Lookup lookup;
-    private Action copyAction;
 
     public IepeNavigatorPanel() {
 
         setLayout(new BorderLayout());
         manager = new ExplorerManager();
-        manager.setRootContext(new RootNode(new CategoryChildren()));
+//        manager.setRootContext(new RootNode(new ChannelChildren()));
         ActionMap map = getActionMap();
-        copyAction = ExplorerUtils.actionCopy(manager);
-        map.put(DefaultEditorKit.copyAction, copyAction);
+        map.put(DefaultEditorKit.copyAction, ExplorerUtils.actionCopy(manager));
         map.put(DefaultEditorKit.cutAction, ExplorerUtils.actionCut(manager));
         map.put(DefaultEditorKit.pasteAction, ExplorerUtils.actionPaste(manager));
-        map.put("delete", ExplorerUtils.actionDelete(manager, true)); // or false
+        map.put("delete", ExplorerUtils.actionDelete(manager, true));
 
         lookup = ExplorerUtils.createLookup(manager, map);
 
@@ -114,11 +112,15 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
 
     @Override
     public void panelActivated(Lookup lkp) {
+        this.result = Utilities.actionsGlobalContext().lookupResult(IepeRealtimeObject.class);
+        this.result.addLookupListener(this);
         ExplorerUtils.activateActions(manager, true);
     }
 
     @Override
     public void panelDeactivated() {
+        this.result.removeLookupListener(this);
+        this.result = null;
         ExplorerUtils.activateActions(manager, false);
     }
 
@@ -130,6 +132,19 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
     @Override
     public ExplorerManager getExplorerManager() {
         return manager;
+    }
+
+    @Override
+    public void resultChanged(LookupEvent le) {
+        System.out.println("resultChanged");
+        System.out.println(le);
+        Collection<? extends IepeRealtimeObject> allInstances = this.result.allInstances();
+        if (!allInstances.isEmpty()) {
+            IepeRealtimeObject realtime = allInstances.iterator().next();
+            System.out.println(realtime.getLookup());
+
+            manager.setRootContext(new RootNode(new ChannelChildren()));
+        }
     }
 
     public class RootNode extends AbstractNode {
@@ -158,83 +173,27 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
 
     }
 
-    public class Category {
+    public class ChannelChildren extends Children.Keys {
 
-        private String name;
-
-        /**
-         * Creates a new instance of Category
-         */
-        public Category() {
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-    }
-
-    public class CategoryChildren extends Children.Keys {
-
-        private String[] Categories = new String[]{
-            "channel-01",
-            "channel-02",
-            "channel-03",
-            "channel-04",
-            "channel-05",
-            "channel-06",};
-
-        public CategoryChildren() {
+        public ChannelChildren() {
         }
 
         protected Node[] createNodes(Object key) {
-            Category obj = (Category) key;
-            return new Node[]{new MovieNode(obj)};
+            Channel obj = (Channel) key;
+            return new Node[]{new ChannelNode(obj)};
         }
 
         protected void addNotify() {
             super.addNotify();
-            Category[] objs = new Category[Categories.length];
-            for (int i = 0; i < objs.length; i++) {
-                Category cat = new Category();
-                cat.setName(Categories[i]);
-                objs[i] = cat;
-            }
+            Channel[] objs = new Channel[]{
+                new Channel("USB:MPS-140801", 0),
+                new Channel("USB:MPS-140801", 1),
+                new Channel("USB:MPS-140801", 2),
+                new Channel("USB:MPS-140801", 3)
+            };
             setKeys(objs);
         }
 
     }
 
-    public class MovieNode extends AbstractNode {
-
-        private Category cccc;
-
-        /**
-         * Creates a new instance of InstrumentNode
-         */
-        public MovieNode(Category key) {
-            super(Children.LEAF, Lookups.fixed(new Object[]{key}));
-            this.cccc = key;
-            setDisplayName(key.getName());
-            setIconBaseWithExtension("org/netbeans/myfirstexplorer/marilyn.gif");
-        }
-
-        public boolean canCut() {
-
-            return true;
-        }
-
-        public boolean canDestroy() {
-            return true;
-        }
-
-        public Action[] getActions(boolean popup) {
-            return new Action[]{};
-        }
-
-    }
 }
