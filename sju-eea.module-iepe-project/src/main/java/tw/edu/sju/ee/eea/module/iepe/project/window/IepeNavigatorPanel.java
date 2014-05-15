@@ -107,7 +107,7 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
         this.result = Utilities.actionsGlobalContext().lookupResult(IepeRealtimeObject.class);
         this.result.addLookupListener(this);
         ExplorerUtils.activateActions(manager, true);
-//        resultChanged(new LookupEvent(result));
+        resultChanged(new LookupEvent(result));
     }
 
     @Override
