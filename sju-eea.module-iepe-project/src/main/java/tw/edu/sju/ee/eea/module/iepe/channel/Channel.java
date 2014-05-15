@@ -22,9 +22,7 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.Paint;
 import java.io.IOException;
-import java.io.PipedInputStream;
 import java.lang.reflect.InvocationTargetException;
-import javax.swing.Action;
 import org.jfree.data.xy.XYSeries;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
@@ -32,9 +30,7 @@ import org.openide.nodes.Node;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.util.ImageUtilities;
-import org.openide.util.lookup.Lookups;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput.IepeStream;
-import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
 import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
 
 /**
@@ -45,8 +41,6 @@ public class Channel {
 
     private String device;
     private int channel;
-//    private String name;
-//    private Color color;
 
     private IepeStream stream;
     private XYSeries series;
@@ -56,28 +50,17 @@ public class Channel {
     public Channel(String device, int channel) throws IOException {
         this.device = device;
         this.channel = channel;
-//        this.name = device + "/" + channel;
+        
         this.series = new XYSeries(device + "/" + channel);
         this.stream = new IepeStream();
-//        this.color = new Color((float) Math.random(), (float) Math.random(), (float) Math.random());
 
         sampled = new SampledStream(stream, 1600);
     }
 
-    /**
-     * Creates a new instance of Category
-     */
-    public Channel(String name) {
-        this.series = new XYSeries(name);
-    }
 
     public void setName(String name) {
         this.series.setKey(name);
     }
-
-//    public void setColor(Color color) {
-//        this.color = color;
-//    }
 
     public String getDevice() {
         return device;
@@ -90,10 +73,6 @@ public class Channel {
     public String getName() {
         return this.series.getKey().toString();
     }
-
-//    public Color getColor() {
-//        return color;
-//    }
 
     public IepeStream getStream() {
         return stream;

@@ -19,7 +19,6 @@ package tw.edu.sju.ee.eea.module.iepe.project.window;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -28,17 +27,13 @@ import javax.swing.JToolBar;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.data.xy.XYSeriesCollection;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
 import org.openide.awt.UndoRedo;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
-import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
 
@@ -124,7 +119,6 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
     private JToolBar toolbar = new IepeVisualToolBar();
     private transient MultiViewElementCallback callback;
 
-//    private IepeProject project;
 
     public IepeRealtimeVisualElement(Lookup lkp) {
         this.lkp = lkp;
@@ -134,20 +128,14 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         initComponents();
         toolbar.setEnabled(false);
 
-//        project = lkp.lookup(IepeProject.class);initComponents
         Thread t = new Thread(rt.getList());
         t.start();
     }
-
-//    private ChannelList list;
 
     private JFreeChart createChart() {
 
         SampledChart sampledChart = new SampledChart("PlotTitle");
 
-//        XYSeriesCollection collection = new XYSeriesCollection();
-//        XYItemRenderer renderer = sampledChart.creatrRenderer();
-//        rt.getList().setSeries(collection, renderer);
 
         sampledChart.addData(0, rt.getList().getCollection(), rt.getList().getRenderer());
 

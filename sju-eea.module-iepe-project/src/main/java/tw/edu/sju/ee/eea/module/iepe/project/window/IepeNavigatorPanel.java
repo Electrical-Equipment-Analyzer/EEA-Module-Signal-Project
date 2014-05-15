@@ -54,7 +54,7 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
 
         setLayout(new BorderLayout());
         manager = new ExplorerManager();
-//        manager.setRootContext(new RootNode(new ChannelChildren()));
+        
         ActionMap map = getActionMap();
         map.put(DefaultEditorKit.copyAction, ExplorerUtils.actionCopy(manager));
         map.put(DefaultEditorKit.cutAction, ExplorerUtils.actionCut(manager));
@@ -62,7 +62,6 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
         map.put("delete", ExplorerUtils.actionDelete(manager, true));
 
         lookup = ExplorerUtils.createLookup(manager, map);
-
         listView = new BeanTreeView();
         add(listView);
     }
@@ -129,15 +128,10 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
 
     @Override
     public void resultChanged(LookupEvent le) {
-        System.out.println("resultChanged");
-        System.out.println(le);
         Collection<? extends IepeRealtimeObject> allInstances = this.result.allInstances();
         if (!allInstances.isEmpty()) {
             IepeRealtimeObject realtime = allInstances.iterator().next();
-            System.out.println(realtime.getLookup());
-//            realtime.getList()
             manager.setRootContext(realtime.getList().createNodeDelegate());
-//            manager.setRootContext(new RootNode(new ChannelChildren()));
         }
     }
 
