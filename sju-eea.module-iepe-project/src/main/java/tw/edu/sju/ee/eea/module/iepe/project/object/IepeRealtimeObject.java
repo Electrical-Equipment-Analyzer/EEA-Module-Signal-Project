@@ -19,6 +19,7 @@ package tw.edu.sju.ee.eea.module.iepe.project.object;
 
 import java.awt.Image;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -30,37 +31,53 @@ import org.netbeans.spi.navigator.NavigatorLookupHint;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.file.IepeCursor;
 import tw.edu.sju.ee.eea.module.iepe.file.IepeDataInfo;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 
 /**
  *
  * @author Leo
  */
-public class IepeRealtimeObject implements IepeDataInfo, Serializable, Lookup.Provider {
+public class IepeRealtimeObject implements Serializable, Lookup.Provider {
 
     private Lookup lkp;
-    private OutputStream screen;
+    private ChannelList list;
 
     public IepeRealtimeObject(Project project) {
         this.lkp = Lookups.fixed(project, this, new IepeNavigatorHint());
+        list = new ChannelList(((IepeProject) project).getIepe());
+
+        try {
+            list.addChannel(new Channel("USB", 1));
+            list.addChannel(new Channel("USB", 2));
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
-    @Override
-    public IepeCursor getCursor() {
-        return null;
+    public ChannelList getList() {
+        return list;
     }
 
-    @Override
-    public InputStream getInputStream() {
-        return null;
-    }
-
-    @Override
+//    @Override
+//    public IepeCursor getCursor() {
+//        return null;
+//    }
+//
+//    @Override
+//    public InputStream getInputStream() {
+//        return null;
+//    }
+//
+//    @Override
     public String getDisplayName() {
         return "Real-time";
     }
@@ -102,7 +119,7 @@ public class IepeRealtimeObject implements IepeDataInfo, Serializable, Lookup.Pr
 
             @Override
             public String getDisplayName() {
-                return "Real-time";
+                return IepeRealtimeObject.this.getDisplayName();
             }
 
         };

@@ -18,10 +18,7 @@
 package tw.edu.sju.ee.eea.module.iepe.project.window;
 
 import java.awt.BorderLayout;
-import java.awt.Image;
-import java.io.IOException;
 import java.util.Collection;
-import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -30,18 +27,11 @@ import org.netbeans.spi.navigator.NavigatorPanel;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
-import org.openide.nodes.AbstractNode;
-import org.openide.nodes.Children;
-import org.openide.nodes.Node;
-import org.openide.util.Exceptions;
-import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
-import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
-import tw.edu.sju.ee.eea.module.iepe.channel.ChannelNode;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 
 /**
@@ -117,6 +107,7 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
         this.result = Utilities.actionsGlobalContext().lookupResult(IepeRealtimeObject.class);
         this.result.addLookupListener(this);
         ExplorerUtils.activateActions(manager, true);
+//        resultChanged(new LookupEvent(result));
     }
 
     @Override
@@ -144,62 +135,10 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
         if (!allInstances.isEmpty()) {
             IepeRealtimeObject realtime = allInstances.iterator().next();
             System.out.println(realtime.getLookup());
-
-            manager.setRootContext(new RootNode(new ChannelChildren()));
+//            realtime.getList()
+            manager.setRootContext(realtime.getList().createNodeDelegate());
+//            manager.setRootContext(new RootNode(new ChannelChildren()));
         }
-    }
-
-    public class RootNode extends AbstractNode {
-
-        /**
-         * Creates a new instance of RootNode
-         */
-        public RootNode(Children children) {
-            super(children);
-        }
-
-        @Override
-        public Image getIcon(int type) {
-            return ImageUtilities.loadImage("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
-        }
-
-        @Override
-        public Image getOpenedIcon(int type) {
-            return getIcon(type);
-        }
-
-        @Override
-        public String getDisplayName() {
-            return "Real-time::ipt";
-        }
-
-    }
-
-    public class ChannelChildren extends Children.Keys {
-
-        public ChannelChildren() {
-        }
-
-        protected Node[] createNodes(Object key) {
-            Channel obj = (Channel) key;
-            return new Node[]{new ChannelNode(obj)};
-        }
-
-        protected void addNotify() {
-            try {
-                super.addNotify();
-                Channel[] objs = new Channel[]{
-                    new Channel("USB:MPS-140801", 0),
-                    new Channel("USB:MPS-140801", 1),
-                    new Channel("USB:MPS-140801", 2),
-                    new Channel("USB:MPS-140801", 3)
-                };
-                setKeys(objs);
-            } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-        }
-
     }
 
 }
