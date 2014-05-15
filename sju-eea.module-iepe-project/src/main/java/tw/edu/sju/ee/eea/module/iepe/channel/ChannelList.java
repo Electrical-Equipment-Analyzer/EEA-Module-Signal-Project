@@ -127,7 +127,7 @@ public class ChannelList extends ArrayList<Channel> implements Runnable {
 
         @Override
         protected Node[] createNodes(Channel key) {
-            return new Node[]{new ChannelNode(key)};
+            return new Node[]{key.createNodeDelegate()};
         }
 
         @Override
