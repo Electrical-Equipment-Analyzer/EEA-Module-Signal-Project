@@ -45,7 +45,7 @@ import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
  *
  * @author Leo
  */
-public class ChannelList extends ArrayList<Channel> implements Runnable {
+public class ChannelList extends ArrayList<Channel> implements Runnable, Channel.Renderer {
 
     private Lookup lkp;
     private IEPEInput manager;
@@ -74,11 +74,13 @@ public class ChannelList extends ArrayList<Channel> implements Runnable {
         add(channel);
     }
     
-    private void setColor(Channel channel, Color color) {
-        renderer.setSeriesPaint(this.indexOf(channel), color);
+    @Override
+    public void setPaint(Channel channel, Paint paint) {
+        renderer.setSeriesPaint(this.indexOf(channel), paint);
     }
     
-    private Paint getColor(Channel channel) {
+    @Override
+    public Paint getPaint(Channel channel) {
         return renderer.getSeriesPaint(this.indexOf(channel));
     }
 
@@ -127,7 +129,7 @@ public class ChannelList extends ArrayList<Channel> implements Runnable {
 
         @Override
         protected Node[] createNodes(Channel key) {
-            return new Node[]{key.createNodeDelegate()};
+            return new Node[]{key.createNodeDelegate(ChannelList.this)};
         }
 
         @Override

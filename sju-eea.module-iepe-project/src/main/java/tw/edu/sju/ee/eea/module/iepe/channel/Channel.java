@@ -20,6 +20,7 @@ package tw.edu.sju.ee.eea.module.iepe.channel;
 import org.openide.util.NbBundle;
 import java.awt.Color;
 import java.awt.Image;
+import java.awt.Paint;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -45,7 +46,7 @@ public class Channel {
     private String device;
     private int channel;
 //    private String name;
-    private Color color;
+//    private Color color;
 
     private IepeStream stream;
     private XYSeries series;
@@ -58,7 +59,7 @@ public class Channel {
 //        this.name = device + "/" + channel;
         this.series = new XYSeries(device + "/" + channel);
         this.stream = new IepeStream();
-        this.color = new Color((float) Math.random(), (float) Math.random(), (float) Math.random());
+//        this.color = new Color((float) Math.random(), (float) Math.random(), (float) Math.random());
 
         sampled = new SampledStream(stream, 1600);
     }
@@ -74,9 +75,9 @@ public class Channel {
         this.series.setKey(name);
     }
 
-    public void setColor(Color color) {
-        this.color = color;
-    }
+//    public void setColor(Color color) {
+//        this.color = color;
+//    }
 
     public String getDevice() {
         return device;
@@ -90,9 +91,9 @@ public class Channel {
         return this.series.getKey().toString();
     }
 
-    public Color getColor() {
-        return color;
-    }
+//    public Color getColor() {
+//        return color;
+//    }
 
     public IepeStream getStream() {
         return stream;
@@ -117,7 +118,7 @@ public class Channel {
         "LBL_CH_color=Color",
         "DCT_CH_color=Show Color"
     })
-    public Node createNodeDelegate() {
+    public Node createNodeDelegate(final Renderer renderer) {
         return new AbstractNode(Children.LEAF) {
 
             @Override
@@ -181,12 +182,12 @@ public class Channel {
                         Bundle.DCT_CH_color()) {
                             @Override
                             public Color getValue() throws IllegalAccessException, InvocationTargetException {
-                                return Channel.this.getColor();
+                                return (Color) renderer.getPaint(Channel.this);
                             }
 
                             @Override
-                            public void setValue(Color t) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-                                Channel.this.setColor(t);
+                            public void setValue(Color color) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+                                renderer.setPaint(Channel.this, color);
                             }
                         });
                 Sheet sheet = super.createSheet();
@@ -194,6 +195,13 @@ public class Channel {
                 return sheet;
             }
         };
+    }
+
+    interface Renderer {
+
+        public void setPaint(Channel channel, Paint paint);
+
+        public Paint getPaint(Channel channel);
     }
 
 }
