@@ -17,12 +17,16 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.window;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -41,6 +45,7 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
@@ -56,7 +61,7 @@ import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
         position = 2000
 )
 @Messages("LBL_Iepe_VISUAL=Visual")
-public final class IepeRealtimeVisualElement extends JPanel implements MultiViewElement {
+public final class IepeRealtimeVisualElement extends JPanel implements MultiViewElement, Runnable {
 
     private class IepeVisualToolBar extends JToolBar {
 
@@ -129,7 +134,7 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
     private JToolBar toolbar = new IepeVisualToolBar();
     private transient MultiViewElementCallback callback;
 
-    private PipedInputStream pi;
+    private IepeProject project;
 
     public IepeRealtimeVisualElement(Lookup lkp) {
         this.lkp = lkp;
@@ -139,45 +144,68 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         initComponents();
         toolbar.setEnabled(false);
 
-        IepeProject project = lkp.lookup(IepeProject.class);
-
+        project = lkp.lookup(IepeProject.class);
         try {
-            pi = new PipedInputStream(19200);
-            project.getIepe().addStream(1, new PipedOutputStream(pi));
+            //        try {
+//            ch0 = new Channel("USB", 0);
+//        } catch (IOException ex) {
+//            Exceptions.printStackTrace(ex);
+//        }
+//
+//        project.getIepe().addStream(1, ch0.getStream());
+//        collection.addSeries(ch0.getSeries());
+
+            this.addChannel(new Channel("USB", 1));
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
 
-        Thread t = new Thread() {
-
-            @Override
-            public void run() {
-                long t = Calendar.getInstance().getTimeInMillis();
-                SampledStream sr = new SampledStream(new IepeInputStream(pi), 1600);
-                while (true) {
-                    try {
-                        series.add(t, sr.readSampled());
-                    } catch (IOException ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
-                    t += 100;
-                }
-            }
-
-        };
+        Thread t = new Thread(this);
         t.start();
     }
 
-    private XYSeries series;
+    @Override
+    public void run() {
+        long time = Calendar.getInstance().getTimeInMillis();
+        while (true) {
+            Iterator<Channel> iterator = channelList.iterator();
+            while (iterator.hasNext()) {
+                Channel next = iterator.next();
+                try {
+                    next.proc(time);
+                } catch (IOException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+            time += 100;
+        }
+    }
+
+//    private Channel ch0;
+    private List<Channel> channelList = new ArrayList<Channel>();
+
+    public void addChannel(Channel channel) {
+        project.getIepe().addStream(channel.getChannel(), channel.getStream());
+        collection.addSeries(channel.getSeries());
+        channelList.add(channel);
+    }
+
+//    private PipedInputStream pi;
+//    private XYSeries series;
+    private XYSeriesCollection collection;
 
     private JFreeChart createChart() {
+        collection = new XYSeriesCollection();
+
         SampledChart sampledChart = new SampledChart("PlotTitle");
-        sampledChart.addData(0, SampledChart.createSampledSeriesCollection("Ch_0"));
+        sampledChart.addData(0, collection);
+
         ValueAxis axis = sampledChart.getXYPlot().getDomainAxis();
         axis.setAutoRange(true);
         axis.setFixedAutoRange(60000.0);  // 60 seconds
 
-        series = ((XYSeriesCollection) sampledChart.getXYPlot().getDataset()).getSeries(0);
+        sampledChart.getXYPlot().getRenderer(0).setSeriesPaint(0, Color.BLUE);
+
         return sampledChart;
     }
 

@@ -19,6 +19,7 @@ package tw.edu.sju.ee.eea.module.iepe.project.window;
 
 import java.awt.BorderLayout;
 import java.awt.Image;
+import java.io.IOException;
 import java.util.Collection;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -32,6 +33,7 @@ import org.openide.explorer.view.BeanTreeView;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
@@ -184,14 +186,18 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
         }
 
         protected void addNotify() {
-            super.addNotify();
-            Channel[] objs = new Channel[]{
-                new Channel("USB:MPS-140801", 0),
-                new Channel("USB:MPS-140801", 1),
-                new Channel("USB:MPS-140801", 2),
-                new Channel("USB:MPS-140801", 3)
-            };
-            setKeys(objs);
+            try {
+                super.addNotify();
+                Channel[] objs = new Channel[]{
+                    new Channel("USB:MPS-140801", 0),
+                    new Channel("USB:MPS-140801", 1),
+                    new Channel("USB:MPS-140801", 2),
+                    new Channel("USB:MPS-140801", 3)
+                };
+                setKeys(objs);
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
 
     }

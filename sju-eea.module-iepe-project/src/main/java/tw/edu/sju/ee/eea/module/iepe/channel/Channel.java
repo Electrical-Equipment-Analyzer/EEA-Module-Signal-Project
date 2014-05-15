@@ -18,6 +18,12 @@
 package tw.edu.sju.ee.eea.module.iepe.channel;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.io.PipedInputStream;
+import org.jfree.data.xy.XYSeries;
+import tw.edu.sju.ee.eea.util.iepe.IEPEInput.IepeStream;
+import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
+import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
 
 /**
  *
@@ -27,25 +33,35 @@ public class Channel {
 
     private String device;
     private int channel;
-    private String name;
+//    private String name;
     private Color color;
+    
+    private IepeStream stream;
+    private XYSeries series;
+    
+    
+        private SampledStream sampled;
 
-    public Channel(String device, int channel) {
+    public Channel(String device, int channel) throws IOException {
         this.device = device;
         this.channel = channel;
-        this.name = device + "/" + channel;
+//        this.name = device + "/" + channel;
+        this.series = new XYSeries(device + "/" + channel);
+        this.stream = new IepeStream();
         this.color = new Color((float) Math.random(), (float) Math.random(), (float) Math.random());
+        
+        sampled = new SampledStream(stream, 1600);
     }
 
     /**
      * Creates a new instance of Category
      */
     public Channel(String name) {
-        this.name = name;
+        this.series = new XYSeries(name);
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.series.setKey(name);
     }
 
     public void setColor(Color color) {
@@ -61,11 +77,25 @@ public class Channel {
     }
 
     public String getName() {
-        return name;
+        return this.series.getKey().toString();
     }
 
     public Color getColor() {
         return color;
+    }
+
+    public IepeStream getStream() {
+        return stream;
+    }
+    
+    
+
+    public XYSeries getSeries() {
+        return series;
+    }
+    
+    public void proc(long time) throws IOException {
+        series.add(time, sampled.readSampled());
     }
 
 }
