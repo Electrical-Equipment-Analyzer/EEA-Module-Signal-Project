@@ -56,8 +56,10 @@ public class IepeRealtimeObject implements Serializable, Lookup.Provider {
         list = new ChannelList(((IepeProject) project).getIepe());
 
         try {
+            list.addChannel(new Channel("USB", 0));
             list.addChannel(new Channel("USB", 1));
             list.addChannel(new Channel("USB", 2));
+            list.addChannel(new Channel("USB", 3));
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
