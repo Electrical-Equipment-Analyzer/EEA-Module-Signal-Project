@@ -18,7 +18,13 @@
 package tw.edu.sju.ee.eea.module.iepe.project.ui;
 
 import java.io.IOException;
+import org.apache.commons.math3.complex.Complex;
+import org.apache.commons.math3.complex.ComplexUtils;
+import org.apache.commons.math3.transform.DftNormalization;
+import org.apache.commons.math3.transform.FastFourierTransformer;
+import org.apache.commons.math3.transform.TransformType;
 import org.jfree.data.xy.XYSeries;
+import org.openide.util.Exceptions;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput.IepeStream;
 import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
 
@@ -40,9 +46,55 @@ public class SampledSeries extends XYSeries {
     public IepeStream getStream() {
         return stream;
     }
-    
+
     public void proc(long time) throws IOException {
         this.add(time, sampled.readSampled());
     }
-    
+
+    private static final FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
+
+    public void fft() {
+        try {
+            if (fft_t != null && fft_t.isAlive()) {
+                stream.reset();
+                return;
+            }
+
+            double[] value = new double[1024 * 2];
+            for (int i = 0; i < value.length; i++) {
+                value[i] = stream.readValue();
+            }
+            fft_t = new FFT(value);
+        } catch (IOException ex) {
+        }
+    }
+
+    private FFT fft_t;
+
+    private class FFT extends Thread {
+
+        private double[] value;
+
+        public FFT(double[] value) {
+            this.value = value;
+            this.start();
+        }
+
+        @Override
+        public void run() {
+            Complex[] transform = fft.transform(value, TransformType.FORWARD);
+            int max = transform.length / 2 + 1;
+            for (int i = 1; i < max; i++) {
+                double f = i * 16000.0 / transform.length;
+                SampledSeries.this.addOrUpdate(f, transform[i].abs());
+            }
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+
+    }
+
 }
