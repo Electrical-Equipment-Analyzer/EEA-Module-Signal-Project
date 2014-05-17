@@ -20,8 +20,6 @@ package tw.edu.sju.ee.eea.module.iepe.project.object;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -38,9 +36,6 @@ import org.openide.util.lookup.Lookups;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
-import tw.edu.sju.ee.eea.module.iepe.file.IepeCursor;
-import tw.edu.sju.ee.eea.module.iepe.file.IepeDataInfo;
-import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 
 /**
  *
@@ -53,13 +48,12 @@ public class IepeRealtimeObject implements Serializable, Lookup.Provider {
 
     public IepeRealtimeObject(Project project) {
         this.lkp = Lookups.fixed(project, this, new IepeNavigatorHint());
-        list = new ChannelList(((IepeProject) project).getIepe());
-
+        list = new ChannelList();
         try {
-            list.addChannel(new Channel("USB", 0));
-            list.addChannel(new Channel("USB", 1));
-            list.addChannel(new Channel("USB", 2));
-            list.addChannel(new Channel("USB", 3));
+            list.add(new Channel("USB", 0));
+            list.add(new Channel("USB", 1));
+            list.add(new Channel("USB", 2));
+            list.add(new Channel("USB", 3));
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }

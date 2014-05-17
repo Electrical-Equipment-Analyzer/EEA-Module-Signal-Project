@@ -23,15 +23,14 @@ import java.awt.Image;
 import java.awt.Paint;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import org.jfree.data.xy.XYSeries;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.util.ImageUtilities;
-import tw.edu.sju.ee.eea.util.iepe.IEPEInput.IepeStream;
-import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
+import org.openide.util.Lookup;
+import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 
 /**
  *
@@ -39,27 +38,26 @@ import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
  */
 public class Channel {
 
+    private Lookup lkp;
     private String device;
     private int channel;
-
-    private IepeStream stream;
-    private XYSeries series;
-
-    private SampledStream sampled;
+    private String name;
+    private Color color;
 
     public Channel(String device, int channel) throws IOException {
         this.device = device;
         this.channel = channel;
-        
-        this.series = new XYSeries(device + "/" + channel);
-        this.stream = new IepeStream();
-
-        sampled = new SampledStream(stream, 1600);
+        setName(device + "/" + channel);
+        this.lkp = lkp;
     }
 
-
     public void setName(String name) {
-        this.series.setKey(name);
+        this.name = name;
+
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
     }
 
     public String getDevice() {
@@ -71,19 +69,16 @@ public class Channel {
     }
 
     public String getName() {
-        return this.series.getKey().toString();
+        return name;
     }
 
-    public IepeStream getStream() {
-        return stream;
+    public Color getColor() {
+        return color;
     }
 
-    public XYSeries getSeries() {
-        return series;
-    }
-
-    public void proc(long time) throws IOException {
-        series.add(time, sampled.readSampled());
+    SampledSeries createSampledSeries() throws IOException {
+        SampledSeries sampledSeries = new SampledSeries(name);
+        return sampledSeries;
     }
 
     @NbBundle.Messages({
@@ -112,7 +107,7 @@ public class Channel {
 
             @Override
             public String getDisplayName() {
-                return series.getKey().toString();
+                return Channel.this.getName();
             }
 
             @Override
@@ -150,8 +145,9 @@ public class Channel {
                             }
 
                             @Override
-                            public void setValue(String t) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-                                Channel.this.setName(t);
+                            public void setValue(String name) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+                                Channel.this.setName(name);
+                                renderer.set(Channel.this, Comparable.class, name);
                             }
                         });
                 set.put(new PropertySupport.ReadWrite<Color>(
@@ -161,12 +157,17 @@ public class Channel {
                         Bundle.DCT_CH_color()) {
                             @Override
                             public Color getValue() throws IllegalAccessException, InvocationTargetException {
-                                return (Color) renderer.getPaint(Channel.this);
+                                Color color = Channel.this.getColor();
+                                if (color == null) {
+                                    color = renderer.getColor(Channel.this);
+                                }
+                                return color;
                             }
 
                             @Override
                             public void setValue(Color color) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-                                renderer.setPaint(Channel.this, color);
+                                Channel.this.setColor(color);
+                                renderer.set(Channel.this, Paint.class, color);
                             }
                         });
                 Sheet sheet = super.createSheet();
@@ -178,9 +179,9 @@ public class Channel {
 
     interface Renderer {
 
-        public void setPaint(Channel channel, Paint paint);
+        public void set(Channel channel, Class c, Object o);
 
-        public Paint getPaint(Channel channel);
+        public Color getColor(Channel channel);
     }
 
 }

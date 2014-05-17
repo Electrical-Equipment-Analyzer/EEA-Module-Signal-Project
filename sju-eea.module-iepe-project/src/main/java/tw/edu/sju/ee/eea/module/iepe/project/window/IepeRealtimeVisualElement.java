@@ -19,6 +19,9 @@ package tw.edu.sju.ee.eea.module.iepe.project.window;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Iterator;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -27,14 +30,21 @@ import javax.swing.JToolBar;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.data.xy.XYSeriesCollection;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
 import org.openide.awt.UndoRedo;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
+import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
+import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
 
 @MultiViewElement.Registration(
@@ -46,7 +56,7 @@ import tw.edu.sju.ee.eea.ui.chart.SampledChart;
         position = 2000
 )
 @Messages("LBL_Iepe_VISUAL=Visual")
-public final class IepeRealtimeVisualElement extends JPanel implements MultiViewElement {
+public final class IepeRealtimeVisualElement extends JPanel implements MultiViewElement, Runnable {
 
     private class IepeVisualToolBar extends JToolBar {
 
@@ -119,25 +129,44 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
     private JToolBar toolbar = new IepeVisualToolBar();
     private transient MultiViewElementCallback callback;
 
+    private SampledManager manager;
 
     public IepeRealtimeVisualElement(Lookup lkp) {
         this.lkp = lkp;
         this.rt = lkp.lookup(IepeRealtimeObject.class);
         assert rt != null;
 
+        manager = rt.getList().createSampledManager(lkp.lookup(IepeProject.class).getIepe());
+
         initComponents();
         toolbar.setEnabled(false);
 
-        Thread t = new Thread(rt.getList());
+        Thread t = new Thread(this);
         t.start();
+    }
+
+    @Override
+    public void run() {
+        long time = Calendar.getInstance().getTimeInMillis();
+        while (true) {
+            Iterator<SampledSeries> iterator = manager.getCollection().getSeries().iterator();
+            while (iterator.hasNext()) {
+                SampledSeries next = iterator.next();
+                try {
+                    next.proc(time);
+                } catch (IOException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+            time += 100;
+        }
     }
 
     private JFreeChart createChart() {
 
         SampledChart sampledChart = new SampledChart("PlotTitle");
 
-
-        sampledChart.addData(0, rt.getList().getCollection(), rt.getList().getRenderer());
+        sampledChart.addData(0, manager.getCollection(), manager.getRenderer());
 
         ValueAxis axis = sampledChart.getXYPlot().getDomainAxis();
         axis.setAutoRange(true);

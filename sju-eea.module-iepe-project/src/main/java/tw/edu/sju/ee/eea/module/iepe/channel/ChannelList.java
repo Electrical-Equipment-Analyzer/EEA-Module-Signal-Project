@@ -17,14 +17,14 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.channel;
 
+import java.awt.Color;
 import java.awt.Image;
-import java.awt.Paint;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Iterator;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.data.xy.XYSeriesCollection;
+import java.util.List;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -32,66 +32,75 @@ import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
-import tw.edu.sju.ee.eea.ui.chart.SampledChart;
+import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
+import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
 
 /**
  *
  * @author Leo
  */
-public class ChannelList extends ArrayList<Channel> implements Runnable, Channel.Renderer {
+public class ChannelList extends ArrayList<Channel> implements Channel.Renderer {
 
     private Lookup lkp;
-    private IEPEInput manager;
-    private XYSeriesCollection collection;
-    private XYItemRenderer renderer;
+    private List<SampledManager> list = new ArrayList<SampledManager>();
 
-    public ChannelList(IEPEInput manager) {
+    public ChannelList() {
         this.lkp = Lookups.singleton(this);
-        this.manager = manager;
-
-        collection = new XYSeriesCollection();
-        renderer = SampledChart.creatrRenderer();
     }
 
-    public XYSeriesCollection getCollection() {
-        return collection;
-    }
-
-    public XYItemRenderer getRenderer() {
-        return renderer;
-    }
-    
-    public void addChannel(Channel channel) {
-        manager.addStream(channel.getChannel(), channel.getStream());
-        collection.addSeries(channel.getSeries());
-        add(channel);
-    }
-    
-    @Override
-    public void setPaint(Channel channel, Paint paint) {
-        renderer.setSeriesPaint(this.indexOf(channel), paint);
-    }
-    
-    @Override
-    public Paint getPaint(Channel channel) {
-        return renderer.getSeriesPaint(this.indexOf(channel));
-    }
-
-    @Override
-    public void run() {
-        long time = Calendar.getInstance().getTimeInMillis();
-        while (true) {
-            Iterator<Channel> iterator = this.iterator();
-            while (iterator.hasNext()) {
-                Channel next = iterator.next();
-                try {
-                    next.proc(time);
-                } catch (IOException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
+    public SampledManager createSampledManager(IEPEInput iepe) {
+        SampledManager manager = new SampledManager();
+        for (int i = 0; i < this.size(); i++) {
+            try {
+                Channel channel = this.get(i);
+                SampledSeries series = channel.createSampledSeries();
+                iepe.addStream(channel.getChannel(), series.getStream());
+                manager.getCollection().addSeries(series);
+//                manager.set(i, channel.defaultColor((Color) manager.getRenderer().getSeriesPaint(i)));
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
             }
-            time += 100;
+        }
+        this.list.add(manager);
+        return manager;
+    }
+
+    public boolean remove(SampledManager manager) {
+        return this.list.remove(manager);
+    }
+
+    @Override
+    public Color getColor(Channel channel) {
+        int index = this.indexOf(channel);
+        Iterator<SampledManager> iterator = this.list.iterator();
+        while (iterator.hasNext()) {
+            SampledManager manager = iterator.next();
+            return (Color) manager.getRenderer().getSeriesPaint(index);
+        }
+        return null;
+    }
+
+    @Override
+    public void set(Channel channel, Class c, Object o) {
+        int index = this.indexOf(channel);
+        Iterator<SampledManager> iterator = this.list.iterator();
+        while (iterator.hasNext()) {
+            SampledManager manager = iterator.next();
+            try {
+                Method method = manager.getClass().getMethod("set", int.class, c);
+                method.invoke(manager, index, o);
+            } catch (NoSuchMethodException ex) {
+                Exceptions.printStackTrace(ex);
+            } catch (SecurityException ex) {
+                Exceptions.printStackTrace(ex);
+            } catch (IllegalAccessException ex) {
+                Exceptions.printStackTrace(ex);
+            } catch (IllegalArgumentException ex) {
+                Exceptions.printStackTrace(ex);
+            } catch (InvocationTargetException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
     }
 
