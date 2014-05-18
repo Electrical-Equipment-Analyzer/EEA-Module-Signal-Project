@@ -60,14 +60,6 @@ public class ChannelList extends ArrayList<Channel> implements Channel.Renderer 
                 manager.getCollection().addSeries(series);
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
-//            } catch (InstantiationException ex) {
-//                Exceptions.printStackTrace(ex);
-//            } catch (IllegalAccessException ex) {
-//                Exceptions.printStackTrace(ex);
-//            } catch (NoSuchMethodException ex) {
-//                Exceptions.printStackTrace(ex);
-//            } catch (IllegalArgumentException ex) {
-//                Exceptions.printStackTrace(ex);
             } catch (ReflectiveOperationException ex) {
                 Exceptions.printStackTrace(ex);
             }

@@ -17,24 +17,21 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.window;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import org.apache.commons.math3.complex.Complex;
-import org.apache.commons.math3.complex.ComplexUtils;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.ValueAxis;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.data.xy.XYDataItem;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
@@ -43,15 +40,11 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
-import tw.edu.sju.ee.eea.module.iepe.file.IepeBodeplotElement;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
-import tw.edu.sju.ee.eea.ui.chart.SampledChart;
 import tw.edu.sju.ee.eea.ui.workspace.plot.BodePlot;
-import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
-import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_Iepe_BodePlot",
@@ -99,6 +92,26 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
             this.thread.start();
         }
 
+        @Override
+        public Number getX(int index) {
+            try {
+                return super.getX(index);
+            } catch (IndexOutOfBoundsException ex) {
+            } catch (NullPointerException ex) {
+            }
+            return null;
+        }
+
+        @Override
+        public Number getY(int index) {
+            try {
+                return super.getY(index);
+            } catch (IndexOutOfBoundsException ex) {
+            } catch (NullPointerException ex) {
+            }
+            return null;
+        }
+
         private void process() {
             try {
                 for (int i = 0; i < value.length; i++) {
@@ -113,7 +126,7 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
 
         @Override
         public void run() {
-            while (true) {
+            while (!Thread.interrupted()) {
                 try {
                     Thread.sleep(1000);
                     synchronized (this) {
@@ -122,9 +135,9 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
                 } catch (InterruptedException ex) {
                     Exceptions.printStackTrace(ex);
                 }
-                this.clear();
                 Complex[] transform = fft.transform(value, TransformType.FORWARD);
                 int max = transform.length / 2 + 1;
+                this.clear();
                 for (int i = 1; i < max; i++) {
                     double f = i * 16000.0 / transform.length;
                     this.add(f, transform[i].abs());
@@ -136,7 +149,7 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
 
     @Override
     public void run() {
-        while (true) {
+        while (!Thread.interrupted()) {
             Iterator<Process> iterator = manager.getCollection().getSeries().iterator();
             while (iterator.hasNext()) {
                 Process next = iterator.next();
@@ -203,7 +216,6 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
     // End of variables declaration//GEN-END:variables
     @Override
     public JComponent getVisualRepresentation() {
-        System.out.println("getVisual");
         return this;
     }
 
@@ -224,27 +236,32 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
 
     @Override
     public void componentOpened() {
+        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "open");
     }
 
     @Override
     public void componentClosed() {
+        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "close");
     }
 
     @Override
     public void componentShowing() {
-        System.out.println("Show");
+        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "Show");
     }
 
     @Override
     public void componentHidden() {
+        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "hide");
     }
 
     @Override
     public void componentActivated() {
+        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "active");
     }
 
     @Override
     public void componentDeactivated() {
+        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "deact");
     }
 
     @Override

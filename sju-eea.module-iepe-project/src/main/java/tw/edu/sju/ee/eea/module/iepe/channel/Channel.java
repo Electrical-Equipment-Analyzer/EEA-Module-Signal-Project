@@ -22,7 +22,6 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.Paint;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
@@ -78,11 +77,6 @@ public class Channel {
     }
 
     SampledSeries createSampledSeries(Class<? extends SampledSeries> c) throws IOException, InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-        Constructor<?>[] constructors = c.getConstructors();
-        for (Constructor<?> constructor : constructors) {
-            System.out.println(constructor.getName());
-        }
-        
         SampledSeries sampledSeries = c.getConstructor(Comparable.class).newInstance(name);
         return sampledSeries;
     }

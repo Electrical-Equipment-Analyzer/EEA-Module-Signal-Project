@@ -20,9 +20,6 @@ package tw.edu.sju.ee.eea.module.iepe.project.window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Calendar;
 import java.util.Iterator;
 import javax.swing.Action;
@@ -46,7 +43,6 @@ import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
-import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
 import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
 
 @MultiViewElement.Registration(
@@ -171,10 +167,8 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         long time = Calendar.getInstance().getTimeInMillis();
         while (true) {
             Iterator<Process> iterator = manager.getCollection().getSeries().iterator();
-//            process.init(time);
             while (iterator.hasNext()) {
                 Process next = iterator.next();
-//                next.process(process);
                 try {
                     next.process(time);
                 } catch (IOException ex) {
