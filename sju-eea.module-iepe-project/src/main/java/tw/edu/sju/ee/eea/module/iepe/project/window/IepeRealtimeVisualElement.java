@@ -20,6 +20,9 @@ package tw.edu.sju.ee.eea.module.iepe.project.window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Calendar;
 import java.util.Iterator;
 import javax.swing.Action;
@@ -30,8 +33,6 @@ import javax.swing.JToolBar;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.data.xy.XYSeriesCollection;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
@@ -40,12 +41,13 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
-import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
+import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
+import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_Iepe_VISUAL",
@@ -136,7 +138,11 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         this.rt = lkp.lookup(IepeRealtimeObject.class);
         assert rt != null;
 
-        manager = rt.getList().createSampledManager(lkp.lookup(IepeProject.class).getIepe(), SampledChart.creatrRenderer());
+        manager = rt.getList().createSampledManager(
+                lkp.lookup(IepeProject.class).getIepe(),
+                SampledChart.creatrRenderer(),
+                Process.class
+        );
 
         initComponents();
         toolbar.setEnabled(false);
@@ -145,15 +151,32 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         t.start();
     }
 
+    public static class Process extends SampledSeries {
+
+        private SampledStream sampled;
+
+        public Process(Comparable key) throws IOException {
+            super(key);
+            sampled = new SampledStream(super.stream, 1600);
+        }
+
+        private void process(long time) throws IOException {
+            this.add(time, sampled.readSampled());
+        }
+
+    }
+
     @Override
     public void run() {
         long time = Calendar.getInstance().getTimeInMillis();
         while (true) {
-            Iterator<SampledSeries> iterator = manager.getCollection().getSeries().iterator();
+            Iterator<Process> iterator = manager.getCollection().getSeries().iterator();
+//            process.init(time);
             while (iterator.hasNext()) {
-                SampledSeries next = iterator.next();
+                Process next = iterator.next();
+//                next.process(process);
                 try {
-                    next.proc(time);
+                    next.process(time);
                 } catch (IOException ex) {
                     Exceptions.printStackTrace(ex);
                 }

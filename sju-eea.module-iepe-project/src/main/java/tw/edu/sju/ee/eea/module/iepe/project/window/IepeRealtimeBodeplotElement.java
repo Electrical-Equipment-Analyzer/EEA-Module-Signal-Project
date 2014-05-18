@@ -43,6 +43,7 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.module.iepe.file.IepeBodeplotElement;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
@@ -50,6 +51,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
 import tw.edu.sju.ee.eea.ui.workspace.plot.BodePlot;
 import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
+import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_Iepe_BodePlot",
@@ -73,25 +75,72 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
         assert rt != null;
         toolbar.setFloatable(false);
 
-        manager = rt.getList().createSampledManager(lkp.lookup(IepeProject.class).getIepe(), BodePlot.creatrRenderer());
+        manager = rt.getList().createSampledManager(
+                lkp.lookup(IepeProject.class).getIepe(),
+                BodePlot.creatrRenderer(),
+                Process.class
+        );
+
         initComponents();
 
         Thread t = new Thread(this);
         t.start();
     }
 
-    @Override
-    public String getName() {
-        return "IepeVisualElement";
+    public static class Process extends SampledSeries implements Runnable {
+
+        private static final FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
+        private double[] value = new double[1024 * 4];
+        private Thread thread;
+
+        public Process(Comparable key) throws IOException {
+            super(key);
+            this.thread = new Thread(this);
+            this.thread.start();
+        }
+
+        private void process() {
+            try {
+                for (int i = 0; i < value.length; i++) {
+                    value[i] = stream.readValue();
+                }
+                synchronized (this) {
+                    this.notify();
+                }
+            } catch (IOException ex) {
+            }
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    Thread.sleep(1000);
+                    synchronized (this) {
+                        this.wait();
+                    }
+                } catch (InterruptedException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+                this.clear();
+                Complex[] transform = fft.transform(value, TransformType.FORWARD);
+                int max = transform.length / 2 + 1;
+                for (int i = 1; i < max; i++) {
+                    double f = i * 16000.0 / transform.length;
+                    this.add(f, transform[i].abs());
+                }
+            }
+        }
+
     }
 
     @Override
     public void run() {
         while (true) {
-            Iterator<SampledSeries> iterator = manager.getCollection().getSeries().iterator();
+            Iterator<Process> iterator = manager.getCollection().getSeries().iterator();
             while (iterator.hasNext()) {
-                SampledSeries next = iterator.next();
-                    next.fft();
+                Process next = iterator.next();
+                next.process();
             }
         }
     }
@@ -103,6 +152,11 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
         bodePlot.getXYPlot().getRangeAxis().setRange(0, 500);
         bodePlot.getXYPlot().getDomainAxis().setRange(0.5, 10000);
         return bodePlot;
+    }
+
+    @Override
+    public String getName() {
+        return "IepeVisualElement";
     }
 
     /**

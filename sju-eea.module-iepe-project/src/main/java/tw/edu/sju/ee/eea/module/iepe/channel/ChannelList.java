@@ -50,15 +50,25 @@ public class ChannelList extends ArrayList<Channel> implements Channel.Renderer 
         this.lkp = Lookups.singleton(this);
     }
 
-    public SampledManager createSampledManager(IEPEInput iepe, XYItemRenderer renderer) {
+    public SampledManager createSampledManager(IEPEInput iepe, XYItemRenderer renderer, Class<? extends SampledSeries> c) {
         SampledManager manager = new SampledManager(renderer);
         for (int i = 0; i < this.size(); i++) {
             try {
                 Channel channel = this.get(i);
-                SampledSeries series = channel.createSampledSeries();
+                SampledSeries series = channel.createSampledSeries(c);
                 iepe.addStream(channel.getChannel(), series.getStream());
                 manager.getCollection().addSeries(series);
             } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+//            } catch (InstantiationException ex) {
+//                Exceptions.printStackTrace(ex);
+//            } catch (IllegalAccessException ex) {
+//                Exceptions.printStackTrace(ex);
+//            } catch (NoSuchMethodException ex) {
+//                Exceptions.printStackTrace(ex);
+//            } catch (IllegalArgumentException ex) {
+//                Exceptions.printStackTrace(ex);
+            } catch (ReflectiveOperationException ex) {
                 Exceptions.printStackTrace(ex);
             }
         }

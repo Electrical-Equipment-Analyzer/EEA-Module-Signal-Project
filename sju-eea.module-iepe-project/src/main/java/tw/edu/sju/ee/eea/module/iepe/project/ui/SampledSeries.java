@@ -34,67 +34,72 @@ import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
  */
 public class SampledSeries extends XYSeries {
 
-    private IepeStream stream;
-    private SampledStream sampled;
+    protected IepeStream stream;
+//    private SampledStream sampled;
 
     public SampledSeries(Comparable key) throws IOException {
         super(key);
         this.stream = new IepeStream();
-        sampled = new SampledStream(stream, 1600);
+//        sampled = new SampledStream(stream, 1600);
     }
 
     public IepeStream getStream() {
         return stream;
     }
+    
+//    public void process(SampledProcess process) {
+//        process.read(stream);
+//        process.set(this);
+//    }
 
-    public void proc(long time) throws IOException {
-        this.add(time, sampled.readSampled());
-    }
+//    public void proc(long time) throws IOException {
+//        this.add(time, sampled.readSampled());
+//    }
 
-    private static final FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
+//    private static final FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
 
-    public void fft() {
-        try {
+//    public void fft() {
+//        try {
+//
+//            double[] value = new double[1024 * 4];
+//            for (int i = 0; i < value.length; i++) {
+//                value[i] = stream.readValue();
+//            }
+//            if (fft_t != null && fft_t.isAlive()) {
+//                return;
+//            }
+//            fft_t = new FFT(value);
+//        } catch (IOException ex) {
+//        }
+//    }
 
-            double[] value = new double[1024 * 4];
-            for (int i = 0; i < value.length; i++) {
-                value[i] = stream.readValue();
-            }
-            if (fft_t != null && fft_t.isAlive()) {
-                return;
-            }
-            fft_t = new FFT(value);
-        } catch (IOException ex) {
-        }
-    }
+//    private FFT fft_t;
 
-    private FFT fft_t;
-
-    private class FFT extends Thread {
-
-        private double[] value;
-
-        public FFT(double[] value) {
-            this.value = value;
-            this.start();
-        }
-
-        @Override
-        public void run() {
-            SampledSeries.this.clear();
-            Complex[] transform = fft.transform(value, TransformType.FORWARD);
-            int max = transform.length / 2 + 1;
-            for (int i = 1; i < max; i++) {
-                double f = i * 16000.0 / transform.length;
-                SampledSeries.this.add(f, transform[i].abs());
-            }
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-        }
-
-    }
+//    private class FFT extends Thread {
+//
+//        private double[] value;
+//
+//        public FFT(double[] value) {
+//            this.value = value;
+//            this.start();
+//        }
+//
+//        @Override
+//        public void run() {
+//            SampledSeries.this.clear();
+//            Complex[] transform = fft.transform(value, TransformType.FORWARD);
+//            int max = transform.length / 2 + 1;
+//            for (int i = 1; i < max; i++) {
+//                double f = i * 16000.0 / transform.length;
+//                SampledSeries.this.add(f, transform[i].abs());
+//            }
+//            try {
+//                Thread.sleep(2000);
+//            } catch (InterruptedException ex) {
+//                Exceptions.printStackTrace(ex);
+//            }
+//        }
+//
+//    }
 
 }
