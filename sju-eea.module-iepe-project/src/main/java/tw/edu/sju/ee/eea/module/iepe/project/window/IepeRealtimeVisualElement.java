@@ -136,7 +136,7 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         this.rt = lkp.lookup(IepeRealtimeObject.class);
         assert rt != null;
 
-        manager = rt.getList().createSampledManager(lkp.lookup(IepeProject.class).getIepe());
+        manager = rt.getList().createSampledManager(lkp.lookup(IepeProject.class).getIepe(), SampledChart.creatrRenderer());
 
         initComponents();
         toolbar.setEnabled(false);

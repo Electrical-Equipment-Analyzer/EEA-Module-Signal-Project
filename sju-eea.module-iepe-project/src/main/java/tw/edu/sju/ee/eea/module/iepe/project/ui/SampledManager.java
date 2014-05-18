@@ -31,9 +31,9 @@ public class SampledManager {
     private XYSeriesCollection collection;
     private XYItemRenderer renderer;
 
-    public SampledManager() {
+    public SampledManager(XYItemRenderer renderer) {
         this.collection = new XYSeriesCollection();
-        this.renderer = SampledChart.creatrRenderer();
+        this.renderer = renderer;
     }
 
     public XYSeriesCollection getCollection() {

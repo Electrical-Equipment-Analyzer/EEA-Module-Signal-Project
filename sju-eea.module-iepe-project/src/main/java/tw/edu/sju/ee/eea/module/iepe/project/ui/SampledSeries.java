@@ -55,14 +55,13 @@ public class SampledSeries extends XYSeries {
 
     public void fft() {
         try {
-            if (fft_t != null && fft_t.isAlive()) {
-                stream.reset();
-                return;
-            }
 
-            double[] value = new double[1024 * 2];
+            double[] value = new double[1024 * 4];
             for (int i = 0; i < value.length; i++) {
                 value[i] = stream.readValue();
+            }
+            if (fft_t != null && fft_t.isAlive()) {
+                return;
             }
             fft_t = new FFT(value);
         } catch (IOException ex) {
@@ -82,11 +81,12 @@ public class SampledSeries extends XYSeries {
 
         @Override
         public void run() {
+            SampledSeries.this.clear();
             Complex[] transform = fft.transform(value, TransformType.FORWARD);
             int max = transform.length / 2 + 1;
             for (int i = 1; i < max; i++) {
                 double f = i * 16000.0 / transform.length;
-                SampledSeries.this.addOrUpdate(f, transform[i].abs());
+                SampledSeries.this.add(f, transform[i].abs());
             }
             try {
                 Thread.sleep(2000);

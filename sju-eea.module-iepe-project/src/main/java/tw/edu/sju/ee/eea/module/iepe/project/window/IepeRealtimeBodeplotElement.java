@@ -73,7 +73,7 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
         assert rt != null;
         toolbar.setFloatable(false);
 
-        manager = rt.getList().createSampledManager(lkp.lookup(IepeProject.class).getIepe());
+        manager = rt.getList().createSampledManager(lkp.lookup(IepeProject.class).getIepe(), BodePlot.creatrRenderer());
         initComponents();
 
         Thread t = new Thread(this);
@@ -87,46 +87,13 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
 
     @Override
     public void run() {
-//        long time = Calendar.getInstance().getTimeInMillis();
         while (true) {
             Iterator<SampledSeries> iterator = manager.getCollection().getSeries().iterator();
             while (iterator.hasNext()) {
                 SampledSeries next = iterator.next();
                     next.fft();
             }
-//            time += 100;
         }
-//        System.out.println("start");
-//        while (true) {
-//            try {
-//                synchronized (IepeBodeplotElement.this) {
-//                    IepeBodeplotElement.this.wait();
-//                }
-//            } catch (InterruptedException ex) {
-//            }
-//            ((ChartPanel) chartPanel).setChart(createChart());
-//        }
-//        try {
-//            IepeInputStream vi = new IepeInputStream(info.getInputStream());
-//            vi.skip(info.getCursor().getIndex() / 8);
-//            double[] value = new double[1024 * 16];
-//            for (int i = 0; i < value.length; i++) {
-//                value[i] = vi.readValue();
-//            }
-//
-//            FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
-//            Complex[] data = ComplexUtils.convertToComplex(value);
-//            Complex[] transform = fft.transform(data, TransformType.FORWARD);
-//            int max = transform.length / 2 + 1;
-//            for (int i = 1; i < max; i++) {
-//                double f = i * 16000.0 / transform.length;
-//                series.add(f, transform[i].abs());
-//            }
-//
-//        } catch (FileNotFoundException ex) {
-//            Exceptions.printStackTrace(ex);
-//        } catch (IOException ex) {
-//        }
     }
 
     private JFreeChart createChart() {

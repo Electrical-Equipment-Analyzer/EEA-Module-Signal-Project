@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -49,15 +50,14 @@ public class ChannelList extends ArrayList<Channel> implements Channel.Renderer 
         this.lkp = Lookups.singleton(this);
     }
 
-    public SampledManager createSampledManager(IEPEInput iepe) {
-        SampledManager manager = new SampledManager();
+    public SampledManager createSampledManager(IEPEInput iepe, XYItemRenderer renderer) {
+        SampledManager manager = new SampledManager(renderer);
         for (int i = 0; i < this.size(); i++) {
             try {
                 Channel channel = this.get(i);
                 SampledSeries series = channel.createSampledSeries();
                 iepe.addStream(channel.getChannel(), series.getStream());
                 manager.getCollection().addSeries(series);
-//                manager.set(i, channel.defaultColor((Color) manager.getRenderer().getSeriesPaint(i)));
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }

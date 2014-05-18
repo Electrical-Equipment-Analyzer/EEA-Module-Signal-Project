@@ -12,7 +12,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>nbm</packaging>
 
-    <name>sju-eea.module-iepe-project</name>
+    <name>EEA Module IEPE Project</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
