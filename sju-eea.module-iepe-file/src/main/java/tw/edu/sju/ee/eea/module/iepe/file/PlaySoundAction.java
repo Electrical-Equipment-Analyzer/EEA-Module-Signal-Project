@@ -53,23 +53,26 @@ public final class PlaySoundAction implements ActionListener {
 
             @Override
             public void run() {
-                IEPEPlayer audio = null;
                 try {
-                    audio = new IEPEPlayer();
-                    audio.startPlay();
-                    OutputStream out = audio.getOutputStream();
-                    byte[] buffer = new byte[1024];
-                    while (context.readStream(buffer) > 0) {
-                        out.write(buffer, 0, buffer.length);
+                    IEPEPlayer audio = new IEPEPlayer();
+                    Thread audioTread = null;
+                    try {
+                        audioTread = new Thread(audio);
+                        audioTread.start();
+                        OutputStream out = audio.getOutputStream();
+                        byte[] buffer = new byte[1024];
+                        while (context.readStream(buffer) > 0) {
+                            out.write(buffer, 0, buffer.length);
+                        }
+                    } catch (IOException ex) {
+                        Exceptions.printStackTrace(ex);
+                    } finally {
+                        audioTread.stop();
                     }
-
                 } catch (IOException ex) {
                     Exceptions.printStackTrace(ex);
-                } finally {
-                    audio.stopPlay();
                 }
             }
-
         };
         thread.start();
     }
