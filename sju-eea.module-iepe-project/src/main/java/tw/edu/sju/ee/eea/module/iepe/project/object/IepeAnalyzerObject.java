@@ -15,14 +15,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-
 package tw.edu.sju.ee.eea.module.iepe.project.object;
 
 import java.awt.Image;
 import java.awt.event.ActionEvent;
+import java.io.Serializable;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.netbeans.api.project.Project;
+import org.netbeans.core.api.multiview.MultiViews;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -30,19 +31,30 @@ import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
+import org.openide.windows.TopComponent;
 
 /**
  *
  * @author Leo
  */
-public class IepeAnalyzerObject {
-    
+public class IepeAnalyzerObject implements Serializable, Lookup.Provider {
+
     private Lookup lkp;
 
     public IepeAnalyzerObject(Project project) {
         this.lkp = new ProxyLookup(new Lookup[]{Lookups.singleton(project), Lookups.singleton(this)});
     }
-    
+
+    @Override
+    public Lookup getLookup() {
+        return lkp;
+    }
+
+    public String getDisplayName() {
+        return "Analyzer";
+    }
+    TopComponent tc;
+
     public Node createNodeDelegate() {
         return new AbstractNode(Children.LEAF, lkp) {
 
@@ -52,6 +64,11 @@ public class IepeAnalyzerObject {
 
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        if (tc == null) {
+                            tc = MultiViews.createMultiView("application/iepe-analyzer", IepeAnalyzerObject.this);
+                        }
+                        tc.open();
+                        tc.requestActive();
                     }
                 };
             }
