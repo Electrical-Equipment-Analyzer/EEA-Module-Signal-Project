@@ -47,14 +47,14 @@ import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 import tw.edu.sju.ee.eea.ui.workspace.plot.BodePlot;
 
 @MultiViewElement.Registration(
-        displayName = "#LBL_Iepe_BodePlot",
+        displayName = "#LBL_IEPE_Realtime_BodePlot",
         iconBase = "tw/edu/sju/ee/eea/module/iepe/file/iepe.png",
         mimeType = "application/iepe-realtime",
         persistenceType = TopComponent.PERSISTENCE_NEVER,
         preferredID = "IepeVisual",
         position = 3000
 )
-@Messages("LBL_Iepe_BodePlot=BodePlot")
+@Messages("LBL_IEPE_Realtime_BodePlot=BodePlot")
 public final class IepeRealtimeBodeplotElement extends JPanel implements MultiViewElement, Runnable {
 
     private IepeRealtimeObject rt;
