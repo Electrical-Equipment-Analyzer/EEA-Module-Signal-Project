@@ -19,9 +19,11 @@ package tw.edu.sju.ee.eea.module.iepe.project.object;
 
 import java.awt.Image;
 import java.awt.event.ActionEvent;
+import java.io.Serializable;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.netbeans.api.project.Project;
+import org.netbeans.core.api.multiview.MultiViews;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -29,18 +31,30 @@ import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
+import org.openide.windows.TopComponent;
 
 /**
  *
  * @author Leo
  */
-public class IepeHistoryObject {
+public class IepeHistoryObject implements Serializable, Lookup.Provider {
 
     private Lookup lkp;
 
     public IepeHistoryObject(Project project) {
         this.lkp = new ProxyLookup(new Lookup[]{Lookups.singleton(project), Lookups.singleton(this)});
     }
+
+    @Override
+    public Lookup getLookup() {
+        return lkp;
+    }
+
+    public String getDisplayName() {
+        return "History";
+    }
+
+    TopComponent tc;
 
     public Node createNodeDelegate() {
         return new AbstractNode(Children.LEAF, lkp) {
@@ -51,6 +65,11 @@ public class IepeHistoryObject {
 
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        if (tc == null) {
+                            tc = MultiViews.createMultiView("application/iepe-history", IepeHistoryObject.this);
+                        }
+                        tc.open();
+                        tc.requestActive();
                     }
                 };
             }
