@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>tw.edu.sju.ee.eea.module</groupId>
     <artifactId>module-iepe-parent</artifactId>
-    <version>1.0</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
   
-    <name>sju-eea.module-iepe-parent</name>
+    <name>EEA Module IEPE</name>
     
     <parent>
         <groupId>tw.edu.sju.ee.eea</groupId>
@@ -85,7 +85,7 @@
     </modules>
     <properties>
         <netbeans.version>RELEASE74</netbeans.version>
-        <brandingToken>sjueeamoduleiepe</brandingToken>
+        <brandingToken>eeaiepe</brandingToken>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 </project>

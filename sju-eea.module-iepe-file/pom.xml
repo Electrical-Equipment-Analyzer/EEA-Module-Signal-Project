@@ -4,15 +4,15 @@
     <parent>
         <groupId>tw.edu.sju.ee.eea.module</groupId>
         <artifactId>module-iepe-parent</artifactId>
-        <version>1.0</version>
+        <version>1.0-SNAPSHOT</version>
     </parent>
     
     <groupId>tw.edu.sju.ee.eea.module.iepe</groupId>
     <artifactId>module-iepe-file</artifactId>
-    <version>1.0</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>nbm</packaging>
 
-    <name>sju-eea.module-iepe-file</name>
+    <name>EEA Module IEPE File</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -97,15 +97,15 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>tw.edu.sju.ee.eea.commons</groupId>
-            <artifactId>commons-ui</artifactId>
-            <version>1.0.1</version>
+            <groupId>tw.edu.sju.ee.eea.util</groupId>
+            <artifactId>util-ui</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>tw.edu.sju.ee.eea.jni</groupId>
             <artifactId>jni-mps</artifactId>
-            <version>1.0</version>
+            <version>1.0-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
     </dependencies>
