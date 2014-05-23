@@ -30,18 +30,20 @@ import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
+import org.openide.util.HelpCtx;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 
 /**
  *
  * @author Leo
  */
-public class IepeRealtimeObject implements Serializable, Lookup.Provider {
+public class IepeRealtimeObject implements IepeProject.Child, Serializable, Lookup.Provider {
 
     private Lookup lkp;
     private ChannelList list;
@@ -85,6 +87,7 @@ public class IepeRealtimeObject implements Serializable, Lookup.Provider {
 
     TopComponent tc;
 
+    @Override
     public Node createNodeDelegate() {
         return new AbstractNode(Children.LEAF, lkp) {
 

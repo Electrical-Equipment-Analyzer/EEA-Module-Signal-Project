@@ -19,15 +19,23 @@ package tw.edu.sju.ee.eea.module.iepe.project;
 
 import java.awt.Image;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.event.ChangeListener;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectInformation;
 import org.netbeans.spi.project.ProjectState;
 import org.netbeans.spi.project.ui.LogicalViewProvider;
 import org.netbeans.spi.project.ui.support.CommonProjectActions;
 import org.netbeans.spi.project.ui.support.NodeFactorySupport;
+import org.netbeans.spi.project.ui.support.NodeList;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataFolder;
 import org.openide.loaders.DataObjectNotFoundException;
@@ -36,11 +44,18 @@ import org.openide.nodes.Children;
 import org.openide.nodes.FilterNode;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
+import org.openide.util.HelpCtx;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 import tw.edu.sju.ee.eea.jni.mps.MPS140801IEPE;
+import static tw.edu.sju.ee.eea.module.iepe.project.IepeProjectFactory.PROJECT_FILE;
+import tw.edu.sju.ee.eea.module.iepe.project.object.IepeAnalyzerObject;
+import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
+import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
 
 /**
@@ -52,12 +67,23 @@ public class IepeProject implements Project {
     private final FileObject projectDirectory;
     private final ProjectState state;
     private Lookup lkp;
+    private Document doc;
     private final IEPEInput iepe;
 
     public IepeProject(FileObject projectDirectory, ProjectState state) {
         this.projectDirectory = projectDirectory;
         this.state = state;
         iepe = new IEPEInput(new MPS140801IEPE(0, 16000), new int[]{1}, 512);
+        try {
+            doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath());
+            doc.getDocumentElement().normalize();
+        } catch (ParserConfigurationException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (SAXException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     @Override
@@ -75,6 +101,10 @@ public class IepeProject implements Project {
             });
         }
         return lkp;
+    }
+
+    public Document getDoc() {
+        return doc;
     }
 
     public IEPEInput getIepe() {
@@ -139,9 +169,7 @@ public class IepeProject implements Project {
         private final class ProjectNode extends FilterNode {
 
             public ProjectNode(Node node) throws DataObjectNotFoundException {
-                super(node, NodeFactorySupport.createCompositeChildren(
-                        IepeProject.this,
-                        "Projects/edu-sju-iepe/Nodes"),
+                super(node, new ProjectChildren(),
                         new ProxyLookup(new Lookup[]{Lookups.singleton(IepeProject.this), node.getLookup()}));
             }
 
@@ -170,5 +198,32 @@ public class IepeProject implements Project {
 
         }
 
+        public class ProjectChildren extends Children.Keys<Child> {
+
+            private ProjectChildren() {
+            }
+
+            @Override
+            protected Node[] createNodes(Child key) {
+                return new Node[]{key.createNodeDelegate()};
+            }
+
+            @Override
+            protected void addNotify() {
+                super.addNotify();
+                setKeys(new Child[]{
+                    new IepeRealtimeObject(IepeProject.this),
+                    new IepeHistoryObject(IepeProject.this),
+                    new IepeAnalyzerObject(IepeProject.this)
+                });
+            }
+
+        }
+
+    }
+
+    public interface Child {
+
+        public Node createNodeDelegate();
     }
 }

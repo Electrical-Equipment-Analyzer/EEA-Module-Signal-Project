@@ -32,12 +32,13 @@ import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 
 /**
  *
  * @author Leo
  */
-public class IepeAnalyzerObject implements Serializable, Lookup.Provider {
+public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Lookup.Provider {
 
     private Lookup lkp;
 
@@ -55,6 +56,7 @@ public class IepeAnalyzerObject implements Serializable, Lookup.Provider {
     }
     TopComponent tc;
 
+    @Override
     public Node createNodeDelegate() {
         return new AbstractNode(Children.LEAF, lkp) {
 

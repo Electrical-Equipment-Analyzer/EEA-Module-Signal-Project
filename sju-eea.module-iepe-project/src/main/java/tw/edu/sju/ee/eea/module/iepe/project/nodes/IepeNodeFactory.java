@@ -53,9 +53,9 @@ public class IepeNodeFactory implements NodeFactory {
         @Override
         public List<Node> keys() {
             List<Node> list = new ArrayList<Node>();
-            list.add(new IepeRealtimeObject(project).createNodeDelegate());
-            list.add(new IepeHistoryObject(project).createNodeDelegate());
-            list.add(new IepeAnalyzerObject(project).createNodeDelegate());
+//            list.add(new IepeRealtimeObject(project).createNodeDelegate());
+//            list.add(new IepeHistoryObject(project).createNodeDelegate());
+//            list.add(new IepeAnalyzerObject(project).createNodeDelegate());
             return list;
         }
 
