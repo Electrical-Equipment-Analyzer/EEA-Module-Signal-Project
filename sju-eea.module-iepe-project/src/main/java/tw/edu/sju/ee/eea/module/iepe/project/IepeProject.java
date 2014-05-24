@@ -20,13 +20,9 @@ package tw.edu.sju.ee.eea.module.iepe.project;
 import java.awt.Image;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.event.ChangeListener;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.netbeans.api.project.Project;
@@ -34,8 +30,6 @@ import org.netbeans.api.project.ProjectInformation;
 import org.netbeans.spi.project.ProjectState;
 import org.netbeans.spi.project.ui.LogicalViewProvider;
 import org.netbeans.spi.project.ui.support.CommonProjectActions;
-import org.netbeans.spi.project.ui.support.NodeFactorySupport;
-import org.netbeans.spi.project.ui.support.NodeList;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataFolder;
 import org.openide.loaders.DataObjectNotFoundException;
@@ -44,7 +38,6 @@ import org.openide.nodes.Children;
 import org.openide.nodes.FilterNode;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
-import org.openide.util.HelpCtx;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
@@ -52,7 +45,6 @@ import org.openide.util.lookup.ProxyLookup;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import tw.edu.sju.ee.eea.jni.mps.MPS140801IEPE;
-import static tw.edu.sju.ee.eea.module.iepe.project.IepeProjectFactory.PROJECT_FILE;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeAnalyzerObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
@@ -142,7 +134,17 @@ public class IepeProject implements Project {
         }
     }
 
-    public class IepeProjectLogicalView implements LogicalViewProvider {
+    public class IepeProjectLogicalView implements LogicalViewProvider, Lookup.Provider {
+
+        private Lookup lkp;
+        private Child[] chield = new Child[]{new IepeRealtimeObject(IepeProject.this),
+            new IepeHistoryObject(IepeProject.this),
+            new IepeAnalyzerObject(IepeProject.this)
+        };
+
+        public IepeProjectLogicalView() {
+            lkp = Lookups.fixed(chield);
+        }
 
         @Override
         public Node createLogicalView() {
@@ -164,6 +166,11 @@ public class IepeProject implements Project {
         @Override
         public Node findPath(Node root, Object target) {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public Lookup getLookup() {
+            return lkp;
         }
 
         private final class ProjectNode extends FilterNode {
@@ -200,6 +207,11 @@ public class IepeProject implements Project {
 
         public class ProjectChildren extends Children.Keys<Child> {
 
+            private Child[] chield = new Child[]{new IepeRealtimeObject(IepeProject.this),
+                new IepeHistoryObject(IepeProject.this),
+                new IepeAnalyzerObject(IepeProject.this)
+            };
+
             private ProjectChildren() {
             }
 
@@ -211,11 +223,7 @@ public class IepeProject implements Project {
             @Override
             protected void addNotify() {
                 super.addNotify();
-                setKeys(new Child[]{
-                    new IepeRealtimeObject(IepeProject.this),
-                    new IepeHistoryObject(IepeProject.this),
-                    new IepeAnalyzerObject(IepeProject.this)
-                });
+                setKeys(chield);
             }
 
         }

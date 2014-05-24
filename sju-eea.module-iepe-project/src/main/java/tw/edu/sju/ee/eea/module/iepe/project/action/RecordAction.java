@@ -19,21 +19,16 @@ package tw.edu.sju.ee.eea.module.iepe.project.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.io.OutputStream;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionRegistration;
-import org.openide.filesystems.FileObject;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.RequestProcessor;
 import org.openide.util.TaskListener;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
-import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
-import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
+import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 
 @ActionID(
         category = "IEPE",
@@ -44,20 +39,22 @@ import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
 )
 @ActionReference(path = "Menu/Analyzers", position = 600)
 @Messages("CTL_RecordAction=RecordIEPE")
-public final class RecordAction implements ActionListener, Runnable {
+public final class RecordAction implements ActionListener {
 
     private final IepeProject context;
+    private IepeHistoryObject history;
     private final static RequestProcessor RP = new RequestProcessor("interruptible tasks", 1, true);
     private ProgressHandle progr;
 
     public RecordAction(IepeProject context) {
         this.context = context;
+        history = context.getLookup().lookup(IepeProject.IepeProjectLogicalView.class).getLookup().lookup(IepeHistoryObject.class);
     }
 
     @Override
     public void actionPerformed(ActionEvent ev) {
         // TODO use context
-        RequestProcessor.Task task = RP.create(this);
+        RequestProcessor.Task task = RP.create(this.history);
         progr = ProgressHandleFactory.createHandle("Record task", task);
         task.addTaskListener(new TaskListener() {
             public void taskFinished(org.openide.util.Task task) {
@@ -68,30 +65,4 @@ public final class RecordAction implements ActionListener, Runnable {
         progr.start();
         task.schedule(0);
     }
-
-    @Override
-    public void run() {
-        FileObject projectDirectory = context.getProjectDirectory();
-        try {
-            projectDirectory.createFolder("Record");
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-        FileObject fileObject = projectDirectory.getFileObject("Record");
-        try {
-            FileObject createData = fileObject.createData("aa.iepe");
-            OutputStream outputStream = createData.getOutputStream();
-//            IEPEInput.IepeStream iepeStream = new IEPEInput.IepeStream();
-            IEPEInput.Stream stream = context.getIepe().addStream(0, outputStream);
-            while (!Thread.interrupted()) {
-                
-            }
-            context.getIepe().removeStream(0, stream);
-            outputStream.flush();
-            outputStream.close();
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-    }
-
 }
