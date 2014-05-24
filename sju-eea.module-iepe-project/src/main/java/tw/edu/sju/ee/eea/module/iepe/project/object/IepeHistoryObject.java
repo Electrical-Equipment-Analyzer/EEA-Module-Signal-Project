@@ -24,13 +24,13 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Iterator;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.netbeans.core.api.multiview.MultiViews;
 import org.openide.filesystems.FileObject;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
-import org.openide.nodes.Node;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
@@ -38,11 +38,11 @@ import org.openide.util.lookup.ProxyLookup;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.dom4j.Element;
 
+import org.dom4j.Document;
 /**
  *
  * @author Leo
@@ -51,6 +51,8 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
 
     private Lookup lkp;
     private Document doc;
+    private Element conf;
+    private Element pattern;
     private DateFormat dateFormat;
     private long interval;
 
@@ -58,14 +60,25 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
         this.lkp = new ProxyLookup(new Lookup[]{Lookups.singleton(project), Lookups.singleton(this)});
         doc = project.getDoc();
 
-        System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
-        Element eElement = (Element) doc.getElementsByTagName("history").item(0);
-
+        
+            Element root = doc.getRootElement();
+            for (Iterator i = root.elementIterator("VALUE"); i.hasNext();) {
+                Element foo = (Element) i.next();
+                System.out.print("車牌號碼:" + foo.elementText("NO"));
+                System.out.println("車主地址:" + foo.elementText("ADDR"));
+            }
+        
+        conf = root.element("history");
+        pattern = conf.element("pattern");
         System.out.println("----------------------------");
-        System.out.println("item : " + eElement.getElementsByTagName("patten").item(0).getTextContent());
+        System.out.println("item : " + pattern.getText());
 
-        dateFormat = new SimpleDateFormat("yyyy-MM-dd_HHmm_'channel'");
+        dateFormat = new SimpleDateFormat(pattern.getText());
         interval = 60000;
+    }
+    
+    public Element getConf() {
+        return conf;
     }
 
     @Override
@@ -120,7 +133,7 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
 
     TopComponent tc;
 
-    public Node createNodeDelegate() {
+    public org.openide.nodes.Node createNodeDelegate() {
         return new AbstractNode(Children.LEAF, lkp) {
 
             @Override

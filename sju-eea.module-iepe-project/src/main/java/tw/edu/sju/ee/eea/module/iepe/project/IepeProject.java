@@ -19,12 +19,21 @@ package tw.edu.sju.ee.eea.module.iepe.project;
 
 import java.awt.Image;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Iterator;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+//import javax.xml.parsers.DocumentBuilderFactory;
+//import javax.xml.parsers.ParserConfigurationException;
+//import javax.xml.transform.Transformer;
+//import javax.xml.transform.TransformerConfigurationException;
+//import javax.xml.transform.TransformerException;
+//import javax.xml.transform.TransformerFactory;
+//import javax.xml.transform.dom.DOMSource;
+//import javax.xml.transform.stream.StreamResult;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectInformation;
 import org.netbeans.spi.project.ProjectState;
@@ -42,13 +51,20 @@ import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
+//import org.w3c.dom.Document;
+//import org.xml.sax.SAXException;
 import tw.edu.sju.ee.eea.jni.mps.MPS140801IEPE;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeAnalyzerObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
+
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+import org.dom4j.io.XMLWriter;
 
 /**
  *
@@ -59,23 +75,33 @@ public class IepeProject implements Project {
     private final FileObject projectDirectory;
     private final ProjectState state;
     private Lookup lkp;
-    private Document doc;
+    private Child[] chield;
     private final IEPEInput iepe;
+    private File confFile;
+    private Document doc;
 
     public IepeProject(FileObject projectDirectory, ProjectState state) {
         this.projectDirectory = projectDirectory;
         this.state = state;
         iepe = new IEPEInput(new MPS140801IEPE(0, 16000), new int[]{1}, 512);
+
+        confFile = new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath());
         try {
-            doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath());
-            doc.getDocumentElement().normalize();
-        } catch (ParserConfigurationException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (SAXException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (IOException ex) {
+            doc = new SAXReader().read(confFile);
+        } catch (DocumentException ex) {
             Exceptions.printStackTrace(ex);
         }
+        
+//        try {
+//            doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(confFile.getPath());
+//            doc.getDocumentElement().normalize();
+//        } catch (ParserConfigurationException ex) {
+//            Exceptions.printStackTrace(ex);
+//        } catch (SAXException ex) {
+//            Exceptions.printStackTrace(ex);
+//        } catch (IOException ex) {
+//            Exceptions.printStackTrace(ex);
+//        }
     }
 
     @Override
@@ -97,6 +123,16 @@ public class IepeProject implements Project {
 
     public Document getDoc() {
         return doc;
+    }
+
+    public void save() {
+        try {
+            XMLWriter writer = new XMLWriter(new FileWriter(confFile));
+            writer.write(doc);
+            writer.close();
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     public IEPEInput getIepe() {
@@ -137,12 +173,14 @@ public class IepeProject implements Project {
     public class IepeProjectLogicalView implements LogicalViewProvider, Lookup.Provider {
 
         private Lookup lkp;
-        private Child[] chield = new Child[]{new IepeRealtimeObject(IepeProject.this),
-            new IepeHistoryObject(IepeProject.this),
-            new IepeAnalyzerObject(IepeProject.this)
-        };
 
         public IepeProjectLogicalView() {
+            if (chield == null) {
+                chield = new Child[]{new IepeRealtimeObject(IepeProject.this),
+                    new IepeHistoryObject(IepeProject.this),
+                    new IepeAnalyzerObject(IepeProject.this)
+                };
+            }
             lkp = Lookups.fixed(chield);
         }
 
