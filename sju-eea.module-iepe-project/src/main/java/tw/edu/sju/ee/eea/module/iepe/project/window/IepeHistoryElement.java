@@ -17,16 +17,31 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.window;
 
+import java.awt.Component;
+import java.awt.Graphics;
+import java.io.IOException;
 import javax.swing.Action;
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
+import org.netbeans.spi.actions.AbstractSavable;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
+import org.openide.NotifyDescriptor.Confirmation;
 import org.openide.awt.UndoRedo;
+import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
+import org.openide.util.lookup.AbstractLookup;
+import org.openide.util.lookup.InstanceContent;
+import org.openide.util.lookup.Lookups;
+import org.openide.util.lookup.ProxyLookup;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
@@ -41,28 +56,59 @@ import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
         position = 1000
 )
 @Messages("LBL_IEPE_HISTORY=LogicView")
-public final class IepeHistoryElement extends JPanel implements MultiViewElement {
+public final class IepeHistoryElement extends JPanel implements MultiViewElement, DocumentListener {
 
     private Lookup lkp;
     private IepeHistoryObject object;
     private JToolBar toolbar = new JToolBar();
     private transient MultiViewElementCallback callback;
+    private InstanceContent instanceContent = new InstanceContent();
+    private UndoRedo.Manager manager = new UndoRedo.Manager();
 
-    private SampledManager manager;
-
+//    private SampledManager manager;
     public IepeHistoryElement(Lookup lkp) {
-        this.lkp = lkp;
+        this.lkp = new ProxyLookup(lkp, Lookups.singleton(instanceContent));
         this.object = lkp.lookup(IepeHistoryObject.class);
         assert object != null;
-
         initComponents();
+        initValue();
+        initUndoRedo();
         toolbar.setEnabled(false);
+    }
 
+    private void initValue() {
+        patternText.setText(object.getConf().elementText("pattern"));
+    }
+
+    private void initUndoRedo() {
+        patternText.getDocument().addUndoableEditListener(manager);
+        patternText.getDocument().addDocumentListener(this);
     }
 
     @Override
     public String getName() {
         return "IepeVisualElement";
+    }
+
+    @Override
+    public void insertUpdate(DocumentEvent e) {
+        modify();
+    }
+
+    @Override
+    public void removeUpdate(DocumentEvent e) {
+        modify();
+    }
+
+    @Override
+    public void changedUpdate(DocumentEvent e) {
+        modify();
+    }
+
+    private void modify() {
+        if (getLookup().lookup(MySavable.class) == null) {
+            instanceContent.add(new MySavable());
+        }
     }
 
     /**
@@ -183,7 +229,7 @@ public final class IepeHistoryElement extends JPanel implements MultiViewElement
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         // TODO add your handling code here:
-        
+
     }//GEN-LAST:event_cancelButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -243,7 +289,7 @@ public final class IepeHistoryElement extends JPanel implements MultiViewElement
 
     @Override
     public UndoRedo getUndoRedo() {
-        return UndoRedo.NONE;
+        return manager;
     }
 
     @Override
@@ -257,4 +303,51 @@ public final class IepeHistoryElement extends JPanel implements MultiViewElement
         return CloseOperationState.STATE_OK;
     }
 
+    private static final Icon ICON = ImageUtilities.loadImageIcon("org/shop/editor/Icon.png", true);
+
+    private class MySavable extends AbstractSavable implements Icon {
+
+        MySavable() {
+            register();
+        }
+
+        @Override
+        protected String findDisplayName() {
+            String name = "a";
+            String city = "bf";
+            return name + " from " + city;
+        }
+
+        @Override
+        protected void handleSave() throws IOException {
+            IepeHistoryElement.this.instanceContent.remove(this);
+            unregister();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return this.hashCode() == o.hashCode();
+        }
+
+        @Override
+        public int hashCode() {
+            return IepeHistoryElement.this.hashCode();
+        }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            ICON.paintIcon(c, g, x, y);
+        }
+
+        @Override
+        public int getIconWidth() {
+            return ICON.getIconWidth();
+        }
+
+        @Override
+        public int getIconHeight() {
+            return ICON.getIconHeight();
+        }
+
+    }
 }
