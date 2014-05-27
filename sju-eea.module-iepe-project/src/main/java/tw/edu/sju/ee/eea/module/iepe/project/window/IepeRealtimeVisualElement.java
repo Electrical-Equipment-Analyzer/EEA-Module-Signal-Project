@@ -43,6 +43,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
+import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
 import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
 
 @MultiViewElement.Registration(
@@ -135,9 +136,9 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         assert rt != null;
 
         manager = lkp.lookup(IepeProject.class).getList().createSampledManager(
-                lkp.lookup(IepeProject.class).getIepe(),
                 SampledChart.creatrRenderer(),
-                Process.class
+                Process.class,
+                lkp.lookup(IepeProject.class).getIepe()
         );
 
         initComponents();
@@ -147,13 +148,18 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         t.start();
     }
 
-    public static class Process extends SampledSeries {
+    public static class Process extends SampledSeries<IEPEInput> {
 
         private SampledStream sampled;
 
-        public Process(Comparable key) throws IOException {
-            super(key);
+        public Process(Comparable key, int channel) throws IOException {
+            super(key, channel);
             sampled = new SampledStream(super.stream, 1600);
+        }
+
+        @Override
+        public void configure(IEPEInput conf) {
+            conf.addStream(getChannel(), getStream());
         }
 
         private void process(long time) throws IOException {

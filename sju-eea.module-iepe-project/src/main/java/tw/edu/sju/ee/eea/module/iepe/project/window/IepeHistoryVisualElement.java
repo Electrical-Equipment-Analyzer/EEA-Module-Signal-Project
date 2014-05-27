@@ -44,6 +44,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
+import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
 import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
 
 @MultiViewElement.Registration(
@@ -136,25 +137,30 @@ public final class IepeHistoryVisualElement extends JPanel implements MultiViewE
         assert object != null;
 
         manager = lkp.lookup(IepeProject.class).getList().createSampledManager(
-                lkp.lookup(IepeProject.class).getIepe(),
                 SampledChart.creatrRenderer(),
-                Process.class
+                Process.class,
+                lkp.lookup(IepeProject.class).getIepe()
         );
 
         initComponents();
         toolbar.setEnabled(false);
 
-        Thread t = new Thread(this);
-        t.start();
+//        Thread t = new Thread(this);
+//        t.start();
     }
 
-    public static class Process extends SampledSeries {
+    public static class Process extends SampledSeries<IEPEInput> {
 
         private SampledStream sampled;
 
-        public Process(Comparable key) throws IOException {
-            super(key);
+        public Process(Comparable key, int channel) throws IOException {
+            super(key, channel);
             sampled = new SampledStream(super.stream, 1600);
+        }
+
+        @Override
+        public void configure(IEPEInput conf) {
+            
         }
 
         private void process(long time) throws IOException {
@@ -165,31 +171,24 @@ public final class IepeHistoryVisualElement extends JPanel implements MultiViewE
 
     @Override
     public void run() {
-        long time = Calendar.getInstance().getTimeInMillis();
-        while (true) {
-            Iterator<Process> iterator = manager.getCollection().getSeries().iterator();
-            while (iterator.hasNext()) {
-                Process next = iterator.next();
-                try {
-                    next.process(time);
-                } catch (IOException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
-            }
-            time += 100;
-        }
+//        long time = Calendar.getInstance().getTimeInMillis();
+//        while (true) {
+//            Iterator<Process> iterator = manager.getCollection().getSeries().iterator();
+//            while (iterator.hasNext()) {
+//                Process next = iterator.next();
+//                try {
+//                    next.process(time);
+//                } catch (IOException ex) {
+//                    Exceptions.printStackTrace(ex);
+//                }
+//            }
+//            time += 100;
+//        }
     }
 
     private JFreeChart createChart() {
-
         SampledChart sampledChart = new SampledChart("PlotTitle");
-
         sampledChart.addData(0, manager.getCollection(), manager.getRenderer());
-
-        ValueAxis axis = sampledChart.getXYPlot().getDomainAxis();
-        axis.setAutoRange(true);
-        axis.setFixedAutoRange(60000.0);  // 60 seconds
-
         return sampledChart;
     }
 

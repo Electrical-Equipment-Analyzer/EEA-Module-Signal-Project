@@ -25,17 +25,25 @@ import tw.edu.sju.ee.eea.util.iepe.IEPEInput.IepeStream;
  *
  * @author Leo
  */
-public abstract class SampledSeries extends XYSeries {
+public abstract class SampledSeries<C> extends XYSeries {
 
+    private int channel;
     protected IepeStream stream;
 
-    public SampledSeries(Comparable key) throws IOException {
+    public SampledSeries(Comparable key, int channel) throws IOException {
         super(key);
+        this.channel = channel;
         this.stream = new IepeStream();
+    }
+
+    public int getChannel() {
+        return channel;
     }
 
     public IepeStream getStream() {
         return stream;
     }
+    
+    public abstract  void configure(C conf);
 
 }

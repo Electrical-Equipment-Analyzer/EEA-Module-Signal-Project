@@ -77,7 +77,7 @@ public class Channel {
     }
 
     SampledSeries createSampledSeries(Class<? extends SampledSeries> c) throws IOException, InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-        SampledSeries sampledSeries = c.getConstructor(Comparable.class).newInstance(name);
+        SampledSeries sampledSeries = c.getConstructor(Comparable.class, int.class).newInstance(name, channel);
         return sampledSeries;
     }
 

@@ -31,7 +31,6 @@ import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.data.xy.XYDataItem;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
@@ -45,6 +44,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 import tw.edu.sju.ee.eea.ui.workspace.plot.BodePlot;
+import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_IEPE_Realtime_BodePlot",
@@ -69,9 +69,9 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
         toolbar.setFloatable(false);
 
         manager = lkp.lookup(IepeProject.class).getList().createSampledManager(
-                lkp.lookup(IepeProject.class).getIepe(),
                 BodePlot.creatrRenderer(),
-                Process.class
+                Process.class,
+                lkp.lookup(IepeProject.class).getIepe()
         );
 
         initComponents();
@@ -80,16 +80,21 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
         t.start();
     }
 
-    public static class Process extends SampledSeries implements Runnable {
+    public static class Process extends SampledSeries<IEPEInput> implements Runnable {
 
         private static final FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
         private double[] value = new double[1024 * 4];
         private Thread thread;
 
-        public Process(Comparable key) throws IOException {
-            super(key);
+        public Process(Comparable key, int channel) throws IOException {
+            super(key, channel);
             this.thread = new Thread(this);
             this.thread.start();
+        }
+
+        @Override
+        public void configure(IEPEInput conf) {
+            conf.addStream(getChannel(), getStream());
         }
 
         @Override

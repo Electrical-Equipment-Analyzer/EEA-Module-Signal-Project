@@ -35,7 +35,6 @@ import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
-import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
 
 /**
  *
@@ -50,13 +49,13 @@ public class ChannelList extends ArrayList<Channel> implements Channel.Renderer 
         this.lkp = Lookups.singleton(this);
     }
 
-    public SampledManager createSampledManager(IEPEInput iepe, XYItemRenderer renderer, Class<? extends SampledSeries> c) {
+    public SampledManager createSampledManager(XYItemRenderer renderer, Class<? extends SampledSeries> c, Object conf) {
         SampledManager manager = new SampledManager(renderer);
         for (int i = 0; i < this.size(); i++) {
             try {
                 Channel channel = this.get(i);
                 SampledSeries series = channel.createSampledSeries(c);
-                iepe.addStream(channel.getChannel(), series.getStream());
+                series.configure(conf);
                 manager.getCollection().addSeries(series);
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
