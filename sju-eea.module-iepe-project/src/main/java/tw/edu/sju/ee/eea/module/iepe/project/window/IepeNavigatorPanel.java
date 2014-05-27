@@ -32,6 +32,7 @@ import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 
 /**
@@ -131,7 +132,7 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
         Collection<? extends IepeRealtimeObject> allInstances = this.result.allInstances();
         if (!allInstances.isEmpty()) {
             IepeRealtimeObject realtime = allInstances.iterator().next();
-            manager.setRootContext(realtime.getList().createNodeDelegate());
+            manager.setRootContext(realtime.getLookup().lookup(IepeProject.class).getList().createNodeDelegate());
         }
     }
 

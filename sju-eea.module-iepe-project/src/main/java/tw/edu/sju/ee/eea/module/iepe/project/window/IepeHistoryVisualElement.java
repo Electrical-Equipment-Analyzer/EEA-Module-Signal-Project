@@ -17,21 +17,19 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.window;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
-import org.apache.commons.math3.complex.Complex;
-import org.apache.commons.math3.transform.DftNormalization;
-import org.apache.commons.math3.transform.FastFourierTransformer;
-import org.apache.commons.math3.transform.TransformType;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.data.xy.XYDataItem;
+import org.jfree.chart.axis.ValueAxis;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
@@ -41,130 +39,158 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
+import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
-import tw.edu.sju.ee.eea.ui.workspace.plot.BodePlot;
+import tw.edu.sju.ee.eea.ui.chart.SampledChart;
+import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
 
 @MultiViewElement.Registration(
-        displayName = "#LBL_IEPE_Realtime_BodePlot",
+        displayName = "#LBL_IEPE_VISUAL",
         iconBase = "tw/edu/sju/ee/eea/module/iepe/file/iepe.png",
-        mimeType = "application/iepe-realtime",
+        mimeType = "application/iepe-history",
         persistenceType = TopComponent.PERSISTENCE_NEVER,
         preferredID = "IepeVisual",
-        position = 3000
+        position = 2000
 )
-@Messages("LBL_IEPE_Realtime_BodePlot=BodePlot")
-public final class IepeRealtimeBodeplotElement extends JPanel implements MultiViewElement, Runnable {
+@Messages("LBL_IEPE_VISUAL=Visual")
+public final class IepeHistoryVisualElement extends JPanel implements MultiViewElement, Runnable {
 
-    private IepeRealtimeObject rt;
-    private JToolBar toolbar = new JToolBar();
+    private class IepeVisualToolBar extends JToolBar {
+
+        private JButton head;
+        private JButton tail;
+        private JButton zoomIn;
+        private JButton zoomOut;
+
+        public IepeVisualToolBar() {
+            this.setFloatable(false);
+            this.addSeparator();
+            head = new JButton(new javax.swing.ImageIcon(getClass().getResource("/tw/edu/sju/ee/eea/module/iepe/file/iepe_visual_cursor_head.png")));
+            head.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+//                    info.getCursor().setTime(0);
+                }
+            });
+            this.add(head);
+            tail = new JButton(new javax.swing.ImageIcon(getClass().getResource("/tw/edu/sju/ee/eea/module/iepe/file/iepe_visual_cursor_tail.png")));
+            tail.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+//                    info.getCursor().setTime(total);
+                }
+            });
+            this.add(tail);
+            this.addSeparator();
+            zoomIn = new JButton(new javax.swing.ImageIcon(getClass().getResource("/tw/edu/sju/ee/eea/module/iepe/file/iepe_visual_cursor_zoomIn.png")));
+            zoomIn.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+//                    double tmp = cursor.getValue();
+//                    index += (int) ((tmp - index) / 2);
+//                    length /= 2;
+//                    scrollLength();
+                }
+            });
+            this.add(zoomIn);
+            zoomOut = new JButton(new javax.swing.ImageIcon(getClass().getResource("/tw/edu/sju/ee/eea/module/iepe/file/iepe_visual_cursor_zoomOut.png")));
+            zoomOut.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+//                    double tmp = cursor.getValue();
+//                    index -= (int) (tmp - index);
+//                    length *= 2;
+//                    scrollLength();
+                }
+            });
+            this.add(zoomOut);
+
+        }
+
+        @Override
+        public void setEnabled(boolean b) {
+            this.head.setEnabled(b);
+            this.tail.setEnabled(b);
+            this.zoomIn.setEnabled(b);
+            this.zoomOut.setEnabled(b);
+        }
+
+    }
+
+    private Lookup lkp;
+    private IepeHistoryObject object;
+    private JToolBar toolbar = new IepeVisualToolBar();
     private transient MultiViewElementCallback callback;
 
     private SampledManager manager;
 
-    public IepeRealtimeBodeplotElement(Lookup lkp) {
-        this.rt = lkp.lookup(IepeRealtimeObject.class);
-        assert rt != null;
-        toolbar.setFloatable(false);
+    public IepeHistoryVisualElement(Lookup lkp) {
+        this.lkp = lkp;
+        this.object = lkp.lookup(IepeHistoryObject.class);
+        assert object != null;
 
         manager = lkp.lookup(IepeProject.class).getList().createSampledManager(
                 lkp.lookup(IepeProject.class).getIepe(),
-                BodePlot.creatrRenderer(),
+                SampledChart.creatrRenderer(),
                 Process.class
         );
 
         initComponents();
+        toolbar.setEnabled(false);
 
         Thread t = new Thread(this);
         t.start();
     }
 
-    public static class Process extends SampledSeries implements Runnable {
+    public static class Process extends SampledSeries {
 
-        private static final FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
-        private double[] value = new double[1024 * 4];
-        private Thread thread;
+        private SampledStream sampled;
 
         public Process(Comparable key) throws IOException {
             super(key);
-            this.thread = new Thread(this);
-            this.thread.start();
+            sampled = new SampledStream(super.stream, 1600);
         }
 
-        @Override
-        public Number getX(int index) {
-            try {
-                return super.getX(index);
-            } catch (IndexOutOfBoundsException ex) {
-            } catch (NullPointerException ex) {
-            }
-            return null;
-        }
-
-        @Override
-        public Number getY(int index) {
-            try {
-                return super.getY(index);
-            } catch (IndexOutOfBoundsException ex) {
-            } catch (NullPointerException ex) {
-            }
-            return null;
-        }
-
-        private void process() {
-            try {
-                for (int i = 0; i < value.length; i++) {
-                    value[i] = stream.readValue();
-                }
-                synchronized (this) {
-                    this.notify();
-                }
-            } catch (IOException ex) {
-            }
-        }
-
-        @Override
-        public void run() {
-            while (!Thread.interrupted()) {
-                try {
-                    Thread.sleep(1000);
-                    synchronized (this) {
-                        this.wait();
-                    }
-                } catch (InterruptedException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
-                Complex[] transform = fft.transform(value, TransformType.FORWARD);
-                int max = transform.length / 2 + 1;
-                this.clear();
-                for (int i = 1; i < max; i++) {
-                    double f = i * 16000.0 / transform.length;
-                    this.add(f, transform[i].abs());
-                }
-            }
+        private void process(long time) throws IOException {
+            this.add(time, sampled.readSampled());
         }
 
     }
 
     @Override
     public void run() {
-        while (!Thread.interrupted()) {
+        long time = Calendar.getInstance().getTimeInMillis();
+        while (true) {
             Iterator<Process> iterator = manager.getCollection().getSeries().iterator();
             while (iterator.hasNext()) {
                 Process next = iterator.next();
-                next.process();
+                try {
+                    next.process(time);
+                } catch (IOException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             }
+            time += 100;
         }
     }
 
     private JFreeChart createChart() {
-        BodePlot bodePlot = new BodePlot("FFT PlotTitle");
-        bodePlot.createAxisY(0, "Magnitude(Voltage)");
-        bodePlot.addData(0, manager.getCollection(), manager.getRenderer());
-        bodePlot.getXYPlot().getRangeAxis().setRange(0, 500);
-        bodePlot.getXYPlot().getDomainAxis().setRange(0.5, 10000);
-        return bodePlot;
+
+        SampledChart sampledChart = new SampledChart("PlotTitle");
+
+        sampledChart.addData(0, manager.getCollection(), manager.getRenderer());
+
+        ValueAxis axis = sampledChart.getXYPlot().getDomainAxis();
+        axis.setAutoRange(true);
+        axis.setFixedAutoRange(60000.0);  // 60 seconds
+
+        return sampledChart;
     }
 
     @Override
@@ -180,7 +206,10 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        scrollBar = new javax.swing.JScrollBar();
         chartPanel = new ChartPanel(createChart());
+
+        scrollBar.setOrientation(javax.swing.JScrollBar.HORIZONTAL);
 
         javax.swing.GroupLayout chartPanelLayout = new javax.swing.GroupLayout(chartPanel);
         chartPanel.setLayout(chartPanelLayout);
@@ -190,7 +219,7 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
         );
         chartPanelLayout.setVerticalGroup(
             chartPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 460, Short.MAX_VALUE)
+            .addGap(0, 437, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -199,7 +228,9 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(chartPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(chartPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(scrollBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -207,12 +238,15 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(chartPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(scrollBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel chartPanel;
+    private javax.swing.JScrollBar scrollBar;
     // End of variables declaration//GEN-END:variables
     @Override
     public JComponent getVisualRepresentation() {
@@ -231,37 +265,31 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
 
     @Override
     public Lookup getLookup() {
-        return rt.getLookup();
+        return lkp;
     }
 
     @Override
     public void componentOpened() {
-        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "open");
     }
 
     @Override
     public void componentClosed() {
-        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "close");
     }
 
     @Override
     public void componentShowing() {
-        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "Show");
     }
 
     @Override
     public void componentHidden() {
-        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "hide");
     }
 
     @Override
     public void componentActivated() {
-        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "active");
     }
 
     @Override
     public void componentDeactivated() {
-        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "deact");
     }
 
     @Override
@@ -272,6 +300,7 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
     @Override
     public void setMultiViewCallback(MultiViewElementCallback callback) {
         this.callback = callback;
+        callback.getTopComponent().setDisplayName(object.getDisplayName());
     }
 
     @Override

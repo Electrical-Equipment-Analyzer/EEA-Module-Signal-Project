@@ -65,6 +65,8 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
+import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 
 /**
  *
@@ -79,6 +81,7 @@ public class IepeProject implements Project {
     private final IEPEInput iepe;
     private File confFile;
     private Document doc;
+    private ChannelList list;
 
     public IepeProject(FileObject projectDirectory, ProjectState state) {
         this.projectDirectory = projectDirectory;
@@ -91,17 +94,19 @@ public class IepeProject implements Project {
         } catch (DocumentException ex) {
             Exceptions.printStackTrace(ex);
         }
-        
-//        try {
-//            doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(confFile.getPath());
-//            doc.getDocumentElement().normalize();
-//        } catch (ParserConfigurationException ex) {
-//            Exceptions.printStackTrace(ex);
-//        } catch (SAXException ex) {
-//            Exceptions.printStackTrace(ex);
-//        } catch (IOException ex) {
-//            Exceptions.printStackTrace(ex);
-//        }
+        list = new ChannelList();
+        try {
+            list.add(new Channel("USB", 0));
+            list.add(new Channel("USB", 1));
+            list.add(new Channel("USB", 2));
+            list.add(new Channel("USB", 3));
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
+
+    public ChannelList getList() {
+        return list;
     }
 
     @Override

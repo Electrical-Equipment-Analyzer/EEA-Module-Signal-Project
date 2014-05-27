@@ -46,23 +46,9 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 public class IepeRealtimeObject implements IepeProject.Child, Serializable, Lookup.Provider {
 
     private Lookup lkp;
-    private ChannelList list;
 
     public IepeRealtimeObject(Project project) {
         this.lkp = Lookups.fixed(project, this, new IepeNavigatorHint());
-        list = new ChannelList();
-        try {
-            list.add(new Channel("USB", 0));
-            list.add(new Channel("USB", 1));
-            list.add(new Channel("USB", 2));
-            list.add(new Channel("USB", 3));
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-    }
-
-    public ChannelList getList() {
-        return list;
     }
 
 //    @Override

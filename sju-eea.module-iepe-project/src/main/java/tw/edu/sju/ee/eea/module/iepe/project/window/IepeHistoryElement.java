@@ -17,11 +17,8 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.window;
 
-import java.awt.Component;
-import java.awt.Graphics;
 import java.io.IOException;
 import javax.swing.Action;
-import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
@@ -31,21 +28,15 @@ import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
 import org.netbeans.spi.actions.AbstractSavable;
-import org.openide.DialogDisplayer;
-import org.openide.NotifyDescriptor;
-import org.openide.NotifyDescriptor.Confirmation;
 import org.openide.awt.UndoRedo;
-import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
-import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
-import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_IEPE_HISTORY",
@@ -110,8 +101,6 @@ public final class IepeHistoryElement extends JPanel implements MultiViewElement
         jLabel1 = new javax.swing.JLabel();
         jComboBox1 = new javax.swing.JComboBox();
         jTextField2 = new javax.swing.JTextField();
-
-        patternText.setText(org.openide.util.NbBundle.getMessage(IepeHistoryElement.class, "IepeHistoryElement.patternText.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(IepeHistoryElement.class, "IepeHistoryElement.jLabel2.text")); // NOI18N
 
