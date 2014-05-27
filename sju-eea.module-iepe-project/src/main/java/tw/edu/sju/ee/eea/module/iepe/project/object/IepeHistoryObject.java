@@ -53,7 +53,6 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
     private Document doc;
     private Element conf;
     private Element pattern;
-    private DateFormat dateFormat;
     private long interval;
 
     public IepeHistoryObject(IepeProject project) {
@@ -73,7 +72,6 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
         System.out.println("----------------------------");
         System.out.println("item : " + pattern.getText());
 
-        dateFormat = new SimpleDateFormat(pattern.getText());
         interval = 60000;
     }
     
@@ -91,7 +89,7 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
     }
 
     private String pattern(int channel) {
-        return dateFormat.format(Calendar.getInstance().getTime()).concat(".iepe")
+        return new SimpleDateFormat(pattern.getText()).format(Calendar.getInstance().getTime()).concat(".iepe")
                 .replaceAll("channel", String.valueOf(channel));
     }
 
