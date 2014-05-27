@@ -19,8 +19,14 @@ package tw.edu.sju.ee.eea.module.iepe.project.window;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -29,22 +35,22 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.ValueAxis;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
 import org.openide.awt.UndoRedo;
+import org.openide.filesystems.FileObject;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
-import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
+import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
 import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
 
 @MultiViewElement.Registration(
@@ -56,7 +62,7 @@ import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
         position = 2000
 )
 @Messages("LBL_IEPE_VISUAL=Visual")
-public final class IepeHistoryVisualElement extends JPanel implements MultiViewElement, Runnable {
+public final class IepeHistoryVisualElement extends JPanel implements MultiViewElement {
 
     private class IepeVisualToolBar extends JToolBar {
 
@@ -129,61 +135,73 @@ public final class IepeHistoryVisualElement extends JPanel implements MultiViewE
     private JToolBar toolbar = new IepeVisualToolBar();
     private transient MultiViewElementCallback callback;
 
+    private Date time;
     private SampledManager manager;
 
     public IepeHistoryVisualElement(Lookup lkp) {
         this.lkp = lkp;
         this.object = lkp.lookup(IepeHistoryObject.class);
         assert object != null;
+        try {
+            this.time = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse("2014-05-27 15:15");
+        } catch (ParseException ex) {
+            Exceptions.printStackTrace(ex);
+        }
 
         manager = lkp.lookup(IepeProject.class).getList().createSampledManager(
                 SampledChart.creatrRenderer(),
                 Process.class,
-                lkp.lookup(IepeProject.class).getIepe()
+                this
         );
 
         initComponents();
         toolbar.setEnabled(false);
 
-//        Thread t = new Thread(this);
-//        t.start();
+        Iterator<Process> iterator = manager.getCollection().getSeries().iterator();
+        while (iterator.hasNext()) {
+            Process next = iterator.next();
+            next.process();
+        }
     }
 
-    public static class Process extends SampledSeries<IEPEInput> {
+    private InputStream getStream(int channel) throws FileNotFoundException {
+//        new SimpleDateFormat(object.getConf().getText()).format(time);
+        String format = "2014-05-27_0315_channel".concat(".iepe")
+                .replaceAll("channel", String.valueOf(channel));
+        System.out.println(format);
+        FileObject fileObject = lkp.lookup(IepeProject.class).getProjectDirectory().getFileObject("Record").getFileObject(format);
+        return fileObject.getInputStream();
+    }
+
+    public static class Process extends SampledSeries<IepeHistoryVisualElement> {
 
         private SampledStream sampled;
 
         public Process(Comparable key, int channel) throws IOException {
             super(key, channel);
-            sampled = new SampledStream(super.stream, 1600);
         }
 
         @Override
-        public void configure(IEPEInput conf) {
-            
+        public void configure(IepeHistoryVisualElement conf) {
+            try {
+                sampled = new SampledStream(new IepeInputStream(conf.getStream(getChannel())), 1600);
+            } catch (FileNotFoundException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
 
-        private void process(long time) throws IOException {
-            this.add(time, sampled.readSampled());
+        private void process() {
+            int i = 0;
+            try {
+                while (sampled.available() > 0) {
+                    this.add(i, sampled.readSampled());
+                    i += 100;
+                }
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
 
-    }
-
-    @Override
-    public void run() {
-//        long time = Calendar.getInstance().getTimeInMillis();
-//        while (true) {
-//            Iterator<Process> iterator = manager.getCollection().getSeries().iterator();
-//            while (iterator.hasNext()) {
-//                Process next = iterator.next();
-//                try {
-//                    next.process(time);
-//                } catch (IOException ex) {
-//                    Exceptions.printStackTrace(ex);
-//                }
-//            }
-//            time += 100;
-//        }
     }
 
     private JFreeChart createChart() {
