@@ -17,7 +17,12 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.data;
 
+import java.awt.Image;
 import org.dom4j.Element;
+import org.openide.nodes.AbstractNode;
+import org.openide.nodes.Children;
+import org.openide.nodes.Node;
+import org.openide.util.ImageUtilities;
 
 /**
  *
@@ -39,10 +44,49 @@ public class AnalyzerRule {
         this.magnitude = Integer.parseInt(element.elementText("magnitude"));
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public int getChannel() {
+        return channel;
+    }
+
+    public int getMaximum() {
+        return maximum;
+    }
+
+    public int getMinimum() {
+        return minimum;
+    }
+
+    public int getMagnitude() {
+        return magnitude;
+    }
+
     @Override
     public String toString() {
         return "AnalyzerRule{" + "name=" + name + ", channel=" + channel + ", maximum=" + maximum + ", minimum=" + minimum + ", magnitude=" + magnitude + '}';
     }
 
+    public Node createNodeDelegate() {
+        return new AbstractNode(Children.LEAF) {
+
+            @Override
+            public Image getIcon(int type) {
+                return ImageUtilities.loadImage("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
+            }
+
+            @Override
+            public Image getOpenedIcon(int type) {
+                return getIcon(type);
+            }
+
+            @Override
+            public String getDisplayName() {
+                return AnalyzerRule.this.getName();
+            }
+        };
+    }
 
 }

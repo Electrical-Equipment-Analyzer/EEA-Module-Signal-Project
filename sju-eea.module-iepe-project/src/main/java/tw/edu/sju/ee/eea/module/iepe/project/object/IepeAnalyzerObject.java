@@ -36,6 +36,7 @@ import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
+import tw.edu.sju.ee.eea.module.iepe.project.data.AnalyzerRule;
 
 /**
  *
@@ -69,7 +70,7 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
 
     @Override
     public Node createNodeDelegate() {
-        return new AbstractNode(Children.LEAF, lkp) {
+        return new AbstractNode(new AnalyzerChildren(), lkp) {
 
             @Override
             public Action getPreferredAction() {
@@ -102,5 +103,23 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
             }
 
         };
+    }
+
+    public class AnalyzerChildren extends Children.Keys<Element> {
+
+        public AnalyzerChildren() {
+        }
+
+        @Override
+        protected Node[] createNodes(Element key) {
+            return new Node[]{new AnalyzerRule(key).createNodeDelegate()};
+        }
+
+        @Override
+        protected void addNotify() {
+            super.addNotify();
+            setKeys(getConf().elements());
+        }
+
     }
 }
