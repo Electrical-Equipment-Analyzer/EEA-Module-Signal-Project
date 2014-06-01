@@ -20,8 +20,11 @@ package tw.edu.sju.ee.eea.module.iepe.project.object;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.Serializable;
+import java.util.Iterator;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import org.dom4j.Document;
+import org.dom4j.Element;
 import org.netbeans.api.project.Project;
 import org.netbeans.core.api.multiview.MultiViews;
 import org.openide.nodes.AbstractNode;
@@ -41,9 +44,17 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Lookup.Provider {
 
     private Lookup lkp;
+    private Element conf;
 
-    public IepeAnalyzerObject(Project project) {
+    public IepeAnalyzerObject(IepeProject project) {
         this.lkp = new ProxyLookup(new Lookup[]{Lookups.singleton(project), Lookups.singleton(this)});
+        Document doc = project.getDoc();
+        Element root = doc.getRootElement();
+        conf = root.element("analyzer");
+    }
+
+    public Element getConf() {
+        return conf;
     }
 
     @Override

@@ -17,10 +17,12 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.window;
 
+import java.util.Iterator;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
+import org.dom4j.Element;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
@@ -28,6 +30,7 @@ import org.openide.awt.UndoRedo;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.module.iepe.project.data.AnalyzerRule;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeAnalyzerObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
@@ -57,7 +60,14 @@ public final class IepeAnalyzerElement extends JPanel implements MultiViewElemen
 
         initComponents();
         toolbar.setEnabled(false);
-
+        Iterator elementIterator = object.getConf().elementIterator();
+        while (elementIterator.hasNext()) {
+            Element next = (Element) elementIterator.next();
+            AnalyzerRule analyzerRule = new AnalyzerRule(next);
+            System.out.println(analyzerRule);
+        }
+                
+        
     }
 
     @Override
@@ -163,10 +173,11 @@ public final class IepeAnalyzerElement extends JPanel implements MultiViewElemen
                     .addComponent(jLabel4)
                     .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 106, Short.MAX_VALUE)
-                .addGroup(chartPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2)
-                    .addComponent(jButton3))
+                .addGroup(chartPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(chartPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jButton2)
+                        .addComponent(jButton3)))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
