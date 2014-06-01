@@ -43,6 +43,13 @@ import java.util.logging.Logger;
 import org.dom4j.Element;
 
 import org.dom4j.Document;
+import org.openide.loaders.DataObject;
+import org.openide.loaders.DataObjectNotFoundException;
+import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
+import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
+
 /**
  *
  * @author Leo
@@ -59,14 +66,13 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
         this.lkp = new ProxyLookup(new Lookup[]{Lookups.singleton(project), Lookups.singleton(this)});
         doc = project.getDoc();
 
-        
-            Element root = doc.getRootElement();
-            for (Iterator i = root.elementIterator("VALUE"); i.hasNext();) {
-                Element foo = (Element) i.next();
-                System.out.print("車牌號碼:" + foo.elementText("NO"));
-                System.out.println("車主地址:" + foo.elementText("ADDR"));
-            }
-        
+        Element root = doc.getRootElement();
+        for (Iterator i = root.elementIterator("VALUE"); i.hasNext();) {
+            Element foo = (Element) i.next();
+            System.out.print("車牌號碼:" + foo.elementText("NO"));
+            System.out.println("車主地址:" + foo.elementText("ADDR"));
+        }
+
         conf = root.element("history");
         pattern = conf.element("pattern");
         System.out.println("----------------------------");
@@ -74,7 +80,7 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
 
         interval = 60000;
     }
-    
+
     public Element getConf() {
         return conf;
     }
@@ -132,7 +138,7 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
     TopComponent tc;
 
     public org.openide.nodes.Node createNodeDelegate() {
-        return new AbstractNode(Children.LEAF, lkp) {
+        return new AbstractNode(new ChannelChildren(lkp.lookup(IepeProject.class).getProjectDirectory().getFileObject("Record")), lkp) {
 
             @Override
             public Action getPreferredAction() {
@@ -165,5 +171,31 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
             }
 
         };
+    }
+
+    public class ChannelChildren extends Children.Keys<FileObject> {
+
+        private FileObject folder;
+
+        public ChannelChildren(FileObject folder) {
+            this.folder = folder;
+        }
+
+        @Override
+        protected Node[] createNodes(FileObject key) {
+            try {
+                return new Node[]{DataObject.find(key).getNodeDelegate()};
+            } catch (DataObjectNotFoundException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+            return null;
+        }
+
+        @Override
+        protected void addNotify() {
+            super.addNotify();
+            setKeys(folder.getChildren());
+        }
+
     }
 }
