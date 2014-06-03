@@ -18,11 +18,15 @@
 package tw.edu.sju.ee.eea.module.iepe.project.data;
 
 import java.awt.Image;
+import java.lang.reflect.InvocationTargetException;
 import org.dom4j.Element;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.nodes.PropertySupport;
+import org.openide.nodes.Sheet;
 import org.openide.util.ImageUtilities;
+import org.openide.util.NbBundle;
 
 /**
  *
@@ -42,6 +46,26 @@ public class AnalyzerRule {
         this.maximum = Integer.parseInt(element.elementText("maximum"));
         this.minimum = Integer.parseInt(element.elementText("minimum"));
         this.magnitude = Integer.parseInt(element.elementText("magnitude"));
+    }
+
+    private void setName(String name) {
+        this.name = name;
+    }
+
+    private void setChannel(int channel) {
+        this.channel = channel;
+    }
+
+    private void setMaximum(int maximum) {
+        this.maximum = maximum;
+    }
+
+    private void setMinimum(int minimum) {
+        this.minimum = minimum;
+    }
+
+    private void setMagnitude(int magnitude) {
+        this.magnitude = magnitude;
     }
 
     public String getName() {
@@ -69,6 +93,19 @@ public class AnalyzerRule {
         return "AnalyzerRule{" + "name=" + name + ", channel=" + channel + ", maximum=" + maximum + ", minimum=" + minimum + ", magnitude=" + magnitude + '}';
     }
 
+    @NbBundle.Messages({
+        "LBL_AR_title=Properties",
+        "LBL_AR_name=Name",
+        "DCT_AR_name=Rule Name",
+        "LBL_AR_channel=Channel",
+        "DCT_AR_channel=Input Channel",
+        "LBL_AR_maximum=Maximum",
+        "DCT_AR_maximum=Frequency Maximum",
+        "LBL_AR_minimum=Minimul",
+        "DCT_AR_minimum=Frequency Minimul",
+        "LBL_AR_magnitude=Magnitude",
+        "DCT_AR_magnitude=Magnitude"
+    })
     public Node createNodeDelegate() {
         return new AbstractNode(Children.LEAF) {
 
@@ -85,6 +122,90 @@ public class AnalyzerRule {
             @Override
             public String getDisplayName() {
                 return AnalyzerRule.this.getName();
+            }
+
+            @Override
+            protected Sheet createSheet() {
+                Sheet.Set set = new Sheet.Set();
+                set.setName(Bundle.LBL_AR_title());
+                set.put(new PropertySupport.ReadWrite<String>(
+                        "AR_name",
+                        String.class,
+                        Bundle.LBL_AR_name(),
+                        Bundle.DCT_AR_name()) {
+                            @Override
+                            public String getValue() throws IllegalAccessException, InvocationTargetException {
+                                return AnalyzerRule.this.getName();
+                            }
+
+                            @Override
+                            public void setValue(String name) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+                                AnalyzerRule.this.setName(name);
+                            }
+                        });
+                set.put(new PropertySupport.ReadWrite<Integer>(
+                        "AR_channel",
+                        Integer.class,
+                        Bundle.LBL_AR_channel(),
+                        Bundle.DCT_AR_channel()) {
+                            @Override
+                            public Integer getValue() throws IllegalAccessException, InvocationTargetException {
+                                return AnalyzerRule.this.getChannel();
+                            }
+
+                            @Override
+                            public void setValue(Integer channel) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+                                AnalyzerRule.this.setChannel(channel);
+                            }
+                        });
+                set.put(new PropertySupport.ReadWrite<Integer>(
+                        "AR_maximum",
+                        Integer.class,
+                        Bundle.LBL_AR_maximum(),
+                        Bundle.DCT_AR_maximum()) {
+                            @Override
+                            public Integer getValue() throws IllegalAccessException, InvocationTargetException {
+                                return AnalyzerRule.this.getMaximum();
+                            }
+
+                            @Override
+                            public void setValue(Integer maximum) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+                                AnalyzerRule.this.setMaximum(maximum);
+                            }
+                        });
+                set.put(new PropertySupport.ReadWrite<Integer>(
+                        "AR_minimum",
+                        Integer.class,
+                        Bundle.LBL_AR_minimum(),
+                        Bundle.DCT_AR_minimum()) {
+                            @Override
+                            public Integer getValue() throws IllegalAccessException, InvocationTargetException {
+                                return AnalyzerRule.this.getMinimum();
+                            }
+
+                            @Override
+                            public void setValue(Integer minimum) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+                                AnalyzerRule.this.setMinimum(minimum);
+                            }
+                        });
+                set.put(new PropertySupport.ReadWrite<Integer>(
+                        "AR_magnitude",
+                        Integer.class,
+                        Bundle.LBL_AR_magnitude(),
+                        Bundle.DCT_AR_magnitude()) {
+                            @Override
+                            public Integer getValue() throws IllegalAccessException, InvocationTargetException {
+                                return AnalyzerRule.this.getMagnitude();
+                            }
+
+                            @Override
+                            public void setValue(Integer magnitude) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+                                AnalyzerRule.this.setMagnitude(magnitude);
+                            }
+                        });
+                Sheet sheet = super.createSheet();
+                sheet.put(set);
+                return sheet;
             }
         };
     }
