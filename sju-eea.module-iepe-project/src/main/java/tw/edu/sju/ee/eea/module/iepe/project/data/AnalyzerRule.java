@@ -19,6 +19,8 @@ package tw.edu.sju.ee.eea.module.iepe.project.data;
 
 import java.awt.Image;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import org.dom4j.Element;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
@@ -38,14 +40,15 @@ public class AnalyzerRule {
     private int channel;
     private int maximum;
     private int minimum;
-    private int magnitude;
+    private double magnitude;
+    private List<Warning> warming = new ArrayList<Warning>();
 
     public AnalyzerRule(Element element) {
         this.name = element.elementText("name");
         this.channel = Integer.parseInt(element.elementText("channel"));
         this.maximum = Integer.parseInt(element.elementText("maximum"));
         this.minimum = Integer.parseInt(element.elementText("minimum"));
-        this.magnitude = Integer.parseInt(element.elementText("magnitude"));
+        this.magnitude = Double.parseDouble(element.elementText("magnitude"));
     }
 
     private void setName(String name) {
@@ -64,7 +67,7 @@ public class AnalyzerRule {
         this.minimum = minimum;
     }
 
-    private void setMagnitude(int magnitude) {
+    private void setMagnitude(double magnitude) {
         this.magnitude = magnitude;
     }
 
@@ -84,8 +87,16 @@ public class AnalyzerRule {
         return minimum;
     }
 
-    public int getMagnitude() {
+    public double getMagnitude() {
         return magnitude;
+    }
+
+    public void addWarning(Warning warning) {
+        System.out.println(this.warming.size());
+        if (this.warming.size() < 1 || !this.warming.get(this.warming.size() - 1).equals(warning, 5000)) {
+            this.warming.add(warning);
+            System.out.println("*************add************");
+        }
     }
 
     @Override
@@ -107,7 +118,7 @@ public class AnalyzerRule {
         "DCT_AR_magnitude=Magnitude"
     })
     public Node createNodeDelegate() {
-        return new AbstractNode(Children.LEAF) {
+        return new AbstractNode(new RuleChildren()) {
 
             @Override
             public Image getIcon(int type) {
@@ -188,18 +199,18 @@ public class AnalyzerRule {
                                 AnalyzerRule.this.setMinimum(minimum);
                             }
                         });
-                set.put(new PropertySupport.ReadWrite<Integer>(
+                set.put(new PropertySupport.ReadWrite<Double>(
                         "AR_magnitude",
-                        Integer.class,
+                        Double.class,
                         Bundle.LBL_AR_magnitude(),
                         Bundle.DCT_AR_magnitude()) {
                             @Override
-                            public Integer getValue() throws IllegalAccessException, InvocationTargetException {
+                            public Double getValue() throws IllegalAccessException, InvocationTargetException {
                                 return AnalyzerRule.this.getMagnitude();
                             }
 
                             @Override
-                            public void setValue(Integer magnitude) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+                            public void setValue(Double magnitude) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
                                 AnalyzerRule.this.setMagnitude(magnitude);
                             }
                         });
@@ -210,4 +221,18 @@ public class AnalyzerRule {
         };
     }
 
+    public class RuleChildren extends Children.Keys<Warning> {
+
+        @Override
+        protected Node[] createNodes(Warning key) {
+            return new Node[]{key.createNodeDelegate()};
+        }
+
+        @Override
+        protected void addNotify() {
+            super.addNotify();
+            setKeys(warming);
+        }
+
+    }
 }

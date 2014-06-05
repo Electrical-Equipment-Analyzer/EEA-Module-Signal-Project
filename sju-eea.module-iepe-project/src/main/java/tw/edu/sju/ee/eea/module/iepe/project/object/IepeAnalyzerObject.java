@@ -19,17 +19,18 @@ package tw.edu.sju.ee.eea.module.iepe.project.object;
 
 import java.awt.Image;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 import java.io.Serializable;
-import java.util.Iterator;
+import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.dom4j.Document;
 import org.dom4j.Element;
-import org.netbeans.api.project.Project;
 import org.netbeans.core.api.multiview.MultiViews;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
@@ -37,21 +38,29 @@ import org.openide.util.lookup.ProxyLookup;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.data.AnalyzerRule;
+import tw.edu.sju.ee.eea.module.iepe.project.data.Pattern;
+import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
 
 /**
  *
  * @author Leo
  */
-public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Lookup.Provider {
+public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Lookup.Provider, Runnable {
 
     private Lookup lkp;
     private Element conf;
+    private AnalyzerRule[] rules;
 
     public IepeAnalyzerObject(IepeProject project) {
         this.lkp = new ProxyLookup(new Lookup[]{Lookups.singleton(project), Lookups.singleton(this)});
         Document doc = project.getDoc();
         Element root = doc.getRootElement();
         conf = root.element("analyzer");
+        List elements = getConf().elements();
+        rules = new AnalyzerRule[elements.size()];
+        for (int i = 0; i < rules.length; i++) {
+            rules[i] = new AnalyzerRule((Element) elements.get(i));
+        }
     }
 
     public Element getConf() {
@@ -66,6 +75,40 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
     public String getDisplayName() {
         return "Analyzer";
     }
+
+    @Override
+    public void run() {
+        IepeProject project = lkp.lookup(IepeProject.class);
+
+        IEPEInput.IepeStream[] stream = new IEPEInput.IepeStream[4];
+        for (int i = 0; i < stream.length; i++) {
+            try {
+                stream[i] = (IEPEInput.IepeStream) project.getIepe().addStream(i, new IEPEInput.IepeStream());
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+        do {
+            double[][] channels = new double[stream.length][1024];
+            for (int i = 0; i < channels[0].length; i++) {
+                for (int j = 0; j < channels.length; j++) {
+                    try {
+                        channels[j][i] = stream[j].readValue();
+                    } catch (IOException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                }
+            }
+            Pattern pattern = new Pattern(16000, 1024, channels);
+            pattern.rules(rules);
+        } while (!Thread.interrupted());
+
+        for (int i = 0; i < stream.length; i++) {
+            project.getIepe().removeStream(i, stream[i]);
+        }
+
+    }
+
     TopComponent tc;
 
     @Override
