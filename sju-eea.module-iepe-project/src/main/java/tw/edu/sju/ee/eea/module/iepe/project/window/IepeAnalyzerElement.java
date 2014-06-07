@@ -61,11 +61,11 @@ public final class IepeAnalyzerElement extends JPanel implements MultiViewElemen
         initComponents();
         toolbar.setEnabled(false);
         Iterator elementIterator = object.getConf().elementIterator();
-        while (elementIterator.hasNext()) {
-            Element next = (Element) elementIterator.next();
-            AnalyzerRule analyzerRule = new AnalyzerRule(next);
-            System.out.println(analyzerRule);
-        }
+//        while (elementIterator.hasNext()) {
+//            Element next = (Element) elementIterator.next();
+//            AnalyzerRule analyzerRule = new AnalyzerRule(next);
+//            System.out.println(analyzerRule);
+//        }
                 
         
     }

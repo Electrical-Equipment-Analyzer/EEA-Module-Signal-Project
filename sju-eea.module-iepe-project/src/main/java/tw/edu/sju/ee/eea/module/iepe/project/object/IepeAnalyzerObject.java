@@ -62,7 +62,7 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
         List elements = getConf().elements();
         rules = new AnalyzerRule[elements.size()];
         for (int i = 0; i < rules.length; i++) {
-            rules[i] = new AnalyzerRule((Element) elements.get(i));
+            rules[i] = new AnalyzerRule(project, (Element) elements.get(i));
         }
     }
 
@@ -155,20 +155,20 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
         };
     }
 
-    public class AnalyzerChildren extends Children.Keys<Element> {
+    public class AnalyzerChildren extends Children.Keys<AnalyzerRule> {
 
         public AnalyzerChildren() {
         }
 
         @Override
-        protected Node[] createNodes(Element key) {
-            return new Node[]{new AnalyzerRule(key).createNodeDelegate()};
+        protected Node[] createNodes(AnalyzerRule key) {
+            return new Node[]{key.createNodeDelegate()};
         }
 
         @Override
         protected void addNotify() {
             super.addNotify();
-            setKeys(getConf().elements());
+            setKeys(rules);
         }
 
     }

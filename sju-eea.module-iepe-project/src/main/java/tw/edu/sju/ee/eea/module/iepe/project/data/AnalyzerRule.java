@@ -29,6 +29,7 @@ import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 
 /**
  *
@@ -36,59 +37,68 @@ import org.openide.util.NbBundle;
  */
 public class AnalyzerRule {
 
-    private String name;
-    private int channel;
-    private int maximum;
-    private int minimum;
-    private double magnitude;
-//    private List<Warning> warming = new ArrayList<Warning>();
+    private IepeProject project;
+    private Element element;
 
-    public AnalyzerRule(Element element) {
-        this.name = element.elementText("name");
-        this.channel = Integer.parseInt(element.elementText("channel"));
-        this.maximum = Integer.parseInt(element.elementText("maximum"));
-        this.minimum = Integer.parseInt(element.elementText("minimum"));
-        this.magnitude = Double.parseDouble(element.elementText("magnitude"));
+//    private String name;
+//    private int channel;
+//    private int maximum;
+//    private int minimum;
+//    private double magnitude;
+//    private List<Warning> warming = new ArrayList<Warning>();
+    public AnalyzerRule(IepeProject project, Element element) {
+        this.project = project;
+        this.element = element;
+//        this.name = element.elementText("name");
+//        this.channel = Integer.parseInt(element.elementText("channel"));
+//        this.maximum = Integer.parseInt(element.elementText("maximum"));
+//        this.minimum = Integer.parseInt(element.elementText("minimum"));
+//        this.magnitude = Double.parseDouble(element.elementText("magnitude"));
     }
 
     private void setName(String name) {
-        this.name = name;
+        element.element("name").setText(name);
+        project.save();
     }
 
     private void setChannel(int channel) {
-        this.channel = channel;
+        element.element("channel").setText(String.valueOf(channel));
+        project.save();
     }
 
     private void setMaximum(int maximum) {
-        this.maximum = maximum;
+        element.element("maximum").setText(String.valueOf(maximum));
+        project.save();
     }
 
     private void setMinimum(int minimum) {
-        this.minimum = minimum;
+        element.element("minimum").setText(String.valueOf(minimum));
+        project.save();
     }
 
     private void setMagnitude(double magnitude) {
-        this.magnitude = magnitude;
+        element.element("magnitude").setText(String.valueOf(magnitude));
+        project.save();
     }
 
     public String getName() {
-        return name;
+        return element.elementText("name");
     }
 
     public int getChannel() {
-        return channel;
+        return Integer.parseInt(element.elementText("channel"));
     }
 
     public int getMaximum() {
-        return maximum;
+        return Integer.parseInt(element.elementText("maximum"));
     }
 
     public int getMinimum() {
-        return minimum;
+        return Integer.parseInt(element.elementText("minimum"));
     }
 
     public double getMagnitude() {
-        return magnitude;
+        return Double.parseDouble(element.elementText("magnitude"));
     }
 
 //    public void addWarning(Warning warning) {
@@ -98,10 +108,9 @@ public class AnalyzerRule {
 //            System.out.println("*************add************");
 //        }
 //    }
-
     @Override
     public String toString() {
-        return "AnalyzerRule{" + "name=" + name + ", channel=" + channel + ", maximum=" + maximum + ", minimum=" + minimum + ", magnitude=" + magnitude + '}';
+        return "AnalyzerRule{" + "name=" + getName() + ", channel=" + getChannel() + ", maximum=" + getMaximum() + ", minimum=" + getMinimum() + ", magnitude=" + getMagnitude() + '}';
     }
 
     @NbBundle.Messages({
