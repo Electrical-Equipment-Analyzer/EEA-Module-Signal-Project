@@ -56,7 +56,7 @@ public final class AnalyzerAction implements ActionListener {
     public void actionPerformed(ActionEvent ev) {
         // TODO use context
         RequestProcessor.Task task = RP.create(this.object);
-        progr = ProgressHandleFactory.createHandle("Record task", task);
+        progr = ProgressHandleFactory.createHandle("Amalyzer task", task);
         task.addTaskListener(new TaskListener() {
             public void taskFinished(org.openide.util.Task task) {
                 System.out.println("record task finished");

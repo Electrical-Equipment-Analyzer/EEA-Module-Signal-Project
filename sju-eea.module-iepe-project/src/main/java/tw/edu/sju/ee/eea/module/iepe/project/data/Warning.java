@@ -17,12 +17,17 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.data;
 
+import java.awt.Color;
 import java.awt.Image;
+import java.io.IOException;
 import java.util.Date;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
+import org.openide.windows.IOColorLines;
+import org.openide.windows.InputOutput;
 
 /**
  *
@@ -30,16 +35,27 @@ import org.openide.util.ImageUtilities;
  */
 public class Warning {
 
+    private AnalyzerRule rule;
     private Date date;
     private double value;
 
-    public Warning(Date date, double value) {
+    public Warning(AnalyzerRule rule, Date date, double value) {
+        this.rule = rule;
         this.date = date;
         this.value = value;
     }
 
     private String getName() {
         return date.toString() + ":" + value;
+    }
+
+    public void print(InputOutput io) {
+        String text = this.date + " Warning: " + rule.toString() + " " + this.value;
+        try {
+            IOColorLines.println(io, text, Color.BLACK);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     public boolean equals(Warning w, long i) {

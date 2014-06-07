@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.complex.ComplexUtils;
@@ -66,8 +67,8 @@ public class Pattern extends ArrayList<double[]> {
         return max / length * 2;
     }
 
-    public void rules(AnalyzerRule[] rules) {
-        System.out.println("==================");
+    public List<Warning> rules(AnalyzerRule[] rules) {
+        List<Warning> list = new ArrayList<Warning>();
         for (AnalyzerRule rule : rules) {
             double max = max(rule.getChannel(), rule.getMinimum(), rule.getMaximum());
             System.out.print("Name: " + rule.getName() + "\t");
@@ -75,9 +76,11 @@ public class Pattern extends ArrayList<double[]> {
             System.out.print("FFT: " + max + "\t");
             System.out.println();
             if (max > rule.getMagnitude()) {
-                Warning warning = new Warning(new Date(), max);
-                rule.addWarning(warning);
+                list.add(new Warning(rule, new Date(), max));
+//                Warning warning = new Warning(new Date(), max);
+//                rule.addWarning(warning);
             }
         }
+        return list;
     }
 }

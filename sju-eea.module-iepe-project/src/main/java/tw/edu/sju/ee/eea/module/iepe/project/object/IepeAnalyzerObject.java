@@ -35,10 +35,13 @@ import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
+import org.openide.windows.IOProvider;
+import org.openide.windows.InputOutput;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.data.AnalyzerRule;
 import tw.edu.sju.ee.eea.module.iepe.project.data.Pattern;
+import tw.edu.sju.ee.eea.module.iepe.project.data.Warning;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
 
 /**
@@ -88,19 +91,23 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
                 Exceptions.printStackTrace(ex);
             }
         }
+        
+        InputOutput io = IOProvider.getDefault().getIO(this.getDisplayName(), false);
         do {
-            double[][] channels = new double[stream.length][1024];
-            for (int i = 0; i < channels[0].length; i++) {
-                for (int j = 0; j < channels.length; j++) {
-                    try {
+            try {
+                double[][] channels = new double[stream.length][1024];
+                for (int i = 0; i < channels[0].length; i++) {
+                    for (int j = 0; j < channels.length; j++) {
                         channels[j][i] = stream[j].readValue();
-                    } catch (IOException ex) {
-                        Exceptions.printStackTrace(ex);
                     }
                 }
+                Pattern pattern = new Pattern(16000, 1024, channels);
+                List<Warning> list = pattern.rules(rules);
+                for (Warning warning : list) {
+                    warning.print(io);
+                }
+            } catch (IOException ex) {
             }
-            Pattern pattern = new Pattern(16000, 1024, channels);
-            pattern.rules(rules);
         } while (!Thread.interrupted());
 
         for (int i = 0; i < stream.length; i++) {
@@ -115,20 +122,20 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
     public Node createNodeDelegate() {
         return new AbstractNode(new AnalyzerChildren(), lkp) {
 
-            @Override
-            public Action getPreferredAction() {
-                return new AbstractAction() {
-
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        if (tc == null) {
-                            tc = MultiViews.createMultiView("application/iepe-analyzer", IepeAnalyzerObject.this);
-                        }
-                        tc.open();
-                        tc.requestActive();
-                    }
-                };
-            }
+//            @Override
+//            public Action getPreferredAction() {
+//                return new AbstractAction() {
+//
+//                    @Override
+//                    public void actionPerformed(ActionEvent e) {
+//                        if (tc == null) {
+//                            tc = MultiViews.createMultiView("application/iepe-analyzer", IepeAnalyzerObject.this);
+//                        }
+//                        tc.open();
+//                        tc.requestActive();
+//                    }
+//                };
+//            }
 
             @Override
             public Image getIcon(int type) {

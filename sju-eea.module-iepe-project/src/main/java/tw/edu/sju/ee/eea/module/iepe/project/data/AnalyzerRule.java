@@ -41,7 +41,7 @@ public class AnalyzerRule {
     private int maximum;
     private int minimum;
     private double magnitude;
-    private List<Warning> warming = new ArrayList<Warning>();
+//    private List<Warning> warming = new ArrayList<Warning>();
 
     public AnalyzerRule(Element element) {
         this.name = element.elementText("name");
@@ -91,13 +91,13 @@ public class AnalyzerRule {
         return magnitude;
     }
 
-    public void addWarning(Warning warning) {
-        System.out.println(this.warming.size());
-        if (this.warming.size() < 1 || !this.warming.get(this.warming.size() - 1).equals(warning, 5000)) {
-            this.warming.add(warning);
-            System.out.println("*************add************");
-        }
-    }
+//    public void addWarning(Warning warning) {
+//        System.out.println(this.warming.size());
+//        if (this.warming.size() < 1 || !this.warming.get(this.warming.size() - 1).equals(warning, 5000)) {
+//            this.warming.add(warning);
+//            System.out.println("*************add************");
+//        }
+//    }
 
     @Override
     public String toString() {
@@ -118,7 +118,7 @@ public class AnalyzerRule {
         "DCT_AR_magnitude=Magnitude"
     })
     public Node createNodeDelegate() {
-        return new AbstractNode(new RuleChildren()) {
+        return new AbstractNode(Children.LEAF) {
 
             @Override
             public Image getIcon(int type) {
@@ -221,18 +221,18 @@ public class AnalyzerRule {
         };
     }
 
-    public class RuleChildren extends Children.Keys<Warning> {
-
-        @Override
-        protected Node[] createNodes(Warning key) {
-            return new Node[]{key.createNodeDelegate()};
-        }
-
-        @Override
-        protected void addNotify() {
-            super.addNotify();
-            setKeys(warming);
-        }
-
-    }
+//    public class RuleChildren extends Children.Keys<Warning> {
+//
+//        @Override
+//        protected Node[] createNodes(Warning key) {
+//            return new Node[]{key.createNodeDelegate()};
+//        }
+//
+//        @Override
+//        protected void addNotify() {
+//            super.addNotify();
+//            setKeys(warming);
+//        }
+//
+//    }
 }
