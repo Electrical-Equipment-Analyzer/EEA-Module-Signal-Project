@@ -35,51 +35,61 @@ import org.openide.windows.InputOutput;
  */
 public class Warning {
 
-    private AnalyzerRule rule;
     private Date date;
+    private AnalyzerRule rule;
+    private double frequency;
     private double value;
 
-    public Warning(AnalyzerRule rule, Date date, double value) {
+    public Warning(AnalyzerRule rule, Date date, double frequency, double value) {
         this.rule = rule;
         this.date = date;
+        this.frequency = frequency;
         this.value = value;
     }
 
-    private String getName() {
-        return date.toString() + ":" + value;
+    public double getFrequency() {
+        return frequency;
+    }
+
+    public double getValue() {
+        return value;
     }
 
     public void print(InputOutput io) {
-        String text = this.date + " Warning: " + rule.toString() + " " + this.value;
         try {
-            IOColorLines.println(io, text, Color.BLACK);
+            IOColorLines.println(io, this.toString(), Color.BLACK);
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
     }
 
+    @Override
+    public String toString() {
+        return date + " Warning: " + rule + ", frequency=" + frequency + ", value=" + value;
+    }
+
+
     public boolean equals(Warning w, long i) {
         return Math.abs(this.date.getTime() - w.date.getTime()) < i;
     }
 
-    public Node createNodeDelegate() {
-        return new AbstractNode(Children.LEAF) {
-
-            @Override
-            public Image getIcon(int type) {
-                return ImageUtilities.loadImage("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
-            }
-
-            @Override
-            public Image getOpenedIcon(int type) {
-                return getIcon(type);
-            }
-
-            @Override
-            public String getDisplayName() {
-                return Warning.this.getName();
-            }
-        };
-    }
-
+//    public Node createNodeDelegate() {
+//        return new AbstractNode(Children.LEAF) {
+//
+//            @Override
+//            public Image getIcon(int type) {
+//                return ImageUtilities.loadImage("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
+//            }
+//
+//            @Override
+//            public Image getOpenedIcon(int type) {
+//                return getIcon(type);
+//            }
+//
+//            @Override
+//            public String getDisplayName() {
+//                return Warning.this.getName();
+//            }
+//        };
+//    }
 }

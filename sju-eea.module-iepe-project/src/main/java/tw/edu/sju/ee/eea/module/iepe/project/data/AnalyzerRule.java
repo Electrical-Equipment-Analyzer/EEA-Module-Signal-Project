@@ -110,7 +110,7 @@ public class AnalyzerRule {
 //    }
     @Override
     public String toString() {
-        return "AnalyzerRule{" + "name=" + getName() + ", channel=" + getChannel() + ", maximum=" + getMaximum() + ", minimum=" + getMinimum() + ", magnitude=" + getMagnitude() + '}';
+        return "AnalyzerRule{" + "name=" + getName() + ", channel=" + getChannel() + ", minimum=" + getMinimum() + ", maximum=" + getMaximum() + ", magnitude=" + getMagnitude() + '}';
     }
 
     @NbBundle.Messages({
