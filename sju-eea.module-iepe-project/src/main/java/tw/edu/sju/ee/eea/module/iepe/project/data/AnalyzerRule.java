@@ -19,8 +19,6 @@ package tw.edu.sju.ee.eea.module.iepe.project.data;
 
 import java.awt.Image;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 import org.dom4j.Element;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
@@ -40,20 +38,18 @@ public class AnalyzerRule {
     private IepeProject project;
     private Element element;
 
-//    private String name;
-//    private int channel;
-//    private int maximum;
-//    private int minimum;
-//    private double magnitude;
-//    private List<Warning> warming = new ArrayList<Warning>();
     public AnalyzerRule(IepeProject project, Element element) {
         this.project = project;
         this.element = element;
-//        this.name = element.elementText("name");
-//        this.channel = Integer.parseInt(element.elementText("channel"));
-//        this.maximum = Integer.parseInt(element.elementText("maximum"));
-//        this.minimum = Integer.parseInt(element.elementText("minimum"));
-//        this.magnitude = Double.parseDouble(element.elementText("magnitude"));
+    }
+
+    public void initValue() {
+        element.addElement("name").setText("new rule");
+        element.addElement("channel").setText("-1");
+        element.addElement("minimum").setText("-1");
+        element.addElement("maximum").setText("-1");
+        element.addElement("magnitude").setText("0");
+        project.save();
     }
 
     private void setName(String name) {
@@ -85,29 +81,26 @@ public class AnalyzerRule {
         return element.elementText("name");
     }
 
-    public int getChannel() {
-        return Integer.parseInt(element.elementText("channel"));
+    public Integer getChannel() {
+        String text = element.elementText("channel");
+        return text == null ? null : Integer.parseInt(text);
     }
 
-    public int getMaximum() {
-        return Integer.parseInt(element.elementText("maximum"));
+    public Integer getMaximum() {
+        String text = element.elementText("maximum");
+        return text == null ? null : Integer.parseInt(text);
     }
 
-    public int getMinimum() {
-        return Integer.parseInt(element.elementText("minimum"));
+    public Integer getMinimum() {
+        String text = element.elementText("minimum");
+        return text == null ? null : Integer.parseInt(text);
     }
 
-    public double getMagnitude() {
-        return Double.parseDouble(element.elementText("magnitude"));
+    public Double getMagnitude() {
+        String text = element.elementText("magnitude");
+        return text == null ? null : Double.parseDouble(text);
     }
 
-//    public void addWarning(Warning warning) {
-//        System.out.println(this.warming.size());
-//        if (this.warming.size() < 1 || !this.warming.get(this.warming.size() - 1).equals(warning, 5000)) {
-//            this.warming.add(warning);
-//            System.out.println("*************add************");
-//        }
-//    }
     @Override
     public String toString() {
         return "AnalyzerRule{" + "name=" + getName() + ", channel=" + getChannel() + ", minimum=" + getMinimum() + ", maximum=" + getMaximum() + ", magnitude=" + getMagnitude() + '}';
@@ -179,21 +172,6 @@ public class AnalyzerRule {
                             }
                         });
                 set.put(new PropertySupport.ReadWrite<Integer>(
-                        "AR_maximum",
-                        Integer.class,
-                        Bundle.LBL_AR_maximum(),
-                        Bundle.DCT_AR_maximum()) {
-                            @Override
-                            public Integer getValue() throws IllegalAccessException, InvocationTargetException {
-                                return AnalyzerRule.this.getMaximum();
-                            }
-
-                            @Override
-                            public void setValue(Integer maximum) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-                                AnalyzerRule.this.setMaximum(maximum);
-                            }
-                        });
-                set.put(new PropertySupport.ReadWrite<Integer>(
                         "AR_minimum",
                         Integer.class,
                         Bundle.LBL_AR_minimum(),
@@ -206,6 +184,21 @@ public class AnalyzerRule {
                             @Override
                             public void setValue(Integer minimum) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
                                 AnalyzerRule.this.setMinimum(minimum);
+                            }
+                        });
+                set.put(new PropertySupport.ReadWrite<Integer>(
+                        "AR_maximum",
+                        Integer.class,
+                        Bundle.LBL_AR_maximum(),
+                        Bundle.DCT_AR_maximum()) {
+                            @Override
+                            public Integer getValue() throws IllegalAccessException, InvocationTargetException {
+                                return AnalyzerRule.this.getMaximum();
+                            }
+
+                            @Override
+                            public void setValue(Integer maximum) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+                                AnalyzerRule.this.setMaximum(maximum);
                             }
                         });
                 set.put(new PropertySupport.ReadWrite<Double>(
@@ -229,19 +222,4 @@ public class AnalyzerRule {
             }
         };
     }
-
-//    public class RuleChildren extends Children.Keys<Warning> {
-//
-//        @Override
-//        protected Node[] createNodes(Warning key) {
-//            return new Node[]{key.createNodeDelegate()};
-//        }
-//
-//        @Override
-//        protected void addNotify() {
-//            super.addNotify();
-//            setKeys(warming);
-//        }
-//
-//    }
 }

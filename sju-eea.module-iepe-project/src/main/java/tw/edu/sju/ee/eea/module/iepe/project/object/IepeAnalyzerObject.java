@@ -21,12 +21,13 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.dom4j.Document;
 import org.dom4j.Element;
-import org.netbeans.core.api.multiview.MultiViews;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -52,17 +53,17 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
 
     private Lookup lkp;
     private Element conf;
-    private AnalyzerRule[] rules;
+    private List<AnalyzerRule> rules;
 
     public IepeAnalyzerObject(IepeProject project) {
         this.lkp = new ProxyLookup(new Lookup[]{Lookups.singleton(project), Lookups.singleton(this)});
         Document doc = project.getDoc();
         Element root = doc.getRootElement();
         conf = root.element("analyzer");
-        List elements = getConf().elements();
-        rules = new AnalyzerRule[elements.size()];
-        for (int i = 0; i < rules.length; i++) {
-            rules[i] = new AnalyzerRule(project, (Element) elements.get(i));
+        Iterator elementIterator = getConf().elementIterator("rule");
+        rules = new ArrayList<AnalyzerRule>();
+        while (elementIterator.hasNext()) {
+            rules.add(new AnalyzerRule(project, (Element) elementIterator.next()));
         }
     }
 
@@ -91,7 +92,7 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
                 Exceptions.printStackTrace(ex);
             }
         }
-        
+
         InputOutput io = IOProvider.getDefault().getIO(this.getDisplayName(), false);
         do {
             try {
@@ -136,6 +137,19 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
 //                    }
 //                };
 //            }
+            @Override
+            public Action[] getActions(boolean popup) {
+                return new Action[]{new AbstractAction("Add Rule") {
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        AnalyzerRule analyzerRule = new AnalyzerRule(lkp.lookup(IepeProject.class), getConf().addElement("rule"));
+                        analyzerRule.initValue();
+                        rules.add(analyzerRule);
+                        setChildren(new AnalyzerChildren());
+                    }
+                }};
+            }
 
             @Override
             public Image getIcon(int type) {

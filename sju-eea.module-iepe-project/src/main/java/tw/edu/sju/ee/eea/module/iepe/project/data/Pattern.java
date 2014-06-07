@@ -17,15 +17,11 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.data;
 
-import com.sun.java.swing.plaf.motif.MotifSplitPaneDivider;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.math3.complex.Complex;
-import org.apache.commons.math3.complex.ComplexUtils;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
@@ -62,34 +58,32 @@ public class Pattern extends ArrayList<double[]> {
     }
 
     public Warning max(AnalyzerRule rule, int channel, double mimimum, double maximum) {
-        double max = 0;
-        double frequency = 0;
-        int from = frequency(mimimum);
-        int to = frequency(maximum);
-        double[] data = this.get(channel);
-        for (int i = from; i < to; i++) {
-            if (data[i] > max) {
-                max = data[i];
-                frequency = frequency(i);
+        try {
+            double max = 0;
+            double frequency = 0;
+            int from = frequency(mimimum);
+            int to = frequency(maximum);
+            double[] data = this.get(channel);
+            for (int i = from; i < to; i++) {
+                if (data[i] > max) {
+                    max = data[i];
+                    frequency = frequency(i);
+                }
             }
+            max = max / length * 2;
+            return new Warning(rule, date, frequency, max);
+        } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+            return null;
         }
-        max = max / length * 2;
-        return new Warning(rule, date, frequency, max);
     }
 
-    public List<Warning> rules(AnalyzerRule[] rules) {
+    public List<Warning> rules(List<AnalyzerRule> rules) {
         List<Warning> list = new ArrayList<Warning>();
         for (AnalyzerRule rule : rules) {
             Warning warning = max(rule, rule.getChannel(), rule.getMinimum(), rule.getMaximum());
             System.out.println(warning);
-//            System.out.print("Name: " + rule.getName() + "\t");
-//            System.out.print("Magnitude: " + rule.getMagnitude() + "\t");
-//            System.out.print("FFT: " + max + "\t");
-//            System.out.println();
-            if (warning.getValue() > rule.getMagnitude()) {
+            if (warning != null && warning.getValue() > rule.getMagnitude()) {
                 list.add(warning);
-//                Warning warning = new Warning(new Date(), max);
-//                rule.addWarning(warning);
             }
         }
         return list;
