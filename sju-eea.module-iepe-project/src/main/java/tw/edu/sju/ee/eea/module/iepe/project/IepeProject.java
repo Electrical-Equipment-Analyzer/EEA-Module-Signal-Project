@@ -250,11 +250,6 @@ public class IepeProject implements Project {
 
         public class ProjectChildren extends Children.Keys<Child> {
 
-            private Child[] chield = new Child[]{new IepeRealtimeObject(IepeProject.this),
-                new IepeHistoryObject(IepeProject.this),
-                new IepeAnalyzerObject(IepeProject.this)
-            };
-
             private ProjectChildren() {
             }
 
