@@ -20,6 +20,7 @@ package tw.edu.sju.ee.eea.module.iepe.project.action;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import javax.swing.JOptionPane;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.awt.ActionID;
@@ -56,14 +57,16 @@ public final class ListenAction implements ActionListener {
     public void actionPerformed(ActionEvent ev) {
         try {
             // TODO use context
+            String showInputDialog = JOptionPane.showInputDialog(null, "Channel:", "Info", JOptionPane.INFORMATION_MESSAGE);
+            final int channel = Integer.parseInt(showInputDialog);
             IEPEPlayer player = new IEPEPlayer();
-            final IEPEInput.Stream stream = context.getIepe().addStream(1, player.getOutputStream());
+            final IEPEInput.Stream stream = context.getIepe().addStream(channel, player.getOutputStream());
             RequestProcessor.Task task = RP.create(player);
             progr = ProgressHandleFactory.createHandle("Play task", task);
             task.addTaskListener(new TaskListener() {
                 public void taskFinished(org.openide.util.Task task) {
                     System.out.println("fin");
-                    context.getIepe().removeStream(1, stream);
+                    context.getIepe().removeStream(channel, stream);
                     progr.finish();
                 }
             });
