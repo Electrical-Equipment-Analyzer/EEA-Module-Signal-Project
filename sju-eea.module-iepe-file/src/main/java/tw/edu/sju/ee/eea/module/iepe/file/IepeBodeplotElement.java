@@ -110,7 +110,7 @@ public final class IepeBodeplotElement extends JPanel implements MultiViewElemen
             Complex[] transform = fft.transform(data, TransformType.FORWARD);
             int max = transform.length / 2 + 1;
             for (int i = 1; i < max; i++) {
-                double f = i * 16000.0 / transform.length;
+                double f = i * 32000.0 / transform.length;
                 series.add(f, transform[i].abs());
             }
 

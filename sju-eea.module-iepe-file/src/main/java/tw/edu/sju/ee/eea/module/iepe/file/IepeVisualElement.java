@@ -179,7 +179,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement 
     public JFreeChart createChart() {
 
         SampledChart sampledChart = new SampledChart("PlotTitle");
-        sampledChart.addData(0, SampledChart.createSampledSeriesCollection("Ch_0", info.getInputStream(), index, 16000, length));
+        sampledChart.addData(0, SampledChart.createSampledSeriesCollection("Ch_0", info.getInputStream(), index, 32000, length));
         sampledChart.addMarker(cursor);
         sampledChart.addProgressListener(new ChartProgressListener() {
 
@@ -217,7 +217,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement 
 //        ((ChartPanel) chartPanel).setChart(createChart());
         XYSeriesCollection sc = ((XYSeriesCollection) ((ChartPanel) chartPanel).getChart().getXYPlot().getDataset());
         sc.removeAllSeries();
-        sc.addSeries(SampledChart.series("Ch_0", info.getInputStream(), index, 16000, length));
+        sc.addSeries(SampledChart.series("Ch_0", info.getInputStream(), index, 32000, length));
         chartScroll = true;
     }
 

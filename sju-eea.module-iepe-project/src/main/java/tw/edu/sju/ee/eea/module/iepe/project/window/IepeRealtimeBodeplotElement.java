@@ -144,7 +144,7 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
                 int max = transform.length / 2 + 1;
                 this.clear();
                 for (int i = 1; i < max; i++) {
-                    double f = i * 16000.0 / transform.length;
+                    double f = i * 32000.0 / transform.length;
                     this.add(f, transform[i].abs() / value.length * 2);
                 }
             }
