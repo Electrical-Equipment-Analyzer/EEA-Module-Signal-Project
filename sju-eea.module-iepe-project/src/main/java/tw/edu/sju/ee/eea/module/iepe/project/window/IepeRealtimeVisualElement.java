@@ -154,7 +154,7 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
 
         public Process(Comparable key, int channel) throws IOException {
             super(key, channel);
-            sampled = new SampledStream(super.stream, 1600);
+            sampled = new SampledStream(super.stream, 3200);
         }
 
         @Override

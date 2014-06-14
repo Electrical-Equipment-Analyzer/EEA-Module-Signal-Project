@@ -144,7 +144,7 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
                 int max = transform.length / 2 + 1;
                 this.clear();
                 for (int i = 1; i < max; i++) {
-                    double f = i * 16000.0 / transform.length;
+                    double f = i * 32000.0 / transform.length;
                     this.add(f, transform[i].abs() / value.length * 2);
                 }
             }
@@ -167,8 +167,8 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
         BodePlot bodePlot = new BodePlot("FFT PlotTitle");
         bodePlot.createAxisY(0, "Magnitude(Voltage)");
         bodePlot.addData(0, manager.getCollection(), manager.getRenderer());
-        bodePlot.getXYPlot().getRangeAxis().setRange(0, 500);
-        bodePlot.getXYPlot().getDomainAxis().setRange(0.5, 10000);
+        bodePlot.getXYPlot().getRangeAxis().setRange(0, 10);
+        bodePlot.getXYPlot().getDomainAxis().setRange(0.5, 20000);
         return bodePlot;
     }
 

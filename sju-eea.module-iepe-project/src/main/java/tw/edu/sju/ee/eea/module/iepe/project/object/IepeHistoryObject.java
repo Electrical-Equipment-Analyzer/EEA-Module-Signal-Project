@@ -24,7 +24,12 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
+import java.util.TreeMap;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.netbeans.core.api.multiview.MultiViews;
@@ -194,8 +199,12 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
         @Override
         protected void addNotify() {
             super.addNotify();
-            setKeys(folder.getChildren());
+            java.util.Map<String, FileObject> list = new TreeMap<String, FileObject>();
+            FileObject[] children = folder.getChildren();
+            for (FileObject fileObject : children) {
+                list.put(fileObject.getName(), fileObject);
+            }
+            setKeys(list.values());
         }
-
     }
 }

@@ -102,7 +102,7 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
                         channels[j][i] = stream[j].readValue();
                     }
                 }
-                Pattern pattern = new Pattern(16000, 1024, channels);
+                Pattern pattern = new Pattern(32000, 1024, channels);
                 List<Warning> list = pattern.rules(rules);
                 for (Warning warning : list) {
                     warning.print(io);
