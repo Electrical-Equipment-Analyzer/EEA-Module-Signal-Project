@@ -111,7 +111,7 @@ public final class IepeBodeplotElement extends JPanel implements MultiViewElemen
             int max = transform.length / 2 + 1;
             for (int i = 1; i < max; i++) {
                 double f = i * 32000.0 / transform.length;
-                series.add(f, transform[i].abs());
+                series.add(f, transform[i].abs() / value.length * 2);
             }
 
         } catch (FileNotFoundException ex) {

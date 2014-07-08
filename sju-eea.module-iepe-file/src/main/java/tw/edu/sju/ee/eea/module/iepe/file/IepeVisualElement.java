@@ -48,6 +48,7 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
+import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_Iepe_VISUAL",
@@ -176,7 +177,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement 
         });
     }
 
-    public JFreeChart createChart() {
+    private JFreeChart createChart() {
 
         SampledChart sampledChart = new SampledChart("PlotTitle");
         sampledChart.addData(0, SampledChart.createSampledSeriesCollection("Ch_0", info.getInputStream(), index, 32000, length));
@@ -216,6 +217,9 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement 
 //        chart = null;
 //        ((ChartPanel) chartPanel).setChart(createChart());
         XYSeriesCollection sc = ((XYSeriesCollection) ((ChartPanel) chartPanel).getChart().getXYPlot().getDataset());
+//        XYSeries series = sc.getSeries(0);
+//        series.clear();
+//        SampledStream ss = new
         sc.removeAllSeries();
         sc.addSeries(SampledChart.series("Ch_0", info.getInputStream(), index, 32000, length));
         chartScroll = true;
