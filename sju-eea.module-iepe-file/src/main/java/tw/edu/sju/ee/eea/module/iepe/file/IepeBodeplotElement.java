@@ -51,7 +51,7 @@ import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
         preferredID = "IepeVisual",
         position = 3000
 )
-@Messages("LBL_Iepe_BodePlot=BodePlot")
+@Messages("LBL_Iepe_BodePlot=Spectrum")
 public final class IepeBodeplotElement extends JPanel implements MultiViewElement, Runnable {
 
     private IepeDataInfo info;
@@ -122,7 +122,7 @@ public final class IepeBodeplotElement extends JPanel implements MultiViewElemen
         XYSeriesCollection collection = new XYSeriesCollection();
         collection.addSeries(series);
 
-        BodePlot bodePlot = new BodePlot("Ti");
+        BodePlot bodePlot = new BodePlot("Spectrum");
         bodePlot.addData(0, "Magnitude(dB)", collection);
         bodePlot.getXYPlot().getRangeAxis().setRange(0, 500);
         bodePlot.getXYPlot().getDomainAxis().setRange(0.5, 10000);

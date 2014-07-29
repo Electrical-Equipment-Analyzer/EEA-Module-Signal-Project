@@ -58,7 +58,7 @@ import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
         preferredID = "IepeVisual",
         position = 2000
 )
-@Messages("LBL_Iepe_VISUAL=Visual")
+@Messages("LBL_Iepe_VISUAL=Voltage Oscillogram")
 public final class IepeVisualElement extends JPanel implements MultiViewElement {
 
     private class IepeVisualToolBar extends JToolBar {
@@ -179,7 +179,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement 
 
     private JFreeChart createChart() {
 
-        SampledChart sampledChart = new SampledChart("PlotTitle");
+        SampledChart sampledChart = new SampledChart("Voltage Oscillogram");
         sampledChart.addData(0, SampledChart.createSampledSeriesCollection("Ch_0", info.getInputStream(), index, 32000, length));
         sampledChart.addMarker(cursor);
         sampledChart.addProgressListener(new ChartProgressListener() {
