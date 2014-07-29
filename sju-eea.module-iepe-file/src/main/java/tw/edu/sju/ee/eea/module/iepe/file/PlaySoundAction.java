@@ -54,7 +54,7 @@ public final class PlaySoundAction implements ActionListener {
             @Override
             public void run() {
                 try {
-                    IEPEPlayer audio = new IEPEPlayer();
+                    IEPEPlayer audio = new IEPEPlayer(16000, 16, 1, 2, 16000);
                     Thread audioTread = null;
                     try {
                         audioTread = new Thread(audio);
