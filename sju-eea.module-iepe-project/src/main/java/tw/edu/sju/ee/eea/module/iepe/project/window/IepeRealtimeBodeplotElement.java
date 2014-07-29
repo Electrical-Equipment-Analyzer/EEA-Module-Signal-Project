@@ -47,14 +47,14 @@ import tw.edu.sju.ee.eea.ui.workspace.plot.BodePlot;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
 
 @MultiViewElement.Registration(
-        displayName = "#LBL_IEPE_Realtime_BodePlot",
+        displayName = "#LBL_IEPE_Realtime_Spectrum",
         iconBase = "tw/edu/sju/ee/eea/module/iepe/file/iepe.png",
         mimeType = "application/iepe-realtime",
         persistenceType = TopComponent.PERSISTENCE_NEVER,
         preferredID = "IepeVisual",
         position = 3000
 )
-@Messages("LBL_IEPE_Realtime_BodePlot=BodePlot")
+@Messages("LBL_IEPE_Realtime_Spectrum=Spectrum")
 public final class IepeRealtimeBodeplotElement extends JPanel implements MultiViewElement, Runnable {
 
     private IepeRealtimeObject rt;
@@ -164,7 +164,7 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
     }
 
     private JFreeChart createChart() {
-        BodePlot bodePlot = new BodePlot("FFT PlotTitle");
+        BodePlot bodePlot = new BodePlot("Spectrum");
         bodePlot.createAxisY(0, "Magnitude(Voltage)");
         bodePlot.addData(0, manager.getCollection(), manager.getRenderer());
         bodePlot.getXYPlot().getRangeAxis().setRange(0, 10);
