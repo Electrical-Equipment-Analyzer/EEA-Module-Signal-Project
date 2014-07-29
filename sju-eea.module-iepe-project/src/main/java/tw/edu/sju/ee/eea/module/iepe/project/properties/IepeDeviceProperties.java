@@ -18,9 +18,11 @@
 package tw.edu.sju.ee.eea.module.iepe.project.properties;
 
 import javax.swing.JComponent;
+import org.dom4j.Element;
 import org.netbeans.spi.project.ui.support.ProjectCustomizer;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 
 /**
  *
@@ -29,6 +31,7 @@ import org.openide.util.NbBundle;
 public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectCustomizer.CompositeCategoryProvider {
 
     private static final String DEVICE = "Device";
+    private Element properties;
 
     @ProjectCustomizer.CompositeCategoryProvider.Registration(projectType = "edu-sju-iepe", position = 100)
     public static IepeDeviceProperties createGeneral() {
@@ -38,6 +41,8 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
     @NbBundle.Messages("LBL_Config_Device=Device")
     @Override
     public ProjectCustomizer.Category createCategory(Lookup lkp) {
+        properties = lkp.lookup(IepeProject.class).getDoc().getRootElement().element("properties");
+        int samplerate = Integer.parseInt(properties.elementText("samplerate"));
         return ProjectCustomizer.Category.create(DEVICE, Bundle.LBL_Config_Device(), null);
     }
 
@@ -74,7 +79,7 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(IepeDeviceProperties.class, "IepeDeviceProperties.jLabel2.text")); // NOI18N
 
-        sampleRateTextField.setText(org.openide.util.NbBundle.getMessage(IepeDeviceProperties.class, "IepeDeviceProperties.sampleRateTextField.text")); // NOI18N
+        sampleRateTextField.setText(properties.elementText("samplerate"));
         sampleRateTextField.setPreferredSize(new java.awt.Dimension(101, 21));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
