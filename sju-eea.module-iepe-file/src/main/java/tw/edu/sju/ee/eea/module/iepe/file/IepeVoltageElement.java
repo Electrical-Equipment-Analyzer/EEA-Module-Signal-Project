@@ -51,15 +51,15 @@ import tw.edu.sju.ee.eea.ui.chart.SampledChart;
 import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
 
 @MultiViewElement.Registration(
-        displayName = "#LBL_Iepe_VISUAL",
+        displayName = "#LBL_Iepe_Voltage",
         iconBase = "tw/edu/sju/ee/eea/module/iepe/file/iepe.png",
         mimeType = "application/iepe",
         persistenceType = TopComponent.PERSISTENCE_NEVER,
         preferredID = "IepeVisual",
         position = 2000
 )
-@Messages("LBL_Iepe_VISUAL=Voltage Oscillogram")
-public final class IepeVisualElement extends JPanel implements MultiViewElement {
+@Messages("LBL_Iepe_Voltage=Voltage Oscillogram")
+public final class IepeVoltageElement extends JPanel implements MultiViewElement {
 
     private class IepeVisualToolBar extends JToolBar {
 
@@ -129,7 +129,7 @@ public final class IepeVisualElement extends JPanel implements MultiViewElement 
     private int length;
     private int total = 62500;
 
-    public IepeVisualElement(Lookup lkp) {
+    public IepeVoltageElement(Lookup lkp) {
         info = lkp.lookup(IepeDataInfo.class);
         assert info != null;
 

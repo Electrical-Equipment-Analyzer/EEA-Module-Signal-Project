@@ -44,21 +44,21 @@ import tw.edu.sju.ee.eea.ui.workspace.plot.BodePlot;
 import tw.edu.sju.ee.eea.util.iepe.io.IepeInputStream;
 
 @MultiViewElement.Registration(
-        displayName = "#LBL_Iepe_BodePlot",
+        displayName = "#LBL_Iepe_Spectrum",
         iconBase = "tw/edu/sju/ee/eea/module/iepe/file/iepe.png",
         mimeType = "application/iepe",
         persistenceType = TopComponent.PERSISTENCE_NEVER,
         preferredID = "IepeVisual",
         position = 3000
 )
-@Messages("LBL_Iepe_BodePlot=Spectrum")
-public final class IepeBodeplotElement extends JPanel implements MultiViewElement, Runnable {
+@Messages("LBL_Iepe_Spectrum=Spectrum")
+public final class IepeSpectrumElement extends JPanel implements MultiViewElement, Runnable {
 
     private IepeDataInfo info;
     private JToolBar toolbar = new JToolBar();
     private transient MultiViewElementCallback callback;
 
-    public IepeBodeplotElement(Lookup lkp) {
+    public IepeSpectrumElement(Lookup lkp) {
         info = lkp.lookup(IepeDataInfo.class);
         assert info != null;
         toolbar.setFloatable(false);
@@ -68,8 +68,8 @@ public final class IepeBodeplotElement extends JPanel implements MultiViewElemen
 
             @Override
             public void cursorMoved(IepeCursorEvent e) {
-                synchronized (IepeBodeplotElement.this) {
-                    IepeBodeplotElement.this.notify();
+                synchronized (IepeSpectrumElement.this) {
+                    IepeSpectrumElement.this.notify();
                 }
             }
         });
@@ -85,8 +85,8 @@ public final class IepeBodeplotElement extends JPanel implements MultiViewElemen
         System.out.println("start");
         while (true) {
             try {
-                synchronized (IepeBodeplotElement.this) {
-                    IepeBodeplotElement.this.wait();
+                synchronized (IepeSpectrumElement.this) {
+                    IepeSpectrumElement.this.wait();
                 }
             } catch (InterruptedException ex) {
             }
