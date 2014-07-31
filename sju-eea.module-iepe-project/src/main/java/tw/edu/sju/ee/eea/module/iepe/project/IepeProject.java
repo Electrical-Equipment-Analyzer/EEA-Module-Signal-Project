@@ -79,8 +79,9 @@ public class IepeProject implements Project {
     private Lookup lkp;
     private Child[] chield;
     private final IEPEInput iepe;
-    private File confFile;
-    private Document doc;
+//    private File confFile;
+//    private Document doc;
+    private IepeProjectProperties properties;
     private ChannelList list;
 
     public IepeProject(FileObject projectDirectory, ProjectState state) {
@@ -88,12 +89,14 @@ public class IepeProject implements Project {
         this.state = state;
         iepe = new IEPEInput(new MPS140801IEPE(0, 32000), new int[]{1}, 512);
 
-        confFile = new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath());
-        try {
-            doc = new SAXReader().read(confFile);
-        } catch (DocumentException ex) {
-            Exceptions.printStackTrace(ex);
-        }
+        properties = new IepeProjectProperties(
+                new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath()));
+//        confFile = new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath());
+//        try {
+//            doc = new SAXReader().read(confFile);
+//        } catch (DocumentException ex) {
+//            Exceptions.printStackTrace(ex);
+//        }
         list = new ChannelList();
         try {
             list.add(new Channel("USB", 0));
@@ -127,17 +130,11 @@ public class IepeProject implements Project {
     }
 
     public Document getDoc() {
-        return doc;
+        return properties.doc();
     }
 
     public void save() {
-        try {
-            XMLWriter writer = new XMLWriter(new FileWriter(confFile));
-            writer.write(doc);
-            writer.close();
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
+        properties.write();
     }
 
     public IEPEInput getIepe() {
