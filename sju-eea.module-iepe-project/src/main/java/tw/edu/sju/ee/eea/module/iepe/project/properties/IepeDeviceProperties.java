@@ -23,6 +23,7 @@ import org.netbeans.spi.project.ui.support.ProjectCustomizer;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 
 /**
  *
@@ -31,7 +32,8 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectCustomizer.CompositeCategoryProvider {
 
     private static final String DEVICE = "Device";
-    private Element properties;
+    private IepeProjectProperties properties;
+//    private Element prop;
 
     @ProjectCustomizer.CompositeCategoryProvider.Registration(projectType = "edu-sju-iepe", position = 100)
     public static IepeDeviceProperties createGeneral() {
@@ -41,8 +43,8 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
     @NbBundle.Messages("LBL_Config_Device=Device")
     @Override
     public ProjectCustomizer.Category createCategory(Lookup lkp) {
-        properties = lkp.lookup(IepeProject.class).getDoc().getRootElement().element("properties");
-        int samplerate = Integer.parseInt(properties.elementText("samplerate"));
+        properties = lkp.lookup(IepeProject.class).getProperties();
+        initText();
         return ProjectCustomizer.Category.create(DEVICE, Bundle.LBL_Config_Device(), null);
     }
 
@@ -57,6 +59,11 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
     public IepeDeviceProperties() {
         initComponents();
     }
+    
+    private void initText() {
+        nameTextField.setText(properties.device().getDeviceName());
+        sampleRateTextField.setText(String.valueOf(properties.device().getSampleRate()));
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -67,19 +74,17 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
-        NameTextField = new javax.swing.JTextField();
-        jLabel2 = new javax.swing.JLabel();
+        nameLabel = new javax.swing.JLabel();
+        nameTextField = new javax.swing.JTextField();
+        sampleRateLabel = new javax.swing.JLabel();
         sampleRateTextField = new javax.swing.JTextField();
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(IepeDeviceProperties.class, "IepeDeviceProperties.jLabel1.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(nameLabel, org.openide.util.NbBundle.getMessage(IepeDeviceProperties.class, "IepeDeviceProperties.nameLabel.text")); // NOI18N
 
-        NameTextField.setText(org.openide.util.NbBundle.getMessage(IepeDeviceProperties.class, "IepeDeviceProperties.NameTextField.text")); // NOI18N
-        NameTextField.setPreferredSize(new java.awt.Dimension(101, 21));
+        nameTextField.setPreferredSize(new java.awt.Dimension(101, 21));
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(IepeDeviceProperties.class, "IepeDeviceProperties.jLabel2.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(sampleRateLabel, org.openide.util.NbBundle.getMessage(IepeDeviceProperties.class, "IepeDeviceProperties.sampleRateLabel.text")); // NOI18N
 
-        sampleRateTextField.setText(properties.elementText("samplerate"));
         sampleRateTextField.setPreferredSize(new java.awt.Dimension(101, 21));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -89,12 +94,12 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel2))
+                    .addComponent(nameLabel)
+                    .addComponent(sampleRateLabel))
                 .addGap(63, 63, 63)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(sampleRateTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(NameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(nameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -102,11 +107,11 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(NameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(nameLabel)
+                    .addComponent(nameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
+                    .addComponent(sampleRateLabel)
                     .addComponent(sampleRateTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(395, Short.MAX_VALUE))
         );
@@ -114,9 +119,9 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField NameTextField;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel nameLabel;
+    private javax.swing.JTextField nameTextField;
+    private javax.swing.JLabel sampleRateLabel;
     private javax.swing.JTextField sampleRateTextField;
     // End of variables declaration//GEN-END:variables
 }

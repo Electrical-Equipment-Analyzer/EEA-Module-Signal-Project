@@ -87,10 +87,11 @@ public class IepeProject implements Project {
     public IepeProject(FileObject projectDirectory, ProjectState state) {
         this.projectDirectory = projectDirectory;
         this.state = state;
-        iepe = new IEPEInput(new MPS140801IEPE(0, 32000), new int[]{1}, 512);
-
         properties = new IepeProjectProperties(
                 new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath()));
+
+        iepe = new IEPEInput(new MPS140801IEPE(0, 32000), new int[]{1}, 512);
+
 //        confFile = new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath());
 //        try {
 //            doc = new SAXReader().read(confFile);
@@ -131,6 +132,10 @@ public class IepeProject implements Project {
 
     public Document getDoc() {
         return properties.doc();
+    }
+
+    public IepeProjectProperties getProperties() {
+        return properties;
     }
 
     public void save() {

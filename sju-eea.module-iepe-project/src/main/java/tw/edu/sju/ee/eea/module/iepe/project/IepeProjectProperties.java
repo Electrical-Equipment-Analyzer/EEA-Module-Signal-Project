@@ -22,6 +22,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
+import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 import org.openide.util.Exceptions;
@@ -40,6 +41,11 @@ public class IepeProjectProperties {
     public IepeProjectProperties(File confFile) {
         this.confFile = confFile;
         read();
+        device = new Device(doc.getRootElement());
+//        Element root = doc.getRootElement();
+//        Element conf = root.element("properties");
+//        Element samplerate = conf.element("samplerate");
+//        System.out.println(samplerate.getText());
     }
 
     private IepeProjectProperties(Device device) {
@@ -68,22 +74,41 @@ public class IepeProjectProperties {
         return doc;
     }
 
+    public Device device() {
+        return device;
+    }
+
     public class Device {
 
-        private int deviceNumber;
+        private final Element device;
+        private static final String DEVICE = "properties";
+        private static final String NAME = "name";
+        private static final String SAMPLERATE = "samplerate";
+
+        private String deviceName;
         private int sampleRate;
 
-        public Device(int deviceNumber, int sampleRate) {
-            this.deviceNumber = deviceNumber;
-            this.sampleRate = sampleRate;
+        public Device(Element root) {
+            device = root.element(DEVICE);
+            read();
         }
 
-        public int getDeviceNumber() {
-            return deviceNumber;
+        public void read() {
+            deviceName = device.elementText(NAME);
+            sampleRate = Integer.parseInt(device.elementText(SAMPLERATE));
         }
 
-        public void setDeviceNumber(int deviceNumber) {
-            this.deviceNumber = deviceNumber;
+        public void write() {
+            device.element(NAME).setText(deviceName);
+            device.element(SAMPLERATE).setText(String.valueOf(sampleRate));
+        }
+
+        public String getDeviceName() {
+            return deviceName;
+        }
+
+        public void setDeviceName(String deviceName) {
+            this.deviceName = deviceName;
         }
 
         public int getSampleRate() {
