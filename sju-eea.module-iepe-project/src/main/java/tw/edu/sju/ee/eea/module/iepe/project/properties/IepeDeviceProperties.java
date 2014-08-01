@@ -59,7 +59,7 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
     public IepeDeviceProperties() {
         initComponents();
     }
-    
+
     private void initText() {
         nameTextField.setText(properties.device().getDeviceName());
         sampleRateTextField.setText(String.valueOf(properties.device().getSampleRate()));
@@ -82,10 +82,20 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
         org.openide.awt.Mnemonics.setLocalizedText(nameLabel, org.openide.util.NbBundle.getMessage(IepeDeviceProperties.class, "IepeDeviceProperties.nameLabel.text")); // NOI18N
 
         nameTextField.setPreferredSize(new java.awt.Dimension(101, 21));
+        nameTextField.addCaretListener(new javax.swing.event.CaretListener() {
+            public void caretUpdate(javax.swing.event.CaretEvent evt) {
+                nameTextFieldCaretUpdate(evt);
+            }
+        });
 
         org.openide.awt.Mnemonics.setLocalizedText(sampleRateLabel, org.openide.util.NbBundle.getMessage(IepeDeviceProperties.class, "IepeDeviceProperties.sampleRateLabel.text")); // NOI18N
 
         sampleRateTextField.setPreferredSize(new java.awt.Dimension(101, 21));
+        sampleRateTextField.addCaretListener(new javax.swing.event.CaretListener() {
+            public void caretUpdate(javax.swing.event.CaretEvent evt) {
+                sampleRateTextFieldCaretUpdate(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -116,6 +126,17 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
                 .addContainerGap(395, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void nameTextFieldCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_nameTextFieldCaretUpdate
+        properties.device().setDeviceName(nameTextField.getText());
+    }//GEN-LAST:event_nameTextFieldCaretUpdate
+
+    private void sampleRateTextFieldCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_sampleRateTextFieldCaretUpdate
+        try {
+            properties.device().setSampleRate(Integer.parseInt(sampleRateTextField.getText()));
+        } catch (NumberFormatException ex) {
+        }
+    }//GEN-LAST:event_sampleRateTextFieldCaretUpdate
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

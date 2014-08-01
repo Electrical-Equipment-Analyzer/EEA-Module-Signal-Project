@@ -63,6 +63,9 @@
           <Dimension value="[101, 21]"/>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="caretUpdate" listener="javax.swing.event.CaretListener" parameters="javax.swing.event.CaretEvent" handler="nameTextFieldCaretUpdate"/>
+      </Events>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_SerializeTo" type="java.lang.String" value="IepeGeneralProperties_NameTextField"/>
       </AuxValues>
@@ -80,6 +83,9 @@
           <Dimension value="[101, 21]"/>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="caretUpdate" listener="javax.swing.event.CaretListener" parameters="javax.swing.event.CaretEvent" handler="sampleRateTextFieldCaretUpdate"/>
+      </Events>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_SerializeTo" type="java.lang.String" value="IepeDeviceProperties1_sampleRateTextField"/>
       </AuxValues>

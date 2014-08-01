@@ -63,6 +63,8 @@ public class IepeCustomizerProvider implements CustomizerProvider {
         public void actionPerformed(ActionEvent e) {
             StatusDisplayer.getDefault().setStatusText("OK button clicked for "
                     + project.getProjectDirectory().getName() + " customizer!");
+            project.getProperties().device().write();
+            project.getProperties().write();
         }
 
     }
