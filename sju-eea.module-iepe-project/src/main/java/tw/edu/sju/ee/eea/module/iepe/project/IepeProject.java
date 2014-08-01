@@ -90,7 +90,7 @@ public class IepeProject implements Project {
         properties = new IepeProjectProperties(
                 new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath()));
 
-        iepe = new IEPEInput(new MPS140801IEPE(0, 32000), new int[]{1}, 512);
+        iepe = new IEPEInput(new MPS140801IEPE(0, properties.device().getSampleRate()), new int[]{1}, 512);
 
 //        confFile = new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath());
 //        try {

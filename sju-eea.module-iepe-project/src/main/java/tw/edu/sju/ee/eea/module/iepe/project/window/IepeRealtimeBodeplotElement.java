@@ -40,6 +40,7 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
@@ -57,6 +58,7 @@ import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
 @Messages("LBL_IEPE_Realtime_Spectrum=Spectrum")
 public final class IepeRealtimeBodeplotElement extends JPanel implements MultiViewElement, Runnable {
 
+    private IepeProjectProperties properties;
     private IepeRealtimeObject rt;
     private JToolBar toolbar = new JToolBar();
     private transient MultiViewElementCallback callback;
@@ -66,6 +68,7 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
     public IepeRealtimeBodeplotElement(Lookup lkp) {
         this.rt = lkp.lookup(IepeRealtimeObject.class);
         assert rt != null;
+        properties = lkp.lookup(IepeProject.class).getProperties();
         toolbar.setFloatable(false);
 
         manager = lkp.lookup(IepeProject.class).getList().createSampledManager(

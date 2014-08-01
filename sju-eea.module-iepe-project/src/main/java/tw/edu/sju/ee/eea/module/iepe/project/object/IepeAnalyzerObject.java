@@ -40,6 +40,7 @@ import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.data.AnalyzerRule;
 import tw.edu.sju.ee.eea.module.iepe.project.data.Pattern;
 import tw.edu.sju.ee.eea.module.iepe.project.data.Warning;
@@ -54,9 +55,11 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
     private Lookup lkp;
     private Element conf;
     private List<AnalyzerRule> rules;
+    private IepeProjectProperties properties;
 
     public IepeAnalyzerObject(IepeProject project) {
         this.lkp = new ProxyLookup(new Lookup[]{Lookups.singleton(project), Lookups.singleton(this)});
+        properties = project.getProperties();
         Document doc = project.getDoc();
         Element root = doc.getRootElement();
         conf = root.element("analyzer");
@@ -102,7 +105,7 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
                         channels[j][i] = stream[j].readValue();
                     }
                 }
-                Pattern pattern = new Pattern(32000, 1024, channels);
+                Pattern pattern = new Pattern(properties.device().getSampleRate(), 1024, channels);
                 List<Warning> list = pattern.rules(rules);
                 for (Warning warning : list) {
                     warning.print(io);
