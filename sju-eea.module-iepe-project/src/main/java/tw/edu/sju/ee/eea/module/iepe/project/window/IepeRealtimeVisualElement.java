@@ -61,7 +61,7 @@ import tw.edu.sju.ee.eea.util.iepe.io.VoltageOutput;
         position = 2000
 )
 @Messages("LBL_Iepe_VISUAL=Voltage Oscillogram")
-public final class IepeRealtimeVisualElement extends JPanel implements MultiViewElement, Runnable {
+public final class IepeRealtimeVisualElement extends JPanel implements MultiViewElement {
 
     private class IepeVisualToolBar extends JToolBar {
 
@@ -142,8 +142,6 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         initComponents();
         toolbar.setEnabled(false);
 
-        Thread t = new Thread(this);
-        t.start();
     }
 
     
@@ -184,25 +182,6 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
 //    private IEPEInput.IepeStream stream;
 //    private XYSeries xySeries;
     private VoltageChannel channel0;
-    
-    @Override
-    public void run() {
-//        SampledStream sampled = new SampledStream(stream, 3200);
-        long time = Calendar.getInstance().getTimeInMillis();
-        while (true) {
-            try {
-                //            try {
-//                xySeries.add(time, sampled.readSampled());
-//            } catch (IOException ex) {
-//                Exceptions.printStackTrace(ex);
-//            }
-                Thread.sleep(5000);
-            } catch (InterruptedException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-            time += 100;
-        }
-    }
 
     private JFreeChart createChart() {
 
