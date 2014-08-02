@@ -43,6 +43,8 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelsConfigure;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
@@ -142,10 +144,19 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         this.rt = lkp.lookup(IepeRealtimeObject.class);
         assert rt != null;
 
+        ChannelList list = lkp.lookup(IepeProject.class).getList();
+        IEPEInput iepe = lkp.lookup(IepeProject.class).getIepe();
+        list.addConfigure(this);
+        channels = new VoltageChannel[list.size()];
+        for (int i = 0; i < channels.length; i++) {
+            Channel channel = list.get(i);
+            channels[i] = new VoltageChannel(channel.getName());
+            iepe.addStream(channel.getChannel(), channels[i]);
+        }
+
         initComponents();
         toolbar.setEnabled(false);
 
-        lkp.lookup(IepeProject.class).getList().addConfigure(this);
     }
 
     private class VoltageChannel extends XYSeries implements IEPEInput.VoltageArrayOutout, VoltageOutput {
@@ -196,15 +207,12 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         return (Color) renderer.getSeriesPaint(channel);
     }
 
-//    private IEPEInput.IepeStream stream;
-//    private XYSeries xySeries;
     private XYItemRenderer renderer;
     private VoltageChannel[] channels;
 
     private JFreeChart createChart() {
 
         SampledChart sampledChart = new SampledChart("Voltage Oscillogram");
-//        sampledChart.addData(0, manager.getCollection(), manager.getRenderer());
         XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
         renderer = SampledChart.creatrRenderer();
 
@@ -212,28 +220,13 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         sampledChart.getXYPlot().mapDatasetToRangeAxis(0, 0);
         sampledChart.getXYPlot().setRenderer(0, renderer);
 
-//        xySeries = new XYSeries("ch0");
-//        xySeriesCollection.addSeries(xySeries);
-        channels = new VoltageChannel[2];
         for (int i = 0; i < channels.length; i++) {
-            channels[i] = new VoltageChannel("ch" + i);
             xySeriesCollection.addSeries(channels[i]);
         }
 
         ValueAxis axis = sampledChart.getXYPlot().getDomainAxis();
         axis.setAutoRange(true);
         axis.setFixedAutoRange(60000.0);  // 60 seconds
-
-        IEPEInput iepe = lkp.lookup(IepeProject.class).getIepe();
-//        try {
-//            stream = new IEPEInput.IepeStream();
-//        } catch (IOException ex) {
-//            Exceptions.printStackTrace(ex);
-//        }
-        for (int i = 0; i < channels.length; i++) {
-            iepe.addStream(i, channels[i]);
-        }
-        
 
         return sampledChart;
     }
