@@ -147,19 +147,18 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
     }
 
     
-    public class Channel implements IEPEInput.VoltageArrayOutout, VoltageOutput {
+    private class VoltageChannel extends XYSeries implements IEPEInput.VoltageArrayOutout, VoltageOutput {
 
-        private XYSeries series;
         private SampledOutputStream stream;
         
-        public Channel(Comparable key) {
-            series = new XYSeries(key);
+        public VoltageChannel(Comparable key) {
+            super(key);
             stream = new SampledOutputStream(this, 3200);
         }
 
         @Override
         public void writeValue(double value) throws IOException {
-            series.add(Calendar.getInstance().getTimeInMillis(), value);
+            add(Calendar.getInstance().getTimeInMillis(), value);
         }
 
         @Override
@@ -184,7 +183,7 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
 
 //    private IEPEInput.IepeStream stream;
 //    private XYSeries xySeries;
-    private Channel channel0;
+    private VoltageChannel channel0;
     
     @Override
     public void run() {
@@ -217,8 +216,8 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         
 //        xySeries = new XYSeries("ch0");
 //        xySeriesCollection.addSeries(xySeries);
-        channel0 = new Channel("ch0");
-        xySeriesCollection.addSeries(channel0.series);
+        channel0 = new VoltageChannel("ch0");
+        xySeriesCollection.addSeries(channel0);
 
         ValueAxis axis = sampledChart.getXYPlot().getDomainAxis();
         axis.setAutoRange(true);
