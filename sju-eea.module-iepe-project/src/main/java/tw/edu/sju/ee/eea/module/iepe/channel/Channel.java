@@ -147,7 +147,7 @@ public class Channel {
                             @Override
                             public void setValue(String name) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
                                 Channel.this.setName(name);
-                                renderer.set(Channel.this, Comparable.class, name);
+                                renderer.setName(Channel.this, name);
                             }
                         });
                 set.put(new PropertySupport.ReadWrite<Color>(
@@ -167,7 +167,7 @@ public class Channel {
                             @Override
                             public void setValue(Color color) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
                                 Channel.this.setColor(color);
-                                renderer.set(Channel.this, Paint.class, color);
+                                renderer.setColor(Channel.this, color);
                             }
                         });
                 Sheet sheet = super.createSheet();
@@ -178,8 +178,10 @@ public class Channel {
     }
 
     interface Renderer {
-
-        public void set(Channel channel, Class c, Object o);
+        
+        public void setName(Channel channel, String name);
+        
+        public void setColor(Channel channel, Color color);
 
         public Color getColor(Channel channel);
     }

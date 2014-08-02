@@ -17,6 +17,7 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.window;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import javax.swing.JToolBar;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.netbeans.core.spi.multiview.CloseOperationState;
@@ -41,6 +43,7 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.module.iepe.channel.ChannelsConfigure;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
@@ -61,7 +64,7 @@ import tw.edu.sju.ee.eea.util.iepe.io.VoltageOutput;
         position = 2000
 )
 @Messages("LBL_Iepe_VISUAL=Voltage Oscillogram")
-public final class IepeRealtimeVisualElement extends JPanel implements MultiViewElement {
+public final class IepeRealtimeVisualElement extends JPanel implements MultiViewElement, ChannelsConfigure {
 
     private class IepeVisualToolBar extends JToolBar {
 
@@ -142,13 +145,13 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         initComponents();
         toolbar.setEnabled(false);
 
+        lkp.lookup(IepeProject.class).getList().addConfigure(this);
     }
 
-    
     private class VoltageChannel extends XYSeries implements IEPEInput.VoltageArrayOutout, VoltageOutput {
 
         private SampledOutputStream stream;
-        
+
         public VoltageChannel(Comparable key) {
             super(key);
             stream = new SampledOutputStream(this, 3200);
@@ -175,40 +178,62 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         public void flush() throws IOException {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
-        
+
     }
-    
+
+    @Override
+    public void setChannelName(int channel, String name) {
+        channels[channel].setKey(name);
+    }
+
+    @Override
+    public void setChannelColor(int channel, Color color) {
+        renderer.setSeriesPaint(channel, color);
+    }
+
+    @Override
+    public Color getChannelColor(int channel) {
+        return (Color) renderer.getSeriesPaint(channel);
+    }
 
 //    private IEPEInput.IepeStream stream;
 //    private XYSeries xySeries;
-    private VoltageChannel channel0;
+    private XYItemRenderer renderer;
+    private VoltageChannel[] channels;
 
     private JFreeChart createChart() {
 
         SampledChart sampledChart = new SampledChart("Voltage Oscillogram");
 //        sampledChart.addData(0, manager.getCollection(), manager.getRenderer());
         XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
-        
+        renderer = SampledChart.creatrRenderer();
+
         sampledChart.getXYPlot().setDataset(0, xySeriesCollection);
         sampledChart.getXYPlot().mapDatasetToRangeAxis(0, 0);
-        sampledChart.getXYPlot().setRenderer(0, SampledChart.creatrRenderer());
-        
+        sampledChart.getXYPlot().setRenderer(0, renderer);
+
 //        xySeries = new XYSeries("ch0");
 //        xySeriesCollection.addSeries(xySeries);
-        channel0 = new VoltageChannel("ch0");
-        xySeriesCollection.addSeries(channel0);
+        channels = new VoltageChannel[2];
+        for (int i = 0; i < channels.length; i++) {
+            channels[i] = new VoltageChannel("ch" + i);
+            xySeriesCollection.addSeries(channels[i]);
+        }
 
         ValueAxis axis = sampledChart.getXYPlot().getDomainAxis();
         axis.setAutoRange(true);
         axis.setFixedAutoRange(60000.0);  // 60 seconds
-        
+
         IEPEInput iepe = lkp.lookup(IepeProject.class).getIepe();
 //        try {
 //            stream = new IEPEInput.IepeStream();
 //        } catch (IOException ex) {
 //            Exceptions.printStackTrace(ex);
 //        }
-        iepe.addStream(0, channel0);
+        for (int i = 0; i < channels.length; i++) {
+            iepe.addStream(i, channels[i]);
+        }
+        
 
         return sampledChart;
     }

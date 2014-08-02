@@ -17,16 +17,18 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.ui;
 
+import java.awt.Color;
 import java.awt.Paint;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.XYSeriesCollection;
+import tw.edu.sju.ee.eea.module.iepe.channel.ChannelsConfigure;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
 
 /**
  *
  * @author Leo
  */
-public class SampledManager {
+public class SampledManager implements ChannelsConfigure {
 
     private XYSeriesCollection collection;
     private XYItemRenderer renderer;
@@ -44,12 +46,26 @@ public class SampledManager {
         return renderer;
     }
 
-    public void set(int index, Comparable key) {
-        collection.getSeries(index).setKey(key);
+//    public void set(int index, Comparable key) {
+//        collection.getSeries(index).setKey(key);
+//    }
+//
+//    public void set(int index, Paint paint) {
+//        renderer.setSeriesPaint(index, paint);
+//    }
+    @Override
+    public void setChannelName(int channel, String name) {
+        collection.getSeries(channel).setKey(name);
     }
 
-    public void set(int index, Paint paint) {
-        renderer.setSeriesPaint(index, paint);
+    @Override
+    public void setChannelColor(int channel, Color color) {
+        renderer.setSeriesPaint(channel, color);
+    }
+
+    @Override
+    public Color getChannelColor(int channel) {
+        return (Color) renderer.getSeriesPaint(channel);
     }
 
 }

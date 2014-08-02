@@ -43,7 +43,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 public class ChannelList extends ArrayList<Channel> implements Channel.Renderer {
 
     private Lookup lkp;
-    private List<SampledManager> list = new ArrayList<SampledManager>();
+    private List<ChannelsConfigure> list = new ArrayList<ChannelsConfigure>();
 
     public ChannelList() {
         this.lkp = Lookups.singleton(this);
@@ -71,37 +71,35 @@ public class ChannelList extends ArrayList<Channel> implements Channel.Renderer 
         return this.list.remove(manager);
     }
 
+    public void addConfigure(ChannelsConfigure config) {
+        this.list.add(config);
+    }
+
     @Override
     public Color getColor(Channel channel) {
         int index = this.indexOf(channel);
-        Iterator<SampledManager> iterator = this.list.iterator();
+        Iterator<ChannelsConfigure> iterator = this.list.iterator();
         while (iterator.hasNext()) {
-            SampledManager manager = iterator.next();
-            return (Color) manager.getRenderer().getSeriesPaint(index);
+            return iterator.next().getChannelColor(index);
         }
         return null;
     }
 
     @Override
-    public void set(Channel channel, Class c, Object o) {
+    public void setName(Channel channel, String name) {
         int index = this.indexOf(channel);
-        Iterator<SampledManager> iterator = this.list.iterator();
+        Iterator<ChannelsConfigure> iterator = this.list.iterator();
         while (iterator.hasNext()) {
-            SampledManager manager = iterator.next();
-            try {
-                Method method = manager.getClass().getMethod("set", int.class, c);
-                method.invoke(manager, index, o);
-            } catch (NoSuchMethodException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (SecurityException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (IllegalAccessException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (IllegalArgumentException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (InvocationTargetException ex) {
-                Exceptions.printStackTrace(ex);
-            }
+            iterator.next().setChannelName(index, name);
+        }
+    }
+
+    @Override
+    public void setColor(Channel channel, Color color) {
+        int index = this.indexOf(channel);
+        Iterator<ChannelsConfigure> iterator = this.list.iterator();
+        while (iterator.hasNext()) {
+            iterator.next().setChannelColor(index, color);
         }
     }
 
