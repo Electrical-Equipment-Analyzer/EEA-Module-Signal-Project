@@ -28,6 +28,7 @@ import javax.swing.JToolBar;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.data.xy.XYDataItem;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.netbeans.core.spi.multiview.CloseOperationState;
@@ -119,7 +120,7 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
         public void writeFrequency(double frequencyBase, double[] value) throws IOException {
             this.clear();
             for (int i = 0; i < value.length; i++) {
-                this.add(i * frequencyBase, value[i] / this.length * 2);
+                this.add(new XYDataItem(i * frequencyBase, value[i] / this.length * 2), false);
             }
         }
 

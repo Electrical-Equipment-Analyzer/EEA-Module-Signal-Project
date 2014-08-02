@@ -22,7 +22,6 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
-import org.dom4j.Element;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
@@ -30,10 +29,7 @@ import org.openide.awt.UndoRedo;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
-import tw.edu.sju.ee.eea.module.iepe.project.data.AnalyzerRule;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeAnalyzerObject;
-import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
-import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_IEPE_Analyzer",
@@ -51,7 +47,6 @@ public final class IepeAnalyzerElement extends JPanel implements MultiViewElemen
     private JToolBar toolbar = new JToolBar();
     private transient MultiViewElementCallback callback;
 
-    private SampledManager manager;
 
     public IepeAnalyzerElement(Lookup lkp) {
         this.lkp = lkp;

@@ -15,7 +15,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-
 package tw.edu.sju.ee.eea.module.iepe.io;
 
 import java.io.IOException;
@@ -31,24 +30,24 @@ import tw.edu.sju.ee.eea.core.math.ComplexArray;
  * @author Leo
  */
 public class FourierTransformerOutputStreeam {
-    
-        private static final FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
-        private FrequencyOutput out;
-        private int index;
-        private double[] array;
 
-        public FourierTransformerOutputStreeam(FrequencyOutput out, int size) {
-            this.out = out;
-            this.array = new double[size];
-        }
+    private static final FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
+    private FrequencyOutput out;
+    private int index;
+    private double[] array;
 
-        public void writeValue(double value) throws IOException {
-            this.array[index++] = value;
-            if (!(index < array.length)) {
-                index = 0;
-                Complex[] transform = fft.transform(array, TransformType.FORWARD);
-                double[] absolute = ComplexArray.getAbsolute(Arrays.copyOf(transform, transform.length / 2 + 1));
-                out.writeFrequency(32000.0 / transform.length, absolute);
-            }
+    public FourierTransformerOutputStreeam(FrequencyOutput out, int size) {
+        this.out = out;
+        this.array = new double[size];
+    }
+
+    public void writeValue(double value) throws IOException {
+        this.array[index++] = value;
+        if (!(index < array.length)) {
+            index = 0;
+            Complex[] transform = fft.transform(array, TransformType.FORWARD);
+            double[] absolute = ComplexArray.getAbsolute(Arrays.copyOf(transform, transform.length / 2 + 1));
+            out.writeFrequency(32000.0 / transform.length, absolute);
         }
+    }
 }

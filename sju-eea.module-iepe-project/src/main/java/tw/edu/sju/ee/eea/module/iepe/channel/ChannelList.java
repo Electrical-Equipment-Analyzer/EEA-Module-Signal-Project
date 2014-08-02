@@ -19,22 +19,15 @@ package tw.edu.sju.ee.eea.module.iepe.channel;
 
 import java.awt.Color;
 import java.awt.Image;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
-import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
-import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
-import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 
 /**
  *
@@ -47,28 +40,6 @@ public class ChannelList extends ArrayList<Channel> implements Channel.Renderer 
 
     public ChannelList() {
         this.lkp = Lookups.singleton(this);
-    }
-
-    public SampledManager createSampledManager(XYItemRenderer renderer, Class<? extends SampledSeries> c, Object conf) {
-        SampledManager manager = new SampledManager(renderer);
-        for (int i = 0; i < this.size(); i++) {
-            try {
-                Channel channel = this.get(i);
-                SampledSeries series = channel.createSampledSeries(c);
-                series.configure(conf);
-                manager.getCollection().addSeries(series);
-            } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (ReflectiveOperationException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-        }
-        this.list.add(manager);
-        return manager;
-    }
-
-    public boolean remove(SampledManager manager) {
-        return this.list.remove(manager);
     }
 
     public void addConfigure(ChannelsConfigure config) {

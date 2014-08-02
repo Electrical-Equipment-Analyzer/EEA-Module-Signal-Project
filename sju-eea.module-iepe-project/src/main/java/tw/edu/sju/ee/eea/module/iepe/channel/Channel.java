@@ -20,7 +20,6 @@ package tw.edu.sju.ee.eea.module.iepe.channel;
 import org.openide.util.NbBundle;
 import java.awt.Color;
 import java.awt.Image;
-import java.awt.Paint;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import org.openide.nodes.AbstractNode;
@@ -30,7 +29,6 @@ import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
-import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 
 /**
  *
@@ -74,11 +72,6 @@ public class Channel {
 
     public Color getColor() {
         return color;
-    }
-
-    SampledSeries createSampledSeries(Class<? extends SampledSeries> c) throws IOException, InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-        SampledSeries sampledSeries = c.getConstructor(Comparable.class, int.class).newInstance(name, channel);
-        return sampledSeries;
     }
 
     @NbBundle.Messages({
