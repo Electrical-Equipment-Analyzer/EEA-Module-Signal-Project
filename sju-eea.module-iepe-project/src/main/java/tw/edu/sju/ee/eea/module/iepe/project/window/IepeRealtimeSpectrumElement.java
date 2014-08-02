@@ -58,14 +58,14 @@ import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
         position = 3000
 )
 @Messages("LBL_IEPE_Realtime_Spectrum=Spectrum")
-public final class IepeRealtimeBodeplotElement extends JPanel implements MultiViewElement, ChannelsConfigure {
+public final class IepeRealtimeSpectrumElement extends JPanel implements MultiViewElement, ChannelsConfigure {
 
     private IepeProjectProperties properties;
     private IepeRealtimeObject rt;
     private JToolBar toolbar = new JToolBar();
     private transient MultiViewElementCallback callback;
 
-    public IepeRealtimeBodeplotElement(Lookup lkp) {
+    public IepeRealtimeSpectrumElement(Lookup lkp) {
         this.rt = lkp.lookup(IepeRealtimeObject.class);
         assert rt != null;
         properties = lkp.lookup(IepeProject.class).getProperties();
@@ -270,32 +270,32 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
 
     @Override
     public void componentOpened() {
-        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "open");
+        Logger.getLogger(IepeRealtimeSpectrumElement.class.getName()).log(Level.INFO, "open");
     }
 
     @Override
     public void componentClosed() {
-        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "close");
+        Logger.getLogger(IepeRealtimeSpectrumElement.class.getName()).log(Level.INFO, "close");
     }
 
     @Override
     public void componentShowing() {
-        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "Show");
+        Logger.getLogger(IepeRealtimeSpectrumElement.class.getName()).log(Level.INFO, "Show");
     }
 
     @Override
     public void componentHidden() {
-        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "hide");
+        Logger.getLogger(IepeRealtimeSpectrumElement.class.getName()).log(Level.INFO, "hide");
     }
 
     @Override
     public void componentActivated() {
-        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "active");
+        Logger.getLogger(IepeRealtimeSpectrumElement.class.getName()).log(Level.INFO, "active");
     }
 
     @Override
     public void componentDeactivated() {
-        Logger.getLogger(IepeRealtimeBodeplotElement.class.getName()).log(Level.INFO, "deact");
+        Logger.getLogger(IepeRealtimeSpectrumElement.class.getName()).log(Level.INFO, "deact");
     }
 
     @Override

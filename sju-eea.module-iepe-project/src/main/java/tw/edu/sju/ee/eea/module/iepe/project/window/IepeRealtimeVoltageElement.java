@@ -51,15 +51,15 @@ import tw.edu.sju.ee.eea.util.iepe.io.SampledOutputStream;
 import tw.edu.sju.ee.eea.util.iepe.io.VoltageOutput;
 
 @MultiViewElement.Registration(
-        displayName = "#LBL_Iepe_VISUAL",
+        displayName = "#LBL_IEPE_Realtime_Voltage",
         iconBase = "tw/edu/sju/ee/eea/module/iepe/file/iepe.png",
         mimeType = "application/iepe-realtime",
         persistenceType = TopComponent.PERSISTENCE_NEVER,
         preferredID = "IepeVisual",
         position = 2000
 )
-@Messages("LBL_Iepe_VISUAL=Voltage Oscillogram")
-public final class IepeRealtimeVisualElement extends JPanel implements MultiViewElement, ChannelsConfigure {
+@Messages("LBL_IEPE_Realtime_Voltage=Voltage Oscillogram")
+public final class IepeRealtimeVoltageElement extends JPanel implements MultiViewElement, ChannelsConfigure {
 
     private class IepeVisualToolBar extends JToolBar {
 
@@ -132,7 +132,7 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
     private JToolBar toolbar = new IepeVisualToolBar();
     private transient MultiViewElementCallback callback;
 
-    public IepeRealtimeVisualElement(Lookup lkp) {
+    public IepeRealtimeVoltageElement(Lookup lkp) {
         this.lkp = lkp;
         this.rt = lkp.lookup(IepeRealtimeObject.class);
         assert rt != null;
