@@ -30,6 +30,8 @@ import javax.swing.JToolBar;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
@@ -128,18 +130,10 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
     private JToolBar toolbar = new IepeVisualToolBar();
     private transient MultiViewElementCallback callback;
 
-    private SampledManager manager;
-
     public IepeRealtimeVisualElement(Lookup lkp) {
         this.lkp = lkp;
         this.rt = lkp.lookup(IepeRealtimeObject.class);
         assert rt != null;
-
-        manager = lkp.lookup(IepeProject.class).getList().createSampledManager(
-                SampledChart.creatrRenderer(),
-                Process.class,
-                lkp.lookup(IepeProject.class).getIepe()
-        );
 
         initComponents();
         toolbar.setEnabled(false);
@@ -148,38 +142,19 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         t.start();
     }
 
-    public static class Process extends SampledSeries<IEPEInput> {
 
-        private SampledStream sampled;
-
-        public Process(Comparable key, int channel) throws IOException {
-            super(key, channel);
-            sampled = new SampledStream(super.stream, 3200);
-        }
-
-        @Override
-        public void configure(IEPEInput conf) {
-            conf.addStream(getChannel(), getStream());
-        }
-
-        private void process(long time) throws IOException {
-            this.add(time, sampled.readSampled());
-        }
-
-    }
-
+    private IEPEInput.IepeStream stream;
+    private XYSeries xySeries;
+    
     @Override
     public void run() {
+        SampledStream sampled = new SampledStream(stream, 3200);
         long time = Calendar.getInstance().getTimeInMillis();
         while (true) {
-            Iterator<Process> iterator = manager.getCollection().getSeries().iterator();
-            while (iterator.hasNext()) {
-                Process next = iterator.next();
-                try {
-                    next.process(time);
-                } catch (IOException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
+            try {
+                xySeries.add(time, sampled.readSampled());
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
             }
             time += 100;
         }
@@ -188,12 +163,27 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
     private JFreeChart createChart() {
 
         SampledChart sampledChart = new SampledChart("Voltage Oscillogram");
-
-        sampledChart.addData(0, manager.getCollection(), manager.getRenderer());
+//        sampledChart.addData(0, manager.getCollection(), manager.getRenderer());
+        XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
+        
+        sampledChart.getXYPlot().setDataset(0, xySeriesCollection);
+        sampledChart.getXYPlot().mapDatasetToRangeAxis(0, 0);
+        sampledChart.getXYPlot().setRenderer(0, SampledChart.creatrRenderer());
+        
+        xySeries = new XYSeries("ch0");
+        xySeriesCollection.addSeries(xySeries);
 
         ValueAxis axis = sampledChart.getXYPlot().getDomainAxis();
         axis.setAutoRange(true);
         axis.setFixedAutoRange(60000.0);  // 60 seconds
+        
+        IEPEInput iepe = lkp.lookup(IepeProject.class).getIepe();
+        try {
+            stream = new IEPEInput.IepeStream();
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        iepe.addStream(0, stream);
 
         return sampledChart;
     }
