@@ -17,33 +17,34 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.window;
 
+import java.awt.Color;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
-import org.apache.commons.math3.complex.Complex;
-import org.apache.commons.math3.transform.DftNormalization;
-import org.apache.commons.math3.transform.FastFourierTransformer;
-import org.apache.commons.math3.transform.TransformType;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
 import org.openide.awt.UndoRedo;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
+import tw.edu.sju.ee.eea.module.iepe.channel.ChannelsConfigure;
+import tw.edu.sju.ee.eea.module.iepe.io.FourierTransformerOutputStreeam;
+import tw.edu.sju.ee.eea.module.iepe.io.FrequencyOutput;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
-import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
-import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 import tw.edu.sju.ee.eea.ui.workspace.plot.BodePlot;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
 
@@ -56,14 +57,12 @@ import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
         position = 3000
 )
 @Messages("LBL_IEPE_Realtime_Spectrum=Spectrum")
-public final class IepeRealtimeBodeplotElement extends JPanel implements MultiViewElement, Runnable {
+public final class IepeRealtimeBodeplotElement extends JPanel implements MultiViewElement, ChannelsConfigure {
 
     private IepeProjectProperties properties;
     private IepeRealtimeObject rt;
     private JToolBar toolbar = new JToolBar();
     private transient MultiViewElementCallback callback;
-
-    private SampledManager manager;
 
     public IepeRealtimeBodeplotElement(Lookup lkp) {
         this.rt = lkp.lookup(IepeRealtimeObject.class);
@@ -71,33 +70,29 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
         properties = lkp.lookup(IepeProject.class).getProperties();
         toolbar.setFloatable(false);
 
-        manager = lkp.lookup(IepeProject.class).getList().createSampledManager(
-                BodePlot.creatrRenderer(),
-                Process.class,
-                lkp.lookup(IepeProject.class).getIepe()
-        );
+        ChannelList list = lkp.lookup(IepeProject.class).getList();
+        IEPEInput iepe = lkp.lookup(IepeProject.class).getIepe();
+        list.addConfigure(this);
+        channels = new FrequencyChannel[list.size()];
+        for (int i = 0; i < channels.length; i++) {
+            Channel channel = list.get(i);
+            channels[i] = new FrequencyChannel(channel.getName(), 4096);
+            iepe.addStream(channel.getChannel(), channels[i]);
+        }
 
         initComponents();
 
-        Thread t = new Thread(this);
-        t.start();
     }
 
-    public static class Process extends SampledSeries<IEPEInput> implements Runnable {
+    private class FrequencyChannel extends XYSeries implements IEPEInput.VoltageArrayOutout, FrequencyOutput {
 
-        private static final FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
-        private double[] value = new double[1024 * 4];
-        private Thread thread;
+        private FourierTransformerOutputStreeam stream;
+        private int length;
 
-        public Process(Comparable key, int channel) throws IOException {
-            super(key, channel);
-            this.thread = new Thread(this);
-            this.thread.start();
-        }
-
-        @Override
-        public void configure(IEPEInput conf) {
-            conf.addStream(getChannel(), getStream());
+        public FrequencyChannel(Comparable key, int length) {
+            super(key);
+            this.length = length;
+            stream = new FourierTransformerOutputStreeam(this, length);
         }
 
         @Override
@@ -120,59 +115,89 @@ public final class IepeRealtimeBodeplotElement extends JPanel implements MultiVi
             return null;
         }
 
-        private void process() {
-            try {
-                for (int i = 0; i < value.length; i++) {
-                    value[i] = stream.readValue();
-                }
-                synchronized (this) {
-                    this.notify();
-                }
-            } catch (IOException ex) {
+        @Override
+        public void writeFrequency(double frequencyBase, double[] value) throws IOException {
+            this.clear();
+            for (int i = 0; i < value.length; i++) {
+                this.add(i * frequencyBase, value[i] / this.length * 2);
+            }
+        }
+
+//        private double frequencyBase;
+//        private double[] value;
+//        @Override
+//        public void run() {
+//            while (!Thread.interrupted()) {
+//                try {
+//                    Thread.sleep(1000);
+//                    synchronized (this) {
+//                        this.wait();
+//                    }
+//                } catch (InterruptedException ex) {
+//                    Exceptions.printStackTrace(ex);
+//                }
+//                this.clear();
+//                for (int i = 0; i < value.length; i++) {
+//                    this.add(i, value[i]);
+//                }
+//            }
+//        }
+        @Override
+        public void writeVoltageArray(double[] data) throws IOException {
+            for (double d : data) {
+                stream.writeValue(d);
             }
         }
 
         @Override
-        public void run() {
-            while (!Thread.interrupted()) {
-                try {
-                    Thread.sleep(1000);
-                    synchronized (this) {
-                        this.wait();
-                    }
-                } catch (InterruptedException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
-                Complex[] transform = fft.transform(value, TransformType.FORWARD);
-                int max = transform.length / 2 + 1;
-                this.clear();
-                for (int i = 1; i < max; i++) {
-                    double f = i * 32000.0 / transform.length;
-                    this.add(f, transform[i].abs() / value.length * 2);
-                }
-            }
+        public void close() throws IOException {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void flush() throws IOException {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
     }
 
     @Override
-    public void run() {
-        while (!Thread.interrupted()) {
-            Iterator<Process> iterator = manager.getCollection().getSeries().iterator();
-            while (iterator.hasNext()) {
-                Process next = iterator.next();
-                next.process();
-            }
-        }
+    public void setChannelName(int channel, String name) {
+        channels[channel].setKey(name);
     }
 
+    @Override
+    public void setChannelColor(int channel, Color color) {
+        renderer.setSeriesPaint(channel, color);
+    }
+
+    @Override
+    public Color getChannelColor(int channel) {
+        return (Color) renderer.getSeriesPaint(channel);
+    }
+
+    XYSeriesCollection xySeriesCollection;
+    private XYItemRenderer renderer;
+    private FrequencyChannel[] channels;
+
     private JFreeChart createChart() {
-        BodePlot bodePlot = new BodePlot("Spectrum");
-        bodePlot.createAxisY(0, "Magnitude(Voltage)");
-        bodePlot.addData(0, manager.getCollection(), manager.getRenderer());
-        bodePlot.getXYPlot().getRangeAxis().setRange(0, 10);
-        bodePlot.getXYPlot().getDomainAxis().setRange(0.5, 20000);
-        return bodePlot;
+        BodePlot chart = new BodePlot("Spectrum");
+        chart.createAxisY(0, "Magnitude(Voltage)");
+
+        xySeriesCollection = new XYSeriesCollection();
+        renderer = BodePlot.creatrRenderer();
+
+        chart.getXYPlot().setDataset(0, xySeriesCollection);
+        chart.getXYPlot().mapDatasetToRangeAxis(0, 0);
+        chart.getXYPlot().setRenderer(0, renderer);
+
+        for (int i = 0; i < channels.length; i++) {
+            xySeriesCollection.addSeries(channels[i]);
+        }
+
+        chart.getXYPlot().getRangeAxis().setRange(0, 10);
+        chart.getXYPlot().getDomainAxis().setRange(0.5, 20000);
+        return chart;
     }
 
     @Override
