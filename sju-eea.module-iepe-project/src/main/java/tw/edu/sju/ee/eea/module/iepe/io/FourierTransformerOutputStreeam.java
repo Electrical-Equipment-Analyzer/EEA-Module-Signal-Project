@@ -33,11 +33,13 @@ public class FourierTransformerOutputStreeam {
 
     private static final FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
     private FrequencyOutput out;
+    private double samplerate;
     private int index;
     private double[] array;
 
-    public FourierTransformerOutputStreeam(FrequencyOutput out, int size) {
+    public FourierTransformerOutputStreeam(FrequencyOutput out, int samplerate, int size) {
         this.out = out;
+        this.samplerate = samplerate;
         this.array = new double[size];
     }
 
@@ -47,7 +49,7 @@ public class FourierTransformerOutputStreeam {
             index = 0;
             Complex[] transform = fft.transform(array, TransformType.FORWARD);
             double[] absolute = ComplexArray.getAbsolute(Arrays.copyOf(transform, transform.length / 2 + 1));
-            out.writeFrequency(32000.0 / transform.length, absolute);
+            out.writeFrequency(this.samplerate / transform.length, absolute);
         }
     }
 }

@@ -57,9 +57,10 @@ public final class ListenAction implements ActionListener {
     public void actionPerformed(ActionEvent ev) {
         try {
             // TODO use context
+            int sampleRate = context.getProperties().device().getSampleRate();
             String showInputDialog = JOptionPane.showInputDialog(null, "Channel :", "Select Channel to Listen", JOptionPane.INFORMATION_MESSAGE);
             final int channel = Integer.parseInt(showInputDialog);
-            IEPEPlayer player = new IEPEPlayer(32000, 16, 1, 2, 32000);
+            IEPEPlayer player = new IEPEPlayer(sampleRate, 16, 1, 2, sampleRate);
             final IEPEInput.VoltageArrayOutout stream = context.getIepe().addStream(channel, player.getOutputStream());
             RequestProcessor.Task task = RP.create(player);
             progr = ProgressHandleFactory.createHandle("Play task", task);

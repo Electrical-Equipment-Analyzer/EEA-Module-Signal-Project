@@ -77,7 +77,7 @@ public final class IepeRealtimeSpectrumElement extends JPanel implements MultiVi
         channels = new FrequencyChannel[list.size()];
         for (int i = 0; i < channels.length; i++) {
             Channel channel = list.get(i);
-            channels[i] = new FrequencyChannel(channel.getName(), 4096);
+            channels[i] = new FrequencyChannel(channel.getName(), properties.device().getSampleRate(), 4096);
             iepe.addStream(channel.getChannel(), channels[i]);
         }
 
@@ -90,10 +90,10 @@ public final class IepeRealtimeSpectrumElement extends JPanel implements MultiVi
         private FourierTransformerOutputStreeam stream;
         private int length;
 
-        public FrequencyChannel(Comparable key, int length) {
+        public FrequencyChannel(Comparable key, int samplerate, int length) {
             super(key);
             this.length = length;
-            stream = new FourierTransformerOutputStreeam(this, length);
+            stream = new FourierTransformerOutputStreeam(this, samplerate, length);
         }
 
         @Override

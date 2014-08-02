@@ -44,6 +44,7 @@ import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelsConfigure;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
@@ -127,6 +128,7 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
 
     }
 
+    private IepeProjectProperties properties;
     private Lookup lkp;
     private IepeRealtimeObject rt;
     private JToolBar toolbar = new IepeVisualToolBar();
@@ -136,6 +138,7 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
         this.lkp = lkp;
         this.rt = lkp.lookup(IepeRealtimeObject.class);
         assert rt != null;
+        properties = lkp.lookup(IepeProject.class).getProperties();
 
         ChannelList list = lkp.lookup(IepeProject.class).getList();
         IEPEInput iepe = lkp.lookup(IepeProject.class).getIepe();
@@ -143,7 +146,7 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
         channels = new VoltageChannel[list.size()];
         for (int i = 0; i < channels.length; i++) {
             Channel channel = list.get(i);
-            channels[i] = new VoltageChannel(channel.getName());
+            channels[i] = new VoltageChannel(channel.getName(), properties.device().getSampleRate());
             iepe.addStream(channel.getChannel(), channels[i]);
         }
 
@@ -156,9 +159,9 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
 
         private SampledOutputStream stream;
 
-        public VoltageChannel(Comparable key) {
+        public VoltageChannel(Comparable key, int frequency) {
             super(key);
-            stream = new SampledOutputStream(this, 3200);
+            stream = new SampledOutputStream(this, frequency / 10);
         }
 
         @Override
