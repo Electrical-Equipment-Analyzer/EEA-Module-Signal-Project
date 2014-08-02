@@ -20,6 +20,7 @@ package tw.edu.sju.ee.eea.module.iepe.project.window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Iterator;
 import javax.swing.Action;
@@ -46,7 +47,10 @@ import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
+import tw.edu.sju.ee.eea.util.iepe.io.IepeOutputStream;
+import tw.edu.sju.ee.eea.util.iepe.io.SampledOutputStream;
 import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
+import tw.edu.sju.ee.eea.util.iepe.io.VoltageOutput;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_Iepe_VISUAL",
@@ -142,18 +146,59 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         t.start();
     }
 
+    
+    public class Channel implements IEPEInput.Stream, VoltageOutput {
 
-    private IEPEInput.IepeStream stream;
-    private XYSeries xySeries;
+        private XYSeries series;
+        private SampledOutputStream stream;
+        
+        public Channel(Comparable key) {
+            series = new XYSeries(key);
+            stream = new SampledOutputStream(this, 3200);
+        }
+
+        @Override
+        public void writeValue(double value) throws IOException {
+            series.add(Calendar.getInstance().getTimeInMillis(), value);
+        }
+
+        @Override
+        public void write(double[] data) throws IOException {
+            for (double d : data) {
+                stream.writeSampled(d);
+            }
+        }
+
+        @Override
+        public void close() throws IOException {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void flush() throws IOException {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+        
+    }
+    
+
+//    private IEPEInput.IepeStream stream;
+//    private XYSeries xySeries;
+    private Channel channel0;
     
     @Override
     public void run() {
-        SampledStream sampled = new SampledStream(stream, 3200);
+//        SampledStream sampled = new SampledStream(stream, 3200);
         long time = Calendar.getInstance().getTimeInMillis();
         while (true) {
             try {
-                xySeries.add(time, sampled.readSampled());
-            } catch (IOException ex) {
+                //            try {
+//                xySeries.add(time, sampled.readSampled());
+//            } catch (IOException ex) {
+//                Exceptions.printStackTrace(ex);
+//            }
+                Thread.sleep(5000);
+            } catch (InterruptedException ex) {
                 Exceptions.printStackTrace(ex);
             }
             time += 100;
@@ -170,20 +215,22 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         sampledChart.getXYPlot().mapDatasetToRangeAxis(0, 0);
         sampledChart.getXYPlot().setRenderer(0, SampledChart.creatrRenderer());
         
-        xySeries = new XYSeries("ch0");
-        xySeriesCollection.addSeries(xySeries);
+//        xySeries = new XYSeries("ch0");
+//        xySeriesCollection.addSeries(xySeries);
+        channel0 = new Channel("ch0");
+        xySeriesCollection.addSeries(channel0.series);
 
         ValueAxis axis = sampledChart.getXYPlot().getDomainAxis();
         axis.setAutoRange(true);
         axis.setFixedAutoRange(60000.0);  // 60 seconds
         
         IEPEInput iepe = lkp.lookup(IepeProject.class).getIepe();
-        try {
-            stream = new IEPEInput.IepeStream();
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-        iepe.addStream(0, stream);
+//        try {
+//            stream = new IEPEInput.IepeStream();
+//        } catch (IOException ex) {
+//            Exceptions.printStackTrace(ex);
+//        }
+        iepe.addStream(0, channel0);
 
         return sampledChart;
     }
