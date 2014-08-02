@@ -19,7 +19,7 @@ package tw.edu.sju.ee.eea.module.iepe.project.ui;
 
 import java.io.IOException;
 import org.jfree.data.xy.XYSeries;
-import tw.edu.sju.ee.eea.util.iepe.IEPEInput.IepeStream;
+import tw.edu.sju.ee.eea.util.iepe.IEPEInput.IepePipeStream;
 
 /**
  *
@@ -28,19 +28,19 @@ import tw.edu.sju.ee.eea.util.iepe.IEPEInput.IepeStream;
 public abstract class SampledSeries<C> extends XYSeries {
 
     private int channel;
-    protected IepeStream stream;
+    protected IepePipeStream stream;
 
     public SampledSeries(Comparable key, int channel) throws IOException {
         super(key);
         this.channel = channel;
-        this.stream = new IepeStream();
+        this.stream = new IepePipeStream();
     }
 
     public int getChannel() {
         return channel;
     }
-
-    public IepeStream getStream() {
+    
+    public IepePipeStream getStream() {
         return stream;
     }
     

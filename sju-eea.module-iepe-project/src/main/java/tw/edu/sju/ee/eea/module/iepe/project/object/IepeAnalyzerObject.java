@@ -87,10 +87,10 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
     public void run() {
         IepeProject project = lkp.lookup(IepeProject.class);
 
-        IEPEInput.IepeStream[] stream = new IEPEInput.IepeStream[4];
+        IEPEInput.IepePipeStream[] stream = new IEPEInput.IepePipeStream[4];
         for (int i = 0; i < stream.length; i++) {
             try {
-                stream[i] = (IEPEInput.IepeStream) project.getIepe().addStream(i, new IEPEInput.IepeStream());
+                stream[i] = (IEPEInput.IepePipeStream) project.getIepe().addStream(i, new IEPEInput.IepePipeStream());
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }

@@ -47,9 +47,9 @@ import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledManager;
 import tw.edu.sju.ee.eea.module.iepe.project.ui.SampledSeries;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
-import tw.edu.sju.ee.eea.util.iepe.io.IepeOutputStream;
+import tw.edu.sju.ee.eea.util.iepe.io.VoltageOutputStream;
 import tw.edu.sju.ee.eea.util.iepe.io.SampledOutputStream;
-import tw.edu.sju.ee.eea.util.iepe.io.SampledStream;
+import tw.edu.sju.ee.eea.util.iepe.io.SampledInputStream;
 import tw.edu.sju.ee.eea.util.iepe.io.VoltageOutput;
 
 @MultiViewElement.Registration(
@@ -147,7 +147,7 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
     }
 
     
-    public class Channel implements IEPEInput.Stream, VoltageOutput {
+    public class Channel implements IEPEInput.VoltageArrayOutout, VoltageOutput {
 
         private XYSeries series;
         private SampledOutputStream stream;
@@ -163,7 +163,7 @@ public final class IepeRealtimeVisualElement extends JPanel implements MultiView
         }
 
         @Override
-        public void write(double[] data) throws IOException {
+        public void writeVoltageArray(double[] data) throws IOException {
             for (double d : data) {
                 stream.writeSampled(d);
             }

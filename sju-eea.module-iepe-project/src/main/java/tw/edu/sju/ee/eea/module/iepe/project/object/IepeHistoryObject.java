@@ -116,7 +116,7 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
         FileObject fileObject = projectDirectory.getFileObject("Record");
 
         try {
-            IEPEInput.Stream[] stream = new IEPEInput.Stream[4];
+            IEPEInput.VoltageArrayOutout[] stream = new IEPEInput.VoltageArrayOutout[4];
             try {
                 do {
                     try {
