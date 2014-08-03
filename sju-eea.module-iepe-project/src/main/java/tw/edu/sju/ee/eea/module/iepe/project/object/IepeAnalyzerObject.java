@@ -21,13 +21,9 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import org.dom4j.Document;
-import org.dom4j.Element;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -53,25 +49,11 @@ import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
 public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Lookup.Provider, Runnable {
 
     private Lookup lkp;
-    private Element conf;
-    private List<AnalyzerRule> rules;
     private IepeProjectProperties properties;
 
     public IepeAnalyzerObject(IepeProject project) {
         this.lkp = new ProxyLookup(new Lookup[]{Lookups.singleton(project), Lookups.singleton(this)});
         properties = project.getProperties();
-        Document doc = project.getDoc();
-        Element root = doc.getRootElement();
-        conf = root.element("analyzer");
-        Iterator elementIterator = getConf().elementIterator("rule");
-        rules = new ArrayList<AnalyzerRule>();
-        while (elementIterator.hasNext()) {
-            rules.add(new AnalyzerRule(project, (Element) elementIterator.next()));
-        }
-    }
-
-    public Element getConf() {
-        return conf;
     }
 
     @Override
@@ -106,7 +88,7 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
                     }
                 }
                 Pattern pattern = new Pattern(properties.device().getSampleRate(), 1024, channels);
-                List<Warning> list = pattern.rules(rules);
+                List<Warning> list = pattern.rules(properties.rules());
                 for (Warning warning : list) {
                     warning.print(io);
                 }
@@ -146,9 +128,7 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
 
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        AnalyzerRule analyzerRule = new AnalyzerRule(lkp.lookup(IepeProject.class), getConf().addElement("rule"));
-                        analyzerRule.initValue();
-                        rules.add(analyzerRule);
+                        AnalyzerRule analyzerRule = properties.createRule();
                         setChildren(new AnalyzerChildren());
                     }
                 }};
@@ -185,7 +165,7 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
         @Override
         protected void addNotify() {
             super.addNotify();
-            setKeys(rules);
+            setKeys(properties.rules());
         }
 
     }

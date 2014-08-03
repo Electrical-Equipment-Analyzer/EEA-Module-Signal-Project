@@ -27,7 +27,7 @@ import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
-import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 
 /**
  *
@@ -35,11 +35,11 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
  */
 public class AnalyzerRule {
 
-    private IepeProject project;
+    private IepeProjectProperties properties;
     private Element element;
 
-    public AnalyzerRule(IepeProject project, Element element) {
-        this.project = project;
+    public AnalyzerRule(IepeProjectProperties properties, Element element) {
+        this.properties = properties;
         this.element = element;
     }
 
@@ -49,32 +49,32 @@ public class AnalyzerRule {
         element.addElement("minimum").setText("-1");
         element.addElement("maximum").setText("-1");
         element.addElement("magnitude").setText("0");
-        project.save();
+        properties.write();
     }
 
     private void setName(String name) {
         element.element("name").setText(name);
-        project.save();
+        properties.write();
     }
 
     private void setChannel(int channel) {
         element.element("channel").setText(String.valueOf(channel));
-        project.save();
+        properties.write();
     }
 
     private void setMaximum(int maximum) {
         element.element("maximum").setText(String.valueOf(maximum));
-        project.save();
+        properties.write();
     }
 
     private void setMinimum(int minimum) {
         element.element("minimum").setText(String.valueOf(minimum));
-        project.save();
+        properties.write();
     }
 
     private void setMagnitude(double magnitude) {
         element.element("magnitude").setText(String.valueOf(magnitude));
-        project.save();
+        properties.write();
     }
 
     public String getName() {

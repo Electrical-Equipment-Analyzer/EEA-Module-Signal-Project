@@ -20,12 +20,16 @@ package tw.edu.sju.ee.eea.module.iepe.project;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 import org.openide.util.Exceptions;
+import tw.edu.sju.ee.eea.module.iepe.project.data.AnalyzerRule;
 
 /**
  *
@@ -38,14 +42,20 @@ public class IepeProjectProperties {
 
     private Device device;
 
+    private List<AnalyzerRule> rules;
+
     public IepeProjectProperties(File confFile) {
         this.confFile = confFile;
         read();
-        device = new Device(doc.getRootElement());
-//        Element root = doc.getRootElement();
-//        Element conf = root.element("properties");
-//        Element samplerate = conf.element("samplerate");
-//        System.out.println(samplerate.getText());
+        Element root = doc.getRootElement();
+        device = new Device(root);
+
+        Element conf = root.element("analyzer");
+        Iterator elementIterator = conf.elementIterator("rule");
+        rules = new ArrayList<AnalyzerRule>();
+        while (elementIterator.hasNext()) {
+            rules.add(new AnalyzerRule(this, (Element) elementIterator.next()));
+        }
     }
 
     private IepeProjectProperties(Device device) {
@@ -76,6 +86,10 @@ public class IepeProjectProperties {
 
     public Device device() {
         return device;
+    }
+
+    public List<AnalyzerRule> rules() {
+        return rules;
     }
 
     public class Device {
@@ -119,6 +133,15 @@ public class IepeProjectProperties {
             this.sampleRate = sampleRate;
         }
 
+    }
+
+    public AnalyzerRule createRule() {
+        Element root = doc.getRootElement();
+        Element conf = root.element("analyzer");
+        AnalyzerRule analyzerRule = new AnalyzerRule(this, conf.addElement("rule"));
+        analyzerRule.initValue();
+        rules.add(analyzerRule);
+        return analyzerRule;
     }
 
 }

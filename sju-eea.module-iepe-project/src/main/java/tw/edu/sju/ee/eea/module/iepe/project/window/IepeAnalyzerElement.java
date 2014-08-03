@@ -17,7 +17,6 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.window;
 
-import java.util.Iterator;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -47,7 +46,6 @@ public final class IepeAnalyzerElement extends JPanel implements MultiViewElemen
     private JToolBar toolbar = new JToolBar();
     private transient MultiViewElementCallback callback;
 
-
     public IepeAnalyzerElement(Lookup lkp) {
         this.lkp = lkp;
         this.object = lkp.lookup(IepeAnalyzerObject.class);
@@ -55,14 +53,7 @@ public final class IepeAnalyzerElement extends JPanel implements MultiViewElemen
 
         initComponents();
         toolbar.setEnabled(false);
-        Iterator elementIterator = object.getConf().elementIterator();
-//        while (elementIterator.hasNext()) {
-//            Element next = (Element) elementIterator.next();
-//            AnalyzerRule analyzerRule = new AnalyzerRule(next);
-//            System.out.println(analyzerRule);
-//        }
-                
-        
+
     }
 
     @Override
