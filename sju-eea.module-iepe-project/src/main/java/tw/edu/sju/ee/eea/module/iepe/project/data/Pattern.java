@@ -34,12 +34,12 @@ import tw.edu.sju.ee.eea.core.math.ComplexArray;
 public class Pattern extends ArrayList<double[]> {
 
     private static final FastFourierTransformer FFT = new FastFourierTransformer(DftNormalization.STANDARD);
-    private Date date = new Date();
+    private Date date;
     private int bps;
     private int length;
 
-    public Pattern(int bps, int length, double[]  
-        ... channels) {
+    public Pattern(Date date, int bps, int length, double[] ... channels) {
+        this.date = date;
         this.bps = bps;
         this.length = length;
         for (double[] channel : channels) {
@@ -47,6 +47,10 @@ public class Pattern extends ArrayList<double[]> {
             int max = transform.length / 2 + 1;
             this.add(ComplexArray.getAbsolute(Arrays.copyOf(transform, max)));
         }
+    }
+    
+    public Pattern(int bps, int length, double[] ... channels) {
+        this(new Date(), bps, length, channels);
     }
 
     private double frequency(int i) {
@@ -81,6 +85,7 @@ public class Pattern extends ArrayList<double[]> {
         List<Warning> list = new ArrayList<Warning>();
         for (AnalyzerRule rule : rules) {
             Warning warning = max(rule, rule.getChannel(), rule.getMinimum(), rule.getMaximum());
+//            System.out.println(warning);
             if (warning != null && warning.getValue() > rule.getMagnitude()) {
                 list.add(warning);
             }

@@ -20,10 +20,15 @@ package tw.edu.sju.ee.eea.module.iepe.project.object;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -44,9 +49,14 @@ import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
+import org.openide.windows.IOProvider;
+import org.openide.windows.InputOutput;
 import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
+import tw.edu.sju.ee.eea.module.iepe.project.data.Pattern;
+import tw.edu.sju.ee.eea.module.iepe.project.data.Warning;
+import tw.edu.sju.ee.eea.util.iepe.io.VoltageInputStream;
 
 /**
  *
@@ -148,6 +158,58 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
 
     @Override
     public void run() {
+        IepeProject project = lkp.lookup(IepeProject.class);
+        InputOutput io = IOProvider.getDefault().getIO(this.getDisplayName(), false);
+
+        java.util.Map<String, FileObject> files = new TreeMap<String, FileObject>();
+        FileObject[] children = folder.getChildren();
+        for (FileObject fileObject : children) {
+            files.put(fileObject.getName(), fileObject);
+        }
+
+        int index = 0;
+        VoltageInputStream[] stream = new VoltageInputStream[4];
+        long date = 0;
+        SimpleDateFormat dateFormat = new SimpleDateFormat(properties.history().getPattern());
+        try {
+            for (Map.Entry<String, FileObject> entry : files.entrySet()) {
+                stream[index++] = new VoltageInputStream(entry.getValue().getInputStream());
+                if (index < 4) {
+                    continue;
+                } else {
+                    index = 0;
+                    try {
+                        date = dateFormat.parse(entry.getKey().replace("_3", "_channel")).getTime();
+                    } catch (ParseException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                    try {
+                        do {
+                            try {
+                                double[][] channels = new double[stream.length][1024];
+                                for (int i = 0; i < channels[0].length; i++) {
+                                    for (int j = 0; j < channels.length; j++) {
+                                        channels[j][i] = stream[j].readValue();
+                                    }
+                                }
+                                date += 1000.0 * 1024 / properties.device().getSampleRate();
+                                Pattern pattern = new Pattern(new Date(date), properties.device().getSampleRate(), 1024, channels);
+                                List<Warning> list = pattern.rules(properties.rules());
+                                for (Warning warning : list) {
+                                    warning.print(io);
+                                }
+                            } catch (IOException ex) {
+                            }
+                        } while (stream[0].available() > 1024);
+                    } catch (IOException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                }
+            }
+        } catch (FileNotFoundException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+
     }
 
     TopComponent tc;

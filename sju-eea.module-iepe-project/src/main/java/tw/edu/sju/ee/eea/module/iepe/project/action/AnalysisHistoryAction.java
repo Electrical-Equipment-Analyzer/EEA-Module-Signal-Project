@@ -35,18 +35,18 @@ import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
         id = "tw.edu.sju.ee.eea.module.iepe.project.action.RecordAction"
 )
 @ActionRegistration(
-        displayName = "#CTL_RecordAction"
+        displayName = "#CTL_AnalysisHistoryAction"
 )
 @ActionReference(path = "Menu/Analyzers", position = 600)
-@Messages("CTL_RecordAction=RecordIEPE")
-public final class RecordAction implements ActionListener {
+@Messages("CTL_AnalysisHistoryAction=Analysis History")
+public final class AnalysisHistoryAction implements ActionListener {
 
     private final IepeProject context;
     private IepeHistoryObject history;
     private final static RequestProcessor RP = new RequestProcessor("interruptible tasks", 1, true);
     private ProgressHandle progr;
 
-    public RecordAction(IepeProject context) {
+    public AnalysisHistoryAction(IepeProject context) {
         this.context = context;
         history = context.getLookup().lookup(IepeProject.IepeProjectLogicalView.class).getLookup().lookup(IepeHistoryObject.class);
     }
