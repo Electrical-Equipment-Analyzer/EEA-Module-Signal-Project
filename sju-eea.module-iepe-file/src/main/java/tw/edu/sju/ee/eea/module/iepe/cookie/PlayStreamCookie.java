@@ -27,4 +27,6 @@ import org.openide.nodes.Node;
 public interface PlayStreamCookie extends Node.Cookie {
 
     public int readStream(byte b[]) throws IOException;
+
+    public int getSamplerate();
 }

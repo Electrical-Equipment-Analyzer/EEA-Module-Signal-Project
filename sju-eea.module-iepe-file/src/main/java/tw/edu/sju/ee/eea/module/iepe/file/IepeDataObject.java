@@ -107,7 +107,7 @@ public class IepeDataObject extends MultiDataObject implements IepeDataInfo, Pla
     public IepeDataObject(FileObject pf, MultiFileLoader loader) throws DataObjectExistsException, IOException {
         super(pf, loader);
         registerEditor("application/iepe", true);
-        stream = getPrimaryFile().getInputStream();
+        stream = getInputStream();
         cursor = new IepeCursor();
         cursor.addIepeCursorListener(new IepeCursorListener() {
 
@@ -115,7 +115,7 @@ public class IepeDataObject extends MultiDataObject implements IepeDataInfo, Pla
             public void cursorMoved(IepeCursorEvent e) {
                 if (e.getType() == IepeCursorEvent.SET) {
                     try {
-                        stream = getPrimaryFile().getInputStream();
+                        stream = getInputStream();
                         stream.skip(e.getIndex());
                     } catch (FileNotFoundException ex) {
                         Exceptions.printStackTrace(ex);
@@ -148,14 +148,28 @@ public class IepeDataObject extends MultiDataObject implements IepeDataInfo, Pla
         return getPrimaryFile().getNameExt();
     }
 
+    private IepeFile fileHeader;
+
     @Override
-    public InputStream getInputStream() {
+    public IepeFile.Input getInputStream() {
         try {
-            return getPrimaryFile().getInputStream();
+            IepeFile.Input input = new IepeFile.Input(getPrimaryFile().getInputStream());
+            this.fileHeader = input.getHeader();
+            return input;
+//            return getPrimaryFile().getInputStream();
         } catch (FileNotFoundException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (ClassNotFoundException ex) {
             Exceptions.printStackTrace(ex);
         }
         return null;
+    }
+
+    @Override
+    public int getSamplerate() {
+        return fileHeader.getSamplerate();
     }
 
 }

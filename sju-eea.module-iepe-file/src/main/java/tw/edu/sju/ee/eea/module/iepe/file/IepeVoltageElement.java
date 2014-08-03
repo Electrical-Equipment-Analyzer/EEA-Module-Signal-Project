@@ -180,7 +180,7 @@ public final class IepeVoltageElement extends JPanel implements MultiViewElement
     private JFreeChart createChart() {
 
         SampledChart sampledChart = new SampledChart("Voltage Oscillogram");
-        sampledChart.addData(0, SampledChart.createSampledSeriesCollection("Ch_0", info.getInputStream(), index, 32000, length));
+        sampledChart.addData(0, SampledChart.createSampledSeriesCollection("Ch_0", info.getInputStream(), index, info.getSamplerate(), length));
         sampledChart.addMarker(cursor);
         sampledChart.addProgressListener(new ChartProgressListener() {
 
@@ -221,7 +221,7 @@ public final class IepeVoltageElement extends JPanel implements MultiViewElement
 //        series.clear();
 //        SampledStream ss = new
         sc.removeAllSeries();
-        sc.addSeries(SampledChart.series("Ch_0", info.getInputStream(), index, 32000, length));
+        sc.addSeries(SampledChart.series("Ch_0", info.getInputStream(), index, info.getSamplerate(), length));
         chartScroll = true;
     }
 

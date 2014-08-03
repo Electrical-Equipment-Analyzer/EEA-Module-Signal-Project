@@ -31,6 +31,8 @@ public interface IepeDataInfo {
     public String getDisplayName();
 
     public InputStream getInputStream();
+    
+    public int getSamplerate();
 
     public Lookup getLookup();
 }
