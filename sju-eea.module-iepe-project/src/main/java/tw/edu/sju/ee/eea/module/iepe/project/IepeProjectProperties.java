@@ -41,6 +41,7 @@ public class IepeProjectProperties {
     private Document doc;
 
     private Device device;
+    private History history;
 
     private List<AnalyzerRule> rules;
 
@@ -49,6 +50,7 @@ public class IepeProjectProperties {
         read();
         Element root = doc.getRootElement();
         device = new Device(root);
+        history = new History(root);
 
         Element conf = root.element("analyzer");
         Iterator elementIterator = conf.elementIterator("rule");
@@ -86,6 +88,10 @@ public class IepeProjectProperties {
 
     public Device device() {
         return device;
+    }
+
+    public History history() {
+        return history;
     }
 
     public List<AnalyzerRule> rules() {
@@ -131,6 +137,37 @@ public class IepeProjectProperties {
 
         public void setSampleRate(int sampleRate) {
             this.sampleRate = sampleRate;
+        }
+
+    }
+
+    public class History {
+
+        private final Element history;
+        private static final String RECORD = "history";
+        private static final String PATTERN = "pattern";
+
+        private String pattern;
+
+        public History(Element root) {
+            history = root.element(RECORD);
+            read();
+        }
+
+        public void read() {
+            pattern = history.elementText(PATTERN);
+        }
+
+        public void write() {
+            history.element(PATTERN).setText(pattern);
+        }
+
+        public String getPattern() {
+            return pattern;
+        }
+
+        public void setPattern(String pattern) {
+            this.pattern = pattern;
         }
 
     }

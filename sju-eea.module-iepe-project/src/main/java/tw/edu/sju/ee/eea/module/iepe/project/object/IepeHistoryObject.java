@@ -21,16 +21,9 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Iterator;
 import java.util.TreeMap;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -47,9 +40,6 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.dom4j.Element;
-
-import org.dom4j.Document;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.nodes.Node;
@@ -57,9 +47,6 @@ import org.openide.util.Exceptions;
 import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
-import tw.edu.sju.ee.eea.module.iepe.project.window.IepeRealtimeVoltageElement;
-import tw.edu.sju.ee.eea.util.iepe.io.SampledOutputStream;
-import tw.edu.sju.ee.eea.util.iepe.io.VoltageOutput;
 
 /**
  *
@@ -68,40 +55,18 @@ import tw.edu.sju.ee.eea.util.iepe.io.VoltageOutput;
 public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializable, Lookup.Provider {
 
     private Lookup lkp;
-    private Document doc;
-    private Element conf;
-    private Element pattern;
     private long interval;
     private IepeProjectProperties properties;
 
     public IepeHistoryObject(IepeProject project) {
         this.lkp = new ProxyLookup(new Lookup[]{Lookups.singleton(project), Lookups.singleton(this)});
-        doc = project.getDoc();
-
         properties = project.getProperties();
-
-        Element root = doc.getRootElement();
-        for (Iterator i = root.elementIterator("VALUE"); i.hasNext();) {
-            Element foo = (Element) i.next();
-            System.out.print("車牌號碼:" + foo.elementText("NO"));
-            System.out.println("車主地址:" + foo.elementText("ADDR"));
-        }
-
-        conf = root.element("history");
-        pattern = conf.element("pattern");
-        System.out.println("----------------------------");
-        System.out.println("item : " + pattern.getText());
-
         interval = 60000;
         try {
             initRecord();
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
-    }
-
-    public Element getConf() {
-        return conf;
     }
 
     @Override
@@ -114,7 +79,7 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
     }
 
     private String pattern(int channel) {
-        return new SimpleDateFormat(pattern.getText()).format(Calendar.getInstance().getTime()).concat(".iepe")
+        return new SimpleDateFormat(properties.history().getPattern()).format(Calendar.getInstance().getTime()).concat(".iepe")
                 .replaceAll("channel", String.valueOf(channel));
     }
 

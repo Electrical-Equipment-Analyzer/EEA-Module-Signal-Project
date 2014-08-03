@@ -37,6 +37,7 @@ import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 
 @MultiViewElement.Registration(
@@ -50,6 +51,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 @Messages("LBL_IEPE_HISTORY=LogicView")
 public final class IepeHistoryElement extends JPanel implements MultiViewElement, DocumentListener {
 
+    private IepeProjectProperties properties;
     private Lookup lkp;
     private IepeHistoryObject object;
     private JToolBar toolbar = new JToolBar();
@@ -57,11 +59,11 @@ public final class IepeHistoryElement extends JPanel implements MultiViewElement
     private InstanceContent instanceContent = new InstanceContent();
     private UndoRedo.Manager manager = new UndoRedo.Manager();
 
-//    private SampledManager manager;
     public IepeHistoryElement(Lookup lkp) {
         this.lkp = new ProxyLookup(lkp, Lookups.singleton(instanceContent));
         this.object = lkp.lookup(IepeHistoryObject.class);
         assert object != null;
+        properties = lkp.lookup(IepeProject.class).getProperties();
         initComponents();
         initValue();
         initUndoRedo();
@@ -69,7 +71,7 @@ public final class IepeHistoryElement extends JPanel implements MultiViewElement
     }
 
     private void initValue() {
-        patternText.setText(object.getConf().elementText("pattern"));
+        patternText.setText(properties.history().getPattern());
     }
 
     private void initUndoRedo() {
@@ -83,8 +85,9 @@ public final class IepeHistoryElement extends JPanel implements MultiViewElement
     }
 
     private void save() {
-        object.getConf().element("pattern").setText(patternText.getText());
-        lkp.lookup(IepeProject.class).save();
+        properties.history().setPattern(patternText.getText());
+        properties.history().write();
+        properties.write();
     }
 
     /**
