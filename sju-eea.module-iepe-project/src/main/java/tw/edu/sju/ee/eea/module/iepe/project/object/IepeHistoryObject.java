@@ -19,7 +19,9 @@ package tw.edu.sju.ee.eea.module.iepe.project.object;
 
 import java.awt.Image;
 import java.awt.event.ActionEvent;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -54,6 +56,10 @@ import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
+import tw.edu.sju.ee.eea.module.iepe.project.window.IepeRealtimeVoltageElement;
+import tw.edu.sju.ee.eea.util.iepe.io.SampledOutputStream;
+import tw.edu.sju.ee.eea.util.iepe.io.VoltageOutput;
 
 /**
  *
@@ -66,10 +72,13 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
     private Element conf;
     private Element pattern;
     private long interval;
+    private IepeProjectProperties properties;
 
     public IepeHistoryObject(IepeProject project) {
         this.lkp = new ProxyLookup(new Lookup[]{Lookups.singleton(project), Lookups.singleton(this)});
         doc = project.getDoc();
+
+        properties = project.getProperties();
 
         Element root = doc.getRootElement();
         for (Iterator i = root.elementIterator("VALUE"); i.hasNext();) {
@@ -84,6 +93,11 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
         System.out.println("item : " + pattern.getText());
 
         interval = 60000;
+        try {
+            initRecord();
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     public Element getConf() {
@@ -104,8 +118,34 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
                 .replaceAll("channel", String.valueOf(channel));
     }
 
-    @Override
-    public void run() {
+    private class FileChannel extends DataOutputStream implements IEPEInput.VoltageArrayOutout {
+
+        private FileObject folder;
+        private int channel;
+        private long length;
+        private long index;
+
+        public FileChannel(FileObject folder, int channel, long length) throws IOException {
+            super(folder.createAndOpen(pattern(channel)));
+            this.folder = folder;
+            this.channel = channel;
+            this.length = length;
+        }
+
+        @Override
+        public void writeVoltageArray(double[] data) throws IOException {
+            for (double d : data) {
+                writeDouble(d);
+                if (!(++index < length)) {
+                    super.close();
+                    out = folder.createAndOpen(pattern(channel));
+                    index = 0;
+                }
+            }
+        }
+    }
+
+    public void initRecord() throws IOException {
         IepeProject context = lkp.lookup(IepeProject.class);
         FileObject projectDirectory = context.getProjectDirectory();
         try {
@@ -113,31 +153,36 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
         } catch (IOException ex) {
             Logger.getLogger(IepeHistoryObject.class.getName()).log(Level.INFO, null, ex);
         }
-        FileObject fileObject = projectDirectory.getFileObject("Record");
+        folder = projectDirectory.getFileObject("Record");
+        list = lkp.lookup(IepeProject.class).getList();
+        iepe = lkp.lookup(IepeProject.class).getIepe();
+        fileChannels = new FileChannel[list.size()];
+    }
 
-        try {
-            IEPEInput.VoltageArrayOutout[] stream = new IEPEInput.VoltageArrayOutout[4];
-            try {
-                do {
-                    try {
-                        for (int i = 0; i < stream.length; i++) {
-                            stream[i] = context.getIepe().replaceStream(i, stream[i], new IEPEInput.IepeOutputStream(
-                                    fileObject.createAndOpen(pattern(i))));
-                        }
-                        Thread.sleep(this.interval);
-                    } catch (IOException ex) {
-                        Logger.getLogger(IepeHistoryObject.class.getName()).log(Level.INFO, null, ex);
-                    }
-                } while (!Thread.interrupted());
-            } catch (InterruptedException ex) {
+    private IEPEInput iepe;
+    private ChannelList list;
+    private FileObject folder;
+    private FileChannel[] fileChannels;
+
+    public void recording(boolean run) throws IOException {
+        if (run) {
+            long length = this.interval / 1000 * properties.device().getSampleRate();
+            for (int i = 0; i < fileChannels.length; i++) {
+                Channel channel = list.get(i);
+                fileChannels[i] = new FileChannel(folder, i, length);
+                iepe.addStream(channel.getChannel(), fileChannels[i]);
             }
-            for (int i = 0; i < stream.length; i++) {
-                context.getIepe().removeStream(i, stream[i]);
-                stream[i].close();
+        } else {
+            for (int i = 0; i < fileChannels.length; i++) {
+                Channel channel = list.get(i);
+                iepe.removeStream(channel.getChannel(), fileChannels[i]);
+                fileChannels[i].close();
             }
-        } catch (IOException ex) {
-            Logger.getLogger(IepeHistoryObject.class.getName()).log(Level.INFO, null, ex);
         }
+    }
+
+    @Override
+    public void run() {
     }
 
     TopComponent tc;
