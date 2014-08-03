@@ -53,6 +53,7 @@ import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
+import tw.edu.sju.ee.eea.module.iepe.file.IepeFile;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.data.Pattern;
 import tw.edu.sju.ee.eea.module.iepe.project.data.Warning;
@@ -101,7 +102,8 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
         private long index;
 
         public FileChannel(FileObject folder, int channel, long length) throws IOException {
-            super(folder.createAndOpen(pattern(channel)));
+            super(new IepeFile.Output(folder.createAndOpen(pattern(channel)),
+                    new IepeFile(Calendar.getInstance().getTimeInMillis(), properties.device().getSampleRate(), channel)));
             this.folder = folder;
             this.channel = channel;
             this.length = length;
@@ -113,7 +115,8 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
                 writeDouble(d);
                 if (!(++index < length)) {
                     super.close();
-                    out = folder.createAndOpen(pattern(channel));
+                    out = new IepeFile.Output(folder.createAndOpen(pattern(channel)),
+                            new IepeFile(Calendar.getInstance().getTimeInMillis(), properties.device().getSampleRate(), channel));
                     index = 0;
                 }
             }
