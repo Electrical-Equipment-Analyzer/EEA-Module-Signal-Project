@@ -58,28 +58,33 @@ public class IepeFile implements Serializable {
         return channel;
     }
 
-    public static class Input extends FilterInputStream {
+    public static class Input {
 
         private IepeFile header;
+        private InputStream in;
 
         public Input(InputStream in) throws FileNotFoundException, IOException, ClassNotFoundException {
-            super(in);
             this.header = (IepeFile) new ObjectInputStream(in).readObject();
+            this.in = in;
         }
 
         public IepeFile getHeader() {
             return header;
         }
 
+        public InputStream getInputStream() {
+            return in;
+        }
     }
 
-    public static class Output extends FilterOutputStream {
+    public static class Output {
 
         private IepeFile header;
+        private OutputStream out;
 
         public Output(OutputStream out, IepeFile header) throws FileNotFoundException, IOException {
-            super(out);
             this.header = header;
+            this.out = out;
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(out);
             objectOutputStream.writeObject(header);
             objectOutputStream.flush();
@@ -89,6 +94,9 @@ public class IepeFile implements Serializable {
             return header;
         }
 
+        public OutputStream getOutputStream() {
+            return out;
+        }
     }
 
 }

@@ -151,12 +151,11 @@ public class IepeDataObject extends MultiDataObject implements IepeDataInfo, Pla
     private IepeFile fileHeader;
 
     @Override
-    public IepeFile.Input getInputStream() {
+    public InputStream getInputStream() {
         try {
             IepeFile.Input input = new IepeFile.Input(getPrimaryFile().getInputStream());
             this.fileHeader = input.getHeader();
-            return input;
-//            return getPrimaryFile().getInputStream();
+            return input.getInputStream();
         } catch (FileNotFoundException ex) {
             Exceptions.printStackTrace(ex);
         } catch (IOException ex) {
