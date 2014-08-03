@@ -89,7 +89,7 @@ public class ChannelList extends ArrayList<Channel> implements Channel.Renderer 
 
             @Override
             public String getDisplayName() {
-                return "Real-time::ipt";
+                return "Channel List";
             }
 
         };
