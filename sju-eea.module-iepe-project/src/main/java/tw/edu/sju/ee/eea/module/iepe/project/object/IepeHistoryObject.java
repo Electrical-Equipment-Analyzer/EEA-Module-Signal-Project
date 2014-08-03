@@ -103,7 +103,8 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
 
         public FileChannel(FileObject folder, int channel, long length) throws IOException {
             super(new IepeFile.Output(folder.createAndOpen(pattern(channel)),
-                    new IepeFile(Calendar.getInstance().getTimeInMillis(), properties.device().getSampleRate(), channel)));
+                    new IepeFile(Calendar.getInstance().getTimeInMillis(), properties.device().getSampleRate(), channel))
+                    .getOutputStream());
             this.folder = folder;
             this.channel = channel;
             this.length = length;
@@ -116,7 +117,8 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
                 if (!(++index < length)) {
                     super.close();
                     out = new IepeFile.Output(folder.createAndOpen(pattern(channel)),
-                            new IepeFile(Calendar.getInstance().getTimeInMillis(), properties.device().getSampleRate(), channel));
+                            new IepeFile(Calendar.getInstance().getTimeInMillis(), properties.device().getSampleRate(), channel))
+                            .getOutputStream();
                     index = 0;
                 }
             }
@@ -172,20 +174,17 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
 
         int index = 0;
         VoltageInputStream[] stream = new VoltageInputStream[4];
-        long date = 0;
+        long time = 0;
         SimpleDateFormat dateFormat = new SimpleDateFormat(properties.history().getPattern());
         try {
             for (Map.Entry<String, FileObject> entry : files.entrySet()) {
-                stream[index++] = new VoltageInputStream(entry.getValue().getInputStream());
+                IepeFile.Input input = new IepeFile.Input(entry.getValue().getInputStream());
+                stream[index++] = new VoltageInputStream(input.getInputStream());
                 if (index < 4) {
                     continue;
                 } else {
                     index = 0;
-                    try {
-                        date = dateFormat.parse(entry.getKey().replace("_3", "_channel")).getTime();
-                    } catch (ParseException ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
+                    time = input.getHeader().getTime();
                     try {
                         do {
                             try {
@@ -195,8 +194,8 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
                                         channels[j][i] = stream[j].readValue();
                                     }
                                 }
-                                date += 1000.0 * 1024 / properties.device().getSampleRate();
-                                Pattern pattern = new Pattern(new Date(date), properties.device().getSampleRate(), 1024, channels);
+                                time += 1000.0 * 1024 / properties.device().getSampleRate();
+                                Pattern pattern = new Pattern(new Date(time), input.getHeader().getSamplerate(), 1024, channels);
                                 List<Warning> list = pattern.rules(properties.rules());
                                 for (Warning warning : list) {
                                     warning.print(io);
@@ -210,6 +209,10 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
                 }
             }
         } catch (FileNotFoundException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (ClassNotFoundException ex) {
             Exceptions.printStackTrace(ex);
         }
 
