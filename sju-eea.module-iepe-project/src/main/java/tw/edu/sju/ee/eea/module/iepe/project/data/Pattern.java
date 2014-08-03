@@ -81,7 +81,6 @@ public class Pattern extends ArrayList<double[]> {
         List<Warning> list = new ArrayList<Warning>();
         for (AnalyzerRule rule : rules) {
             Warning warning = max(rule, rule.getChannel(), rule.getMinimum(), rule.getMaximum());
-            System.out.println(warning);
             if (warning != null && warning.getValue() > rule.getMagnitude()) {
                 list.add(warning);
             }
