@@ -21,11 +21,13 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="nameLabel" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Component id="sampleRateLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="channelsLabel" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace min="-2" pref="63" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="sampleRateTextField" min="-2" max="-2" attributes="0"/>
-                  <Component id="nameTextField" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="sampleRateTextField" max="32767" attributes="0"/>
+                  <Component id="nameTextField" max="32767" attributes="0"/>
+                  <Component id="channelsTextField" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
@@ -44,7 +46,12 @@
                   <Component id="sampleRateLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="sampleRateTextField" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="395" max="32767" attributes="0"/>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="channelsLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="channelsTextField" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace pref="362" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -89,6 +96,26 @@
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_SerializeTo" type="java.lang.String" value="IepeDeviceProperties1_sampleRateTextField"/>
       </AuxValues>
+    </Component>
+    <Component class="javax.swing.JLabel" name="channelsLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="tw/edu/sju/ee/eea/module/iepe/project/properties/Bundle.properties" key="IepeDeviceProperties.channelsLabel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="channelsTextField">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="tw/edu/sju/ee/eea/module/iepe/project/properties/Bundle.properties" key="IepeDeviceProperties.channelsTextField.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
+        <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[101, 21]"/>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="caretUpdate" listener="javax.swing.event.CaretListener" parameters="javax.swing.event.CaretEvent" handler="channelsTextFieldCaretUpdate"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

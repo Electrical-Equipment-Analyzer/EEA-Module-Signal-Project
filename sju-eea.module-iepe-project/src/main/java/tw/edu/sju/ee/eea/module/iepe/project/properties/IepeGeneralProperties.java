@@ -30,7 +30,7 @@ public class IepeGeneralProperties extends javax.swing.JPanel implements Project
 
     private static final String GENERAL = "General";
 
-    @ProjectCustomizer.CompositeCategoryProvider.Registration(projectType = "edu-sju-iepe", position = 10)
+//    @ProjectCustomizer.CompositeCategoryProvider.Registration(projectType = "edu-sju-iepe", position = 10)
     public static IepeGeneralProperties createGeneral() {
         return new IepeGeneralProperties();
     }

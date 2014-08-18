@@ -20,20 +20,10 @@ package tw.edu.sju.ee.eea.module.iepe.project;
 import java.awt.Image;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Iterator;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-//import javax.xml.parsers.DocumentBuilderFactory;
-//import javax.xml.parsers.ParserConfigurationException;
-//import javax.xml.transform.Transformer;
-//import javax.xml.transform.TransformerConfigurationException;
-//import javax.xml.transform.TransformerException;
-//import javax.xml.transform.TransformerFactory;
-//import javax.xml.transform.dom.DOMSource;
-//import javax.xml.transform.stream.StreamResult;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectInformation;
 import org.netbeans.spi.project.ProjectState;
@@ -51,20 +41,12 @@ import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
-//import org.w3c.dom.Document;
-//import org.xml.sax.SAXException;
 import tw.edu.sju.ee.eea.jni.mps.MPS140801IEPE;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeAnalyzerObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
-
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
-import org.dom4j.io.XMLWriter;
 import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 
@@ -79,8 +61,6 @@ public class IepeProject implements Project {
     private Lookup lkp;
     private Child[] chield;
     private final IEPEInput iepe;
-//    private File confFile;
-//    private Document doc;
     private IepeProjectProperties properties;
     private ChannelList list;
 
@@ -89,21 +69,12 @@ public class IepeProject implements Project {
         this.state = state;
         properties = new IepeProjectProperties(
                 new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath()));
-
         iepe = new IEPEInput(new MPS140801IEPE(0, properties.device().getSampleRate()), new int[]{1}, 512);
-
-//        confFile = new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath());
-//        try {
-//            doc = new SAXReader().read(confFile);
-//        } catch (DocumentException ex) {
-//            Exceptions.printStackTrace(ex);
-//        }
         list = new ChannelList();
         try {
-            list.add(new Channel("USB", 0));
-            list.add(new Channel("USB", 1));
-            list.add(new Channel("USB", 2));
-            list.add(new Channel("USB", 3));
+            for (int i = 0; i < properties.device().getChannels(); i++) {
+                list.add(new Channel("USB" + properties.device().getDeviceName(), i));
+            }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -130,16 +101,8 @@ public class IepeProject implements Project {
         return lkp;
     }
 
-    public Document getDoc() {
-        return properties.doc();
-    }
-
     public IepeProjectProperties getProperties() {
         return properties;
-    }
-
-    public void save() {
-        properties.write();
     }
 
     public IEPEInput getIepe() {

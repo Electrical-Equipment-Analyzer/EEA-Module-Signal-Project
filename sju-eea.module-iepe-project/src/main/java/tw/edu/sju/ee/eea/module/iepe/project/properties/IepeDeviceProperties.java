@@ -18,7 +18,6 @@
 package tw.edu.sju.ee.eea.module.iepe.project.properties;
 
 import javax.swing.JComponent;
-import org.dom4j.Element;
 import org.netbeans.spi.project.ui.support.ProjectCustomizer;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
@@ -33,7 +32,6 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
 
     private static final String DEVICE = "Device";
     private IepeProjectProperties properties;
-//    private Element prop;
 
     @ProjectCustomizer.CompositeCategoryProvider.Registration(projectType = "edu-sju-iepe", position = 100)
     public static IepeDeviceProperties createGeneral() {
@@ -63,6 +61,7 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
     private void initText() {
         nameTextField.setText(properties.device().getDeviceName());
         sampleRateTextField.setText(String.valueOf(properties.device().getSampleRate()));
+        channelsTextField.setText(String.valueOf(properties.device().getChannels()));
     }
 
     /**
@@ -78,6 +77,8 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
         nameTextField = new javax.swing.JTextField();
         sampleRateLabel = new javax.swing.JLabel();
         sampleRateTextField = new javax.swing.JTextField();
+        channelsLabel = new javax.swing.JLabel();
+        channelsTextField = new javax.swing.JTextField();
 
         org.openide.awt.Mnemonics.setLocalizedText(nameLabel, org.openide.util.NbBundle.getMessage(IepeDeviceProperties.class, "IepeDeviceProperties.nameLabel.text")); // NOI18N
 
@@ -97,6 +98,16 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
             }
         });
 
+        org.openide.awt.Mnemonics.setLocalizedText(channelsLabel, org.openide.util.NbBundle.getMessage(IepeDeviceProperties.class, "IepeDeviceProperties.channelsLabel.text")); // NOI18N
+
+        channelsTextField.setText(org.openide.util.NbBundle.getMessage(IepeDeviceProperties.class, "IepeDeviceProperties.channelsTextField.text")); // NOI18N
+        channelsTextField.setPreferredSize(new java.awt.Dimension(101, 21));
+        channelsTextField.addCaretListener(new javax.swing.event.CaretListener() {
+            public void caretUpdate(javax.swing.event.CaretEvent evt) {
+                channelsTextFieldCaretUpdate(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -105,11 +116,13 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(nameLabel)
-                    .addComponent(sampleRateLabel))
+                    .addComponent(sampleRateLabel)
+                    .addComponent(channelsLabel))
                 .addGap(63, 63, 63)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sampleRateTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(nameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(sampleRateTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(nameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(channelsTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -123,7 +136,11 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(sampleRateLabel)
                     .addComponent(sampleRateTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(395, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(channelsLabel)
+                    .addComponent(channelsTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(362, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -138,8 +155,17 @@ public class IepeDeviceProperties extends javax.swing.JPanel implements ProjectC
         }
     }//GEN-LAST:event_sampleRateTextFieldCaretUpdate
 
+    private void channelsTextFieldCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_channelsTextFieldCaretUpdate
+        try {
+            properties.device().setChannels(Integer.parseInt(channelsTextField.getText()));
+        } catch (NumberFormatException ex) {
+        }
+    }//GEN-LAST:event_channelsTextFieldCaretUpdate
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel channelsLabel;
+    private javax.swing.JTextField channelsTextField;
     private javax.swing.JLabel nameLabel;
     private javax.swing.JTextField nameTextField;
     private javax.swing.JLabel sampleRateLabel;

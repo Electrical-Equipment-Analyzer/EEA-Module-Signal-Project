@@ -104,9 +104,11 @@ public class IepeProjectProperties {
         private static final String DEVICE = "properties";
         private static final String NAME = "name";
         private static final String SAMPLERATE = "samplerate";
+        private static final String CHANNELS = "channels";
 
         private String deviceName;
         private int sampleRate;
+        private int channels;
 
         public Device(Element root) {
             device = root.element(DEVICE);
@@ -116,11 +118,13 @@ public class IepeProjectProperties {
         public void read() {
             deviceName = device.elementText(NAME);
             sampleRate = Integer.parseInt(device.elementText(SAMPLERATE));
+            channels = Integer.parseInt(device.elementText(CHANNELS));
         }
 
         public void write() {
             device.element(NAME).setText(deviceName);
             device.element(SAMPLERATE).setText(String.valueOf(sampleRate));
+            device.element(CHANNELS).setText(String.valueOf(channels));
         }
 
         public String getDeviceName() {
@@ -137,6 +141,14 @@ public class IepeProjectProperties {
 
         public void setSampleRate(int sampleRate) {
             this.sampleRate = sampleRate;
+        }
+
+        public int getChannels() {
+            return channels;
+        }
+
+        public void setChannels(int channels) {
+            this.channels = channels;
         }
 
     }
