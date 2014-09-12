@@ -37,15 +37,15 @@ import org.openide.util.Lookup;
 public class Channel {
 
     private Lookup lkp;
-    private String device;
+    private int device;
     private int channel;
     private String name;
     private Color color;
 
-    public Channel(String device, int channel) throws IOException {
+    public Channel(int device, int channel) throws IOException {
         this.device = device;
         this.channel = channel;
-        setName(device + "/" + channel);
+        setName("USB" + device + "/" + channel);
         this.lkp = lkp;
     }
 
@@ -58,7 +58,7 @@ public class Channel {
         this.color = color;
     }
 
-    public String getDevice() {
+    public int getDevice() {
         return device;
     }
 

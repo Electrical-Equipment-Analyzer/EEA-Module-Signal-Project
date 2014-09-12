@@ -35,6 +35,8 @@ import org.openide.util.lookup.ProxyLookup;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.data.AnalyzerRule;
@@ -50,10 +52,14 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
 
     private Lookup lkp;
     private IepeProjectProperties properties;
+    private IEPEInput iepe;
+    private ChannelList list;
 
     public IepeAnalyzerObject(IepeProject project) {
         this.lkp = new ProxyLookup(new Lookup[]{Lookups.singleton(project), Lookups.singleton(this)});
         properties = project.getProperties();
+        list = lkp.lookup(IepeProject.class).getList();
+        iepe = lkp.lookup(IepeProject.class).getIepe();
     }
 
     @Override
@@ -69,10 +75,11 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
     public void run() {
         IepeProject project = lkp.lookup(IepeProject.class);
 
-        IEPEInput.IepePipeStream[] stream = new IEPEInput.IepePipeStream[4];
+        IEPEInput.IepePipeStream[] stream = new IEPEInput.IepePipeStream[list.size()];
         for (int i = 0; i < stream.length; i++) {
+            Channel channel = list.get(i);
             try {
-                stream[i] = (IEPEInput.IepePipeStream) project.getIepe().addStream(i, new IEPEInput.IepePipeStream());
+                stream[i] = (IEPEInput.IepePipeStream) iepe.addStream(channel.getDevice(), channel.getChannel(), new IEPEInput.IepePipeStream());
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
@@ -97,7 +104,8 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
         } while (!Thread.interrupted());
 
         for (int i = 0; i < stream.length; i++) {
-            project.getIepe().removeStream(i, stream[i]);
+            Channel channel = list.get(i);
+            project.getIepe().removeStream(channel.getDevice(), channel.getChannel(), stream[i]);
         }
 
     }

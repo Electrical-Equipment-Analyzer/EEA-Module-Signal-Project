@@ -21,9 +21,12 @@ import java.awt.Image;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import org.dom4j.Document;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectInformation;
 import org.netbeans.spi.project.ProjectState;
@@ -42,13 +45,13 @@ import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
 import tw.edu.sju.ee.eea.jni.mps.MPS140801IEPE;
+import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeAnalyzerObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
+import tw.edu.sju.ee.eea.util.iepe.IEPEDevice;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
-import org.dom4j.Document;
-import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
-import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 
 /**
  *
@@ -69,11 +72,15 @@ public class IepeProject implements Project {
         this.state = state;
         properties = new IepeProjectProperties(
                 new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath()));
-        iepe = new IEPEInput(new MPS140801IEPE(0, properties.device().getSampleRate()), new int[]{1}, 512);
+        List<IEPEDevice> devices = new ArrayList();
+        for (int i = 0; i < Math.ceil(properties.device().getChannels() / 8.0); i++) {
+            devices.add(new MPS140801IEPE(i, properties.device().getSampleRate()));
+        }
+        iepe = new IEPEInput(devices, new int[]{1}, 512);
         list = new ChannelList();
         try {
             for (int i = 0; i < properties.device().getChannels(); i++) {
-                list.add(new Channel("USB" + properties.device().getDeviceName(), i));
+                list.add(new Channel(i / 8, i % 8));
             }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);

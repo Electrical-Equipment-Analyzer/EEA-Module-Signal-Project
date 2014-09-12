@@ -44,15 +44,15 @@ import tw.edu.sju.ee.eea.util.iepe.IEPEPlayer;
 @ActionReference(path = "Menu/Analyzers", position = 400, separatorBefore = 350)
 @Messages("CTL_ListenAction=Listen")
 public final class ListenAction implements ActionListener {
-    
+
     private final IepeProject context;
     private final static RequestProcessor RP = new RequestProcessor("interruptible tasks", 1, true);
     private ProgressHandle progr;
-    
+
     public ListenAction(IepeProject context) {
         this.context = context;
     }
-    
+
     @Override
     public void actionPerformed(ActionEvent ev) {
         try {
@@ -61,13 +61,13 @@ public final class ListenAction implements ActionListener {
             String showInputDialog = JOptionPane.showInputDialog(null, "Channel :", "Select Channel to Listen", JOptionPane.INFORMATION_MESSAGE);
             final int channel = Integer.parseInt(showInputDialog);
             IEPEPlayer player = new IEPEPlayer(sampleRate, 16, 1, 2, sampleRate);
-            final IEPEInput.VoltageArrayOutout stream = context.getIepe().addOutputStream(channel, player.getOutputStream());
+            final IEPEInput.VoltageArrayOutout stream = context.getIepe().addOutputStream(channel / 8, channel % 8, player.getOutputStream());
             RequestProcessor.Task task = RP.create(player);
             progr = ProgressHandleFactory.createHandle("Play task", task);
             task.addTaskListener(new TaskListener() {
                 public void taskFinished(org.openide.util.Task task) {
                     System.out.println("fin");
-                    context.getIepe().removeStream(channel, stream);
+                    context.getIepe().removeStream(channel / 8, channel % 8, stream);
                     progr.finish();
                 }
             });

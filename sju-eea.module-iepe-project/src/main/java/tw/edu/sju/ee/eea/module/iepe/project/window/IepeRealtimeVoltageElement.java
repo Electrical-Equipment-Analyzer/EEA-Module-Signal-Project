@@ -147,7 +147,7 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
         for (int i = 0; i < channels.length; i++) {
             Channel channel = list.get(i);
             channels[i] = new VoltageChannel(channel.getName(), properties.device().getSampleRate());
-            iepe.addStream(channel.getChannel(), channels[i]);
+            iepe.addStream(channel.getDevice(), channel.getChannel(), channels[i]);
         }
 
         initComponents();
@@ -166,6 +166,7 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
 
         @Override
         public void writeValue(double value) throws IOException {
+            this.remove(0);
             add(Calendar.getInstance().getTimeInMillis(), value);
         }
 
