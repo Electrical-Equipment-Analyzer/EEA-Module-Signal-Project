@@ -23,6 +23,7 @@ import java.io.IOException;
 import javax.swing.JOptionPane;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
+import org.netbeans.api.project.Project;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionRegistration;
@@ -30,7 +31,9 @@ import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.RequestProcessor;
 import org.openide.util.TaskListener;
+import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
+import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
 import tw.edu.sju.ee.eea.util.iepe.IEPEPlayer;
 
@@ -45,29 +48,28 @@ import tw.edu.sju.ee.eea.util.iepe.IEPEPlayer;
 @Messages("CTL_ListenAction=Listen")
 public final class ListenAction implements ActionListener {
 
-    private final IepeProject context;
+    private final Channel channel;
     private final static RequestProcessor RP = new RequestProcessor("interruptible tasks", 1, true);
     private ProgressHandle progr;
 
-    public ListenAction(IepeProject context) {
-        this.context = context;
+    public ListenAction(Channel context) {
+        this.channel = context;
     }
 
     @Override
     public void actionPerformed(ActionEvent ev) {
         try {
             // TODO use context
-            int sampleRate = context.getProperties().device().getSampleRate();
-            String showInputDialog = JOptionPane.showInputDialog(null, "Channel :", "Select Channel to Listen", JOptionPane.INFORMATION_MESSAGE);
-            final int channel = Integer.parseInt(showInputDialog);
+            final IepeProject project = this.channel.getLookup().lookup(IepeProject.class);
+            int sampleRate = project.getProperties().device().getSampleRate();
             IEPEPlayer player = new IEPEPlayer(sampleRate, 16, 1, 2, sampleRate);
-            final IEPEInput.VoltageArrayOutout stream = context.getIepe()[channel / 8].addOutputStream(channel % 8, player.getOutputStream());
+            final IEPEInput.VoltageArrayOutout stream = project.getIepe()[channel.getDevice()].addOutputStream(channel.getChannel(), player.getOutputStream());
             RequestProcessor.Task task = RP.create(player);
             progr = ProgressHandleFactory.createHandle("Play task", task);
             task.addTaskListener(new TaskListener() {
                 public void taskFinished(org.openide.util.Task task) {
                     System.out.println("fin");
-                    context.getIepe()[channel / 8].removeStream(channel % 8, stream);
+                    project.getIepe()[channel.getDevice()].removeStream(channel.getChannel(), stream);
                     progr.finish();
                 }
             });

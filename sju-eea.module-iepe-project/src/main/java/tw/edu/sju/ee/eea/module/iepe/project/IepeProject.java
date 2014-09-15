@@ -81,7 +81,7 @@ public class IepeProject implements Project {
         list = new ChannelList();
         try {
             for (int i = 0; i < properties.device().getChannels(); i++) {
-                list.add(new Channel(i / 8, i % 8));
+                list.add(new Channel(i / 8, i % 8, this));
             }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);

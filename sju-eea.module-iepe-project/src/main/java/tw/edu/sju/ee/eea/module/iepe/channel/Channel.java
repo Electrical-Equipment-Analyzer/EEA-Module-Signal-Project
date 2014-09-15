@@ -17,11 +17,11 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.channel;
 
-import org.openide.util.NbBundle;
 import java.awt.Color;
 import java.awt.Image;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import org.netbeans.api.project.Project;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -29,12 +29,15 @@ import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.Lookups;
+import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 
 /**
  *
  * @author Leo
  */
-public class Channel {
+public class Channel implements  Lookup.Provider {
 
     private Lookup lkp;
     private int device;
@@ -42,11 +45,11 @@ public class Channel {
     private String name;
     private Color color;
 
-    public Channel(int device, int channel) throws IOException {
+    public Channel(int device, int channel, Project project) throws IOException {
         this.device = device;
         this.channel = channel;
         setName("USB" + device + "/" + channel);
-        this.lkp = lkp;
+        this.lkp = Lookups.fixed(project, this);
     }
 
     public void setName(String name) {
@@ -74,6 +77,11 @@ public class Channel {
         return color;
     }
 
+    @Override
+    public Lookup getLookup() {
+        return lkp;
+    }
+    
     @NbBundle.Messages({
         "LBL_CH_title=Properties",
         "LBL_CH_device=Device",
@@ -86,7 +94,7 @@ public class Channel {
         "DCT_CH_color=Show Color"
     })
     public Node createNodeDelegate(final Renderer renderer) {
-        return new AbstractNode(Children.LEAF) {
+        return new AbstractNode(Children.LEAF, lkp) {
 
             @Override
             public Image getIcon(int type) {
