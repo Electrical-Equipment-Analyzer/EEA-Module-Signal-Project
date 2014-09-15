@@ -159,14 +159,24 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
 
         private SampledOutputStream stream;
 
-        public VoltageChannel(Comparable key, int frequency) {
+        public VoltageChannel(Comparable key, int samplerate) {
             super(key);
-            stream = new SampledOutputStream(this, frequency / 10);
+            stream = new SampledOutputStream(this, samplerate / 10);
+            this.setMaximumItemCount(10*60);
+        }
+
+        @Override
+        public Number getX(int index) {
+            try {
+                return super.getX(index);
+            } catch (IndexOutOfBoundsException ex) {
+            } catch (NullPointerException ex) {
+            }
+            return null;
         }
 
         @Override
         public void writeValue(double value) throws IOException {
-            this.remove(0);
             add(Calendar.getInstance().getTimeInMillis(), value);
         }
 
