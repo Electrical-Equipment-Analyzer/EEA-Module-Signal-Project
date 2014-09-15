@@ -24,6 +24,7 @@ import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionRegistration;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.RequestProcessor;
 import org.openide.util.TaskListener;
@@ -38,7 +39,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 )
 @ActionReference(path = "Menu/Analyzers", position = 500)
 @Messages("CTL_AcqAction=Acq")
-public final class AcqAction implements  ActionListener {
+public final class AcqAction implements ActionListener, Runnable {
 
     private final IepeProject context;
     private final static RequestProcessor RP = new RequestProcessor("interruptible tasks", 1, true);
@@ -51,7 +52,7 @@ public final class AcqAction implements  ActionListener {
     @Override
     public void actionPerformed(ActionEvent ev) {
         // TODO use context
-        RequestProcessor.Task task = RP.create(context.getIepe());
+        RequestProcessor.Task task = RP.create(this);
         progr = ProgressHandleFactory.createHandle("Input task", task);
         task.addTaskListener(new TaskListener() {
             public void taskFinished(org.openide.util.Task task) {
@@ -62,4 +63,23 @@ public final class AcqAction implements  ActionListener {
         progr.start();
         task.schedule(0);
     }
+
+    Thread[] thread;
+
+    @Override
+    public void run() {
+        thread = new Thread[context.getIepe().length];
+        for (int i = 0; i < context.getIepe().length; i++) {
+            thread[i] = new Thread(context.getIepe()[i]);
+            thread[i].start();
+        }
+        try {
+            thread[0].join();
+        } catch (InterruptedException ex) {
+            for (int i = 0; i < context.getIepe().length; i++) {
+                thread[i].interrupt();
+            }
+        }
+    }
+
 }

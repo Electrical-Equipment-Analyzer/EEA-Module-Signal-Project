@@ -72,13 +72,13 @@ public final class IepeRealtimeSpectrumElement extends JPanel implements MultiVi
         toolbar.setFloatable(false);
 
         ChannelList list = lkp.lookup(IepeProject.class).getList();
-        IEPEInput iepe = lkp.lookup(IepeProject.class).getIepe();
+        IEPEInput[] iepe = lkp.lookup(IepeProject.class).getIepe();
         list.addConfigure(this);
         channels = new FrequencyChannel[list.size()];
         for (int i = 0; i < channels.length; i++) {
             Channel channel = list.get(i);
             channels[i] = new FrequencyChannel(channel.getName(), properties.device().getSampleRate(), 4096);
-            iepe.addStream(channel.getDevice(), channel.getChannel(), channels[i]);
+            iepe[channel.getDevice()].addStream(channel.getChannel(), channels[i]);
         }
 
         initComponents();
@@ -196,7 +196,7 @@ public final class IepeRealtimeSpectrumElement extends JPanel implements MultiVi
             xySeriesCollection.addSeries(channels[i]);
         }
 
-        chart.getXYPlot().getRangeAxis().setRange(0, 10);
+        chart.getXYPlot().getRangeAxis().setRange(0, 1);
         chart.getXYPlot().getDomainAxis().setRange(0.5, 20000);
         return chart;
     }

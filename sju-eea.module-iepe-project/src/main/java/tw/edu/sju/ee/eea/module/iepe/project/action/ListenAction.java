@@ -61,13 +61,13 @@ public final class ListenAction implements ActionListener {
             String showInputDialog = JOptionPane.showInputDialog(null, "Channel :", "Select Channel to Listen", JOptionPane.INFORMATION_MESSAGE);
             final int channel = Integer.parseInt(showInputDialog);
             IEPEPlayer player = new IEPEPlayer(sampleRate, 16, 1, 2, sampleRate);
-            final IEPEInput.VoltageArrayOutout stream = context.getIepe().addOutputStream(channel / 8, channel % 8, player.getOutputStream());
+            final IEPEInput.VoltageArrayOutout stream = context.getIepe()[channel / 8].addOutputStream(channel % 8, player.getOutputStream());
             RequestProcessor.Task task = RP.create(player);
             progr = ProgressHandleFactory.createHandle("Play task", task);
             task.addTaskListener(new TaskListener() {
                 public void taskFinished(org.openide.util.Task task) {
                     System.out.println("fin");
-                    context.getIepe().removeStream(channel / 8, channel % 8, stream);
+                    context.getIepe()[channel / 8].removeStream(channel % 8, stream);
                     progr.finish();
                 }
             });

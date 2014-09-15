@@ -63,7 +63,7 @@ public class IepeProject implements Project {
     private final ProjectState state;
     private Lookup lkp;
     private Child[] chield;
-    private final IEPEInput iepe;
+    private final IEPEInput[] iepe;
     private IepeProjectProperties properties;
     private ChannelList list;
 
@@ -72,11 +72,12 @@ public class IepeProject implements Project {
         this.state = state;
         properties = new IepeProjectProperties(
                 new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath()));
-        List<IEPEDevice> devices = new ArrayList();
+//        List<IEPEDevice> devices = new ArrayList();
+        iepe = new IEPEInput[(int) Math.ceil(properties.device().getChannels() / 8.0)];
         for (int i = 0; i < Math.ceil(properties.device().getChannels() / 8.0); i++) {
-            devices.add(new MPS140801IEPE(i, properties.device().getSampleRate()));
+//            devices.add(new MPS140801IEPE(i, properties.device().getSampleRate()));
+            iepe[i] = new IEPEInput(new MPS140801IEPE(i, properties.device().getSampleRate()), new int[]{1}, 512);
         }
-        iepe = new IEPEInput(devices, new int[]{1}, 512);
         list = new ChannelList();
         try {
             for (int i = 0; i < properties.device().getChannels(); i++) {
@@ -112,7 +113,7 @@ public class IepeProject implements Project {
         return properties;
     }
 
-    public IEPEInput getIepe() {
+    public IEPEInput[] getIepe() {
         return iepe;
     }
 

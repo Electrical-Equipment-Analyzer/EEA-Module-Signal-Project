@@ -139,7 +139,7 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
         fileChannels = new FileChannel[list.size()];
     }
 
-    private IEPEInput iepe;
+    private IEPEInput[] iepe;
     private ChannelList list;
     private FileObject folder;
     private FileChannel[] fileChannels;
@@ -150,12 +150,12 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
             for (int i = 0; i < fileChannels.length; i++) {
                 Channel channel = list.get(i);
                 fileChannels[i] = new FileChannel(folder, i, length);
-                iepe.addStream(channel.getDevice(), channel.getChannel(), fileChannels[i]);
+                iepe[channel.getDevice()].addStream(channel.getChannel(), fileChannels[i]);
             }
         } else {
             for (int i = 0; i < fileChannels.length; i++) {
                 Channel channel = list.get(i);
-                iepe.removeStream(channel.getDevice(), channel.getChannel(), fileChannels[i]);
+                iepe[channel.getDevice()].removeStream(channel.getChannel(), fileChannels[i]);
                 fileChannels[i].close();
             }
         }

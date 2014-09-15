@@ -141,13 +141,13 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
         properties = lkp.lookup(IepeProject.class).getProperties();
 
         ChannelList list = lkp.lookup(IepeProject.class).getList();
-        IEPEInput iepe = lkp.lookup(IepeProject.class).getIepe();
+        IEPEInput[] iepe = lkp.lookup(IepeProject.class).getIepe();
         list.addConfigure(this);
         channels = new VoltageChannel[list.size()];
         for (int i = 0; i < channels.length; i++) {
             Channel channel = list.get(i);
             channels[i] = new VoltageChannel(channel.getName(), properties.device().getSampleRate());
-            iepe.addStream(channel.getDevice(), channel.getChannel(), channels[i]);
+            iepe[channel.getDevice()].addStream(channel.getChannel(), channels[i]);
         }
 
         initComponents();
@@ -169,6 +169,16 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
         public Number getX(int index) {
             try {
                 return super.getX(index);
+            } catch (IndexOutOfBoundsException ex) {
+            } catch (NullPointerException ex) {
+            }
+            return null;
+        }
+
+        @Override
+        public Number getY(int index) {
+            try {
+                return super.getY(index);
             } catch (IndexOutOfBoundsException ex) {
             } catch (NullPointerException ex) {
             }

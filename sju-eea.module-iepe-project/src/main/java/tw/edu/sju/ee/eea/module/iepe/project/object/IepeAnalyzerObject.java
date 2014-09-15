@@ -52,7 +52,7 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
 
     private Lookup lkp;
     private IepeProjectProperties properties;
-    private IEPEInput iepe;
+    private IEPEInput[] iepe;
     private ChannelList list;
 
     public IepeAnalyzerObject(IepeProject project) {
@@ -79,7 +79,7 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
         for (int i = 0; i < stream.length; i++) {
             Channel channel = list.get(i);
             try {
-                stream[i] = (IEPEInput.IepePipeStream) iepe.addStream(channel.getDevice(), channel.getChannel(), new IEPEInput.IepePipeStream());
+                stream[i] = (IEPEInput.IepePipeStream) iepe[channel.getDevice()].addStream(channel.getChannel(), new IEPEInput.IepePipeStream());
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
@@ -105,7 +105,7 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
 
         for (int i = 0; i < stream.length; i++) {
             Channel channel = list.get(i);
-            project.getIepe().removeStream(channel.getDevice(), channel.getChannel(), stream[i]);
+            project.getIepe()[channel.getDevice()].removeStream(channel.getChannel(), stream[i]);
         }
 
     }
