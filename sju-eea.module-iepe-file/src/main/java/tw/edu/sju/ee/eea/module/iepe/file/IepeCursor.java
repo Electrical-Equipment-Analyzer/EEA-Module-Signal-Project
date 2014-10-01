@@ -26,15 +26,20 @@ import javax.swing.event.EventListenerList;
 public class IepeCursor {
 
     private long index;
+    private int samplerate;
 
     protected EventListenerList listenerList = new EventListenerList();
+
+    public IepeCursor(int samplerate) {
+        this.samplerate = samplerate;
+    }
 
     public long getIndex() {
         return index;
     }
 
     public int getTime() {
-        return (int) (index / 8 / 16);
+        return (int) (index / 8 / (samplerate / 1000));
     }
 
     public void increase(long index) {
@@ -48,7 +53,7 @@ public class IepeCursor {
     }
 
     public void setTime(int ms) {
-        this.index = ms * 16 * 8;
+        this.index = ms * (samplerate / 1000) * 8;
         CursorPerformed(new IepeCursorEvent(this, IepeCursorEvent.SET));
     }
 

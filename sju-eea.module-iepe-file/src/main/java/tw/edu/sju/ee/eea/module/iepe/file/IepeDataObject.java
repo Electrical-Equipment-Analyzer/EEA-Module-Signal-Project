@@ -108,7 +108,7 @@ public class IepeDataObject extends MultiDataObject implements IepeDataInfo, Pla
         super(pf, loader);
         registerEditor("application/iepe", true);
         stream = getInputStream();
-        cursor = new IepeCursor();
+        cursor = new IepeCursor(getSamplerate());
         cursor.addIepeCursorListener(new IepeCursorListener() {
 
             @Override
