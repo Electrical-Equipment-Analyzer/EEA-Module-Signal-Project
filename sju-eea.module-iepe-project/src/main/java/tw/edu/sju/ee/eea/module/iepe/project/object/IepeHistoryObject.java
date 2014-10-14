@@ -112,15 +112,16 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
 
         @Override
         public void writeVoltageArray(double[] data) throws IOException {
+            index += data.length;
+            if (!(index < length)) {
+                super.close();
+                out = new IepeFile.Output(folder.createAndOpen(pattern(channel)),
+                        new IepeFile(Calendar.getInstance().getTimeInMillis(), properties.device().getSampleRate(), channel))
+                        .getOutputStream();
+                index = 0;
+            }
             for (double d : data) {
                 writeDouble(d);
-                if (!(++index < length)) {
-                    super.close();
-                    out = new IepeFile.Output(folder.createAndOpen(pattern(channel)),
-                            new IepeFile(Calendar.getInstance().getTimeInMillis(), properties.device().getSampleRate(), channel))
-                            .getOutputStream();
-                    index = 0;
-                }
             }
         }
     }
