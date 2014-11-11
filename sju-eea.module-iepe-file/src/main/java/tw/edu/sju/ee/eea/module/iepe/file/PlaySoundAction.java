@@ -27,7 +27,7 @@ import org.openide.awt.ActionRegistration;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
 import tw.edu.sju.ee.eea.module.iepe.cookie.PlayStreamCookie;
-import tw.edu.sju.ee.eea.util.iepe.IEPEPlayer;
+import tw.edu.sju.ee.eea.utils.io.tools.IEPEPlayer;
 
 @ActionID(
         category = "Acoustic",

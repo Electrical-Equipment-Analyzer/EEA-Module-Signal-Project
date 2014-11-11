@@ -48,7 +48,7 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
-import tw.edu.sju.ee.eea.util.iepe.io.SampledInputStream;
+import tw.edu.sju.ee.eea.utils.io.SampledInputStream;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_Iepe_Voltage",

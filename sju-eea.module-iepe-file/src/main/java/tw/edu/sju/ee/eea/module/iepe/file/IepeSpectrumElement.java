@@ -41,7 +41,7 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.ui.workspace.plot.BodePlot;
-import tw.edu.sju.ee.eea.util.iepe.io.VoltageInputStream;
+import tw.edu.sju.ee.eea.utils.io.ValueInputStream;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_Iepe_Spectrum",
@@ -98,7 +98,7 @@ public final class IepeSpectrumElement extends JPanel implements MultiViewElemen
         XYSeries series = new XYSeries("Ch_0");
 
         try {
-            VoltageInputStream vi = new VoltageInputStream(info.getInputStream());
+            ValueInputStream vi = new ValueInputStream(info.getInputStream());
             vi.skip(info.getCursor().getIndex() / 8);
             double[] value = new double[1024 * 16];
             for (int i = 0; i < value.length; i++) {
