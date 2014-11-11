@@ -42,7 +42,8 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.data.AnalyzerRule;
 import tw.edu.sju.ee.eea.module.iepe.project.data.Pattern;
 import tw.edu.sju.ee.eea.module.iepe.project.data.Warning;
-import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
+import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
+import tw.edu.sju.ee.eea.utils.io.tools.IOChannel;
 
 /**
  *
@@ -52,7 +53,7 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
 
     private Lookup lkp;
     private IepeProjectProperties properties;
-    private IEPEInput[] iepe;
+    private EEAInput[] iepe;
     private ChannelList list;
 
     public IepeAnalyzerObject(IepeProject project) {
@@ -75,11 +76,11 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
     public void run() {
         IepeProject project = lkp.lookup(IepeProject.class);
 
-        IEPEInput.IepePipeStream[] stream = new IEPEInput.IepePipeStream[list.size()];
+        IOChannel.IepePipeStream[] stream = new IOChannel.IepePipeStream[list.size()];
         for (int i = 0; i < stream.length; i++) {
             Channel channel = list.get(i);
             try {
-                stream[i] = (IEPEInput.IepePipeStream) iepe[channel.getDevice()].addStream(channel.getChannel(), new IEPEInput.IepePipeStream());
+                stream[i] = (IOChannel.IepePipeStream) iepe[channel.getDevice()].getIOChannel(channel.getChannel()).addStream(new IOChannel.IepePipeStream());
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
@@ -105,7 +106,7 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
 
         for (int i = 0; i < stream.length; i++) {
             Channel channel = list.get(i);
-            project.getIepe()[channel.getDevice()].removeStream(channel.getChannel(), stream[i]);
+            project.getIepe()[channel.getDevice()].getIOChannel(channel.getChannel()).removeStream(stream[i]);
         }
 
     }

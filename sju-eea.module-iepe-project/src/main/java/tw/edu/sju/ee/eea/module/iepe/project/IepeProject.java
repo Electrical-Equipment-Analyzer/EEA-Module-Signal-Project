@@ -50,8 +50,8 @@ import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeAnalyzerObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
-import tw.edu.sju.ee.eea.util.iepe.IEPEDevice;
-import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
+import tw.edu.sju.ee.eea.utils.io.tools.EEADevice;
+import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 
 /**
  *
@@ -63,7 +63,7 @@ public class IepeProject implements Project {
     private final ProjectState state;
     private Lookup lkp;
     private Child[] chield;
-    private final IEPEInput[] iepe;
+    private final EEAInput[] iepe;
     private IepeProjectProperties properties;
     private ChannelList list;
 
@@ -73,10 +73,10 @@ public class IepeProject implements Project {
         properties = new IepeProjectProperties(
                 new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath()));
 //        List<IEPEDevice> devices = new ArrayList();
-        iepe = new IEPEInput[(int) Math.ceil(properties.device().getChannels() / 8.0)];
+        iepe = new EEAInput[(int) Math.ceil(properties.device().getChannels() / 8.0)];
         for (int i = 0; i < Math.ceil(properties.device().getChannels() / 8.0); i++) {
 //            devices.add(new MPS140801IEPE(i, properties.device().getSampleRate()));
-            iepe[i] = new IEPEInput(new MPS140801IEPE(i, properties.device().getSampleRate()), new int[]{1}, 512);
+            iepe[i] = new EEAInput(new MPS140801IEPE(i, properties.device().getSampleRate()), new int[]{1});
         }
         list = new ChannelList();
         try {
@@ -113,7 +113,7 @@ public class IepeProject implements Project {
         return properties;
     }
 
-    public IEPEInput[] getIepe() {
+    public EEAInput[] getIepe() {
         return iepe;
     }
 

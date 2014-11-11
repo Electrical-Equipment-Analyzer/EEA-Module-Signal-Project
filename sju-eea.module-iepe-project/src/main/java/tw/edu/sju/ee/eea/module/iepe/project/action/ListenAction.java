@@ -34,8 +34,9 @@ import org.openide.util.TaskListener;
 import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
-import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
-import tw.edu.sju.ee.eea.util.iepe.IEPEPlayer;
+import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
+import tw.edu.sju.ee.eea.utils.io.tools.IEPEPlayer;
+import tw.edu.sju.ee.eea.utils.io.tools.IOChannel;
 
 @ActionID(
         category = "IEPE",
@@ -63,13 +64,13 @@ public final class ListenAction implements ActionListener {
             final IepeProject project = this.channel.getLookup().lookup(IepeProject.class);
             int sampleRate = project.getProperties().device().getSampleRate();
             IEPEPlayer player = new IEPEPlayer(sampleRate, 16, 1, 2, sampleRate);
-            final IEPEInput.VoltageArrayOutout stream = project.getIepe()[channel.getDevice()].addOutputStream(channel.getChannel(), player.getOutputStream());
+            final IOChannel.VoltageArrayOutout stream = project.getIepe()[channel.getDevice()].getIOChannel(channel.getChannel()).addOutputStream(player.getOutputStream());
             RequestProcessor.Task task = RP.create(player);
             progr = ProgressHandleFactory.createHandle("Play task", task);
             task.addTaskListener(new TaskListener() {
                 public void taskFinished(org.openide.util.Task task) {
                     System.out.println("fin");
-                    project.getIepe()[channel.getDevice()].removeStream(channel.getChannel(), stream);
+                    project.getIepe()[channel.getDevice()].getIOChannel(channel.getChannel()).removeStream(stream);
                     progr.finish();
                 }
             });

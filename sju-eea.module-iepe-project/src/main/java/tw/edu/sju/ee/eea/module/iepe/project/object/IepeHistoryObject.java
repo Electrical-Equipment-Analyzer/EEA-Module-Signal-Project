@@ -42,7 +42,7 @@ import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
-import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
+import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.loaders.DataObject;
@@ -57,7 +57,8 @@ import tw.edu.sju.ee.eea.module.iepe.file.IepeFile;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.data.Pattern;
 import tw.edu.sju.ee.eea.module.iepe.project.data.Warning;
-import tw.edu.sju.ee.eea.util.iepe.io.VoltageInputStream;
+import tw.edu.sju.ee.eea.utils.io.tools.IOChannel;
+import tw.edu.sju.ee.eea.utils.io.ValueInputStream;
 
 /**
  *
@@ -94,7 +95,7 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
                 .replaceAll("channel", String.valueOf(channel));
     }
 
-    private class FileChannel extends DataOutputStream implements IEPEInput.VoltageArrayOutout {
+    private class FileChannel extends DataOutputStream implements IOChannel.VoltageArrayOutout {
 
         private FileObject folder;
         private int channel;
@@ -140,7 +141,7 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
         fileChannels = new FileChannel[list.size()];
     }
 
-    private IEPEInput[] iepe;
+    private EEAInput[] iepe;
     private ChannelList list;
     private FileObject folder;
     private FileChannel[] fileChannels;
@@ -151,12 +152,12 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
             for (int i = 0; i < fileChannels.length; i++) {
                 Channel channel = list.get(i);
                 fileChannels[i] = new FileChannel(folder, i, length);
-                iepe[channel.getDevice()].addStream(channel.getChannel(), fileChannels[i]);
+                iepe[channel.getDevice()].getIOChannel(channel.getChannel()).addStream(fileChannels[i]);
             }
         } else {
             for (int i = 0; i < fileChannels.length; i++) {
                 Channel channel = list.get(i);
-                iepe[channel.getDevice()].removeStream(channel.getChannel(), fileChannels[i]);
+                iepe[channel.getDevice()].getIOChannel(channel.getChannel()).removeStream(fileChannels[i]);
                 fileChannels[i].close();
             }
         }
@@ -174,13 +175,13 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
         }
 
         int index = 0;
-        VoltageInputStream[] stream = new VoltageInputStream[4];
+        ValueInputStream[] stream = new ValueInputStream[4];
         long time = 0;
         SimpleDateFormat dateFormat = new SimpleDateFormat(properties.history().getPattern());
         try {
             for (Map.Entry<String, FileObject> entry : files.entrySet()) {
                 IepeFile.Input input = new IepeFile.Input(entry.getValue().getInputStream());
-                stream[index++] = new VoltageInputStream(input.getInputStream());
+                stream[index++] = new ValueInputStream(input.getInputStream());
                 if (index < 4) {
                     continue;
                 } else {

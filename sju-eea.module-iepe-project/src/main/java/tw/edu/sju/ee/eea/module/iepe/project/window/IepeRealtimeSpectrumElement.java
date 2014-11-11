@@ -47,7 +47,8 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.ui.workspace.plot.BodePlot;
-import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
+import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
+import tw.edu.sju.ee.eea.utils.io.tools.IOChannel;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_IEPE_Realtime_Spectrum",
@@ -72,20 +73,20 @@ public final class IepeRealtimeSpectrumElement extends JPanel implements MultiVi
         toolbar.setFloatable(false);
 
         ChannelList list = lkp.lookup(IepeProject.class).getList();
-        IEPEInput[] iepe = lkp.lookup(IepeProject.class).getIepe();
+        EEAInput[] iepe = lkp.lookup(IepeProject.class).getIepe();
         list.addConfigure(this);
         channels = new FrequencyChannel[list.size()];
         for (int i = 0; i < channels.length; i++) {
             Channel channel = list.get(i);
             channels[i] = new FrequencyChannel(channel.getName(), properties.device().getSampleRate(), 4096);
-            iepe[channel.getDevice()].addStream(channel.getChannel(), channels[i]);
+            iepe[channel.getDevice()].getIOChannel(channel.getChannel()).addStream(channels[i]);
         }
 
         initComponents();
 
     }
 
-    private class FrequencyChannel extends XYSeries implements IEPEInput.VoltageArrayOutout, FrequencyOutput {
+    private class FrequencyChannel extends XYSeries implements IOChannel.VoltageArrayOutout, FrequencyOutput {
 
         private FourierTransformerOutputStreeam stream;
         private int length;

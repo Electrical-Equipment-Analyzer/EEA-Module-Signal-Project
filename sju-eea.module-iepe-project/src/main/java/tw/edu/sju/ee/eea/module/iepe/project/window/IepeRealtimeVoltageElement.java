@@ -47,9 +47,10 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
-import tw.edu.sju.ee.eea.util.iepe.IEPEInput;
-import tw.edu.sju.ee.eea.util.iepe.io.SampledOutputStream;
-import tw.edu.sju.ee.eea.util.iepe.io.VoltageOutput;
+import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
+import tw.edu.sju.ee.eea.utils.io.tools.IOChannel;
+import tw.edu.sju.ee.eea.utils.io.SampledOutputStream;
+import tw.edu.sju.ee.eea.utils.io.ValueOutput;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_IEPE_Realtime_Voltage",
@@ -141,13 +142,13 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
         properties = lkp.lookup(IepeProject.class).getProperties();
 
         ChannelList list = lkp.lookup(IepeProject.class).getList();
-        IEPEInput[] iepe = lkp.lookup(IepeProject.class).getIepe();
+        EEAInput[] iepe = lkp.lookup(IepeProject.class).getIepe();
         list.addConfigure(this);
         channels = new VoltageChannel[list.size()];
         for (int i = 0; i < channels.length; i++) {
             Channel channel = list.get(i);
             channels[i] = new VoltageChannel(channel.getName(), properties.device().getSampleRate());
-            iepe[channel.getDevice()].addStream(channel.getChannel(), channels[i]);
+            iepe[channel.getDevice()].getIOChannel(channel.getChannel()).addStream(channels[i]);
         }
 
         initComponents();
@@ -155,7 +156,7 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
 
     }
 
-    private class VoltageChannel extends XYSeries implements IEPEInput.VoltageArrayOutout, VoltageOutput {
+    private class VoltageChannel extends XYSeries implements IOChannel.VoltageArrayOutout, ValueOutput {
 
         private SampledOutputStream stream;
 
