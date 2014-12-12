@@ -18,15 +18,26 @@
 package tw.edu.sju.ee.eea.module.iepe.project.window;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.Calendar;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.text.Format;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JToolBar;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.text.DefaultFormatterFactory;
+import javax.swing.text.NumberFormatter;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
@@ -37,9 +48,11 @@ import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
 import org.openide.awt.UndoRedo;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.core.math.MetricPrefixFormat;
 import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelsConfigure;
@@ -48,9 +61,10 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
-import tw.edu.sju.ee.eea.utils.io.tools.IOChannel;
-import tw.edu.sju.ee.eea.utils.io.SampledOutputStream;
 import tw.edu.sju.ee.eea.utils.io.ValueOutput;
+import tw.edu.sju.ee.eea.core.math.SpinnerPreferredNumberModel;
+import tw.edu.sju.ee.eea.utils.io.ValueInputStream;
+import tw.edu.sju.ee.eea.utils.io.ValueOutputStream;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_IEPE_Realtime_Voltage",
@@ -61,7 +75,7 @@ import tw.edu.sju.ee.eea.utils.io.ValueOutput;
         position = 2000
 )
 @Messages("LBL_IEPE_Realtime_Voltage=Voltage Oscillogram")
-public final class IepeRealtimeVoltageElement extends JPanel implements MultiViewElement, ChannelsConfigure {
+public final class IepeRealtimeVoltageElement extends JPanel implements MultiViewElement, ChannelsConfigure, Runnable {
 
     private class IepeVisualToolBar extends JToolBar {
 
@@ -69,6 +83,11 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
         private JButton tail;
         private JButton zoomIn;
         private JButton zoomOut;
+
+        private JLabel _label_horizontal;
+        private Spinner _spinner_horizontal;
+//        private JLabel _label_vertical;
+//        private Spinner _spinner_vertical;
 
         public IepeVisualToolBar() {
             this.setFloatable(false);
@@ -117,6 +136,42 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
             });
             this.add(zoomOut);
 
+            //##################################################################
+            this.addSeparator();
+            _label_horizontal = new JLabel("horizontal");
+            _label_horizontal.setBorder(new EmptyBorder(0, 10, 0, 10));
+            _spinner_horizontal = new Spinner(new SpinnerPreferredNumberModel(0.000000001, 1000000));
+            _spinner_horizontal.setFormat(new MetricPrefixFormat("0.###"));
+            _spinner_horizontal.setWidth(60);
+            _spinner_horizontal.addChangeListener(new ChangeListener() {
+
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    t = (Double) _spinner_horizontal.getValue();
+                    axis.setRange(0, t * 1000 * 1000);
+                }
+            });
+            this.add(_label_horizontal);
+            this.add(_spinner_horizontal);
+
+//            _label_vertical = new JLabel("vertical");
+//            _label_vertical.setBorder(new EmptyBorder(0, 10, 0, 10));
+//            _spinner_vertical = new Spinner(new SpinnerPreferredNumberModel(0.000000001, 1000000));
+//            _spinner_vertical.setFormat(new MetricPrefixFormat("0.###"));
+//            _spinner_vertical.setWidth(60);
+//            _spinner_vertical.addChangeListener(new ChangeListener() {
+//
+//                @Override
+//                public void stateChanged(ChangeEvent e) {
+//                    System.out.println(_spinner_vertical.getValue());
+////                    axis.setFixedAutoRange((Integer)_spinner_horizontal.getValue());
+//                }
+//            });
+//            this.add(_label_vertical);
+//            this.add(_spinner_vertical);
+            //##################################################################
+            this.addSeparator();
+
         }
 
         @Override
@@ -153,17 +208,40 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
 
         initComponents();
         toolbar.setEnabled(false);
+        new Thread(this).start();
+    }
+    private double t;
 
+    @Override
+    public void run() {
+        while (!Thread.interrupted()) {
+            for (int i = 0; i < channels.length; i++) {
+                channels[i].update(t);
+            }
+            channels[0].setNotify(true);
+            channels[0].setNotify(false);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
     }
 
-    private class VoltageChannel extends XYSeries implements IOChannel.VoltageArrayOutout, ValueOutput {
+    private class VoltageChannel extends XYSeries implements ValueOutput {
 
-        private SampledOutputStream stream;
+        private ValueOutputStream pipeIn;
+        private ValueInputStream pipeOut;
 
         public VoltageChannel(Comparable key, int samplerate) {
             super(key);
-            stream = new SampledOutputStream(this, samplerate / 10);
-            this.setMaximumItemCount(10*60);
+            try {
+                PipedInputStream pipe = new PipedInputStream(1024000);
+                pipeOut = new ValueInputStream(pipe);
+                pipeIn = new ValueOutputStream(new PipedOutputStream(pipe));
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
 
         @Override
@@ -186,26 +264,44 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
             return null;
         }
 
-        @Override
-        public void writeValue(double value) throws IOException {
-            add(Calendar.getInstance().getTimeInMillis(), value);
-        }
+        public void update(double t) {
+            int target = 1000;
+            int unit = 1000000;
+            this.clear();
+            try {
+                double input = t * properties.device().getSampleRate();
+                double rate = input / target;
 
-        @Override
-        public void writeVoltageArray(double[] data) throws IOException {
-            for (double d : data) {
-                stream.writeSampled(d);
+                int index = 0;
+                double count = 0;
+                double value = 0;
+                while (index < target && count < input) {
+                    if (count <= (index * rate)) {
+                        value = pipeOut.readValue();
+                        count++;
+                        if (count <= (index * rate)) {
+                            int skip = (int) Math.ceil((index * rate) - count);
+                            pipeOut.skip(skip);
+                            count += skip;
+                        }
+                    }
+                    if (index < (count / rate)) {
+                        int position = (int) (index * t * unit / target);
+                        add(position, value);
+                        index = (int) Math.ceil(count / rate);
+                    }
+                }
+                while (pipeOut.available() > properties.device().getSampleRate()) {
+                    pipeOut.skip(properties.device().getSampleRate());
+                }
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
             }
         }
 
         @Override
-        public void close() throws IOException {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        public void flush() throws IOException {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        public void writeValue(double value) throws IOException {
+            pipeIn.writeValue(value);
         }
 
     }
@@ -228,6 +324,8 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
     private XYItemRenderer renderer;
     private VoltageChannel[] channels;
 
+    private ValueAxis axis;
+
     private JFreeChart createChart() {
 
         SampledChart sampledChart = new SampledChart("Voltage Oscillogram");
@@ -242,9 +340,9 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
             xySeriesCollection.addSeries(channels[i]);
         }
 
-        ValueAxis axis = sampledChart.getXYPlot().getDomainAxis();
+        axis = sampledChart.getXYPlot().getDomainAxis();
         axis.setAutoRange(true);
-        axis.setFixedAutoRange(60000.0);  // 60 seconds
+//        axis.setFixedAutoRange(60000.0);  // 60 seconds
 
         return sampledChart;
     }
@@ -362,6 +460,25 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
     @Override
     public CloseOperationState canCloseElement() {
         return CloseOperationState.STATE_OK;
+    }
+
+    private static class Spinner extends JSpinner {
+
+        public Spinner(SpinnerNumberModel model) {
+            super(model);
+        }
+
+        public void setWidth(int width) {
+            Dimension maximumSize = getMaximumSize();
+            maximumSize.width = width;
+            setMaximumSize(maximumSize);
+        }
+
+        public void setFormat(Format format) {
+            NumberFormatter formatter = (NumberFormatter) ((DefaultFormatterFactory) (((JSpinner.DefaultEditor) getEditor()).getTextField()).getFormatterFactory()).getDefaultFormatter();
+            formatter.setFormat(format);
+        }
+
     }
 
 }

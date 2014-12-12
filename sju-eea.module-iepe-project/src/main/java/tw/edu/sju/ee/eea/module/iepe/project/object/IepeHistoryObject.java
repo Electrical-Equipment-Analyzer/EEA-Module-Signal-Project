@@ -59,6 +59,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.data.Pattern;
 import tw.edu.sju.ee.eea.module.iepe.project.data.Warning;
 import tw.edu.sju.ee.eea.utils.io.tools.IOChannel;
 import tw.edu.sju.ee.eea.utils.io.ValueInputStream;
+import tw.edu.sju.ee.eea.utils.io.ValueOutput;
 
 /**
  *
@@ -95,7 +96,7 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
                 .replaceAll("channel", String.valueOf(channel));
     }
 
-    private class FileChannel extends DataOutputStream implements IOChannel.VoltageArrayOutout {
+    private class FileChannel extends DataOutputStream implements ValueOutput {
 
         private FileObject folder;
         private int channel;
@@ -112,18 +113,16 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
         }
 
         @Override
-        public void writeVoltageArray(double[] data) throws IOException {
-            index += data.length;
-            if (!(index < length)) {
+        public void writeValue(double value) throws IOException {
+            if (!(index++ < length)) {
+                super.flush();
                 super.close();
                 out = new IepeFile.Output(folder.createAndOpen(pattern(channel)),
                         new IepeFile(Calendar.getInstance().getTimeInMillis(), properties.device().getSampleRate(), channel))
                         .getOutputStream();
                 index = 0;
             }
-            for (double d : data) {
-                writeDouble(d);
-            }
+                writeDouble(value);
         }
     }
 

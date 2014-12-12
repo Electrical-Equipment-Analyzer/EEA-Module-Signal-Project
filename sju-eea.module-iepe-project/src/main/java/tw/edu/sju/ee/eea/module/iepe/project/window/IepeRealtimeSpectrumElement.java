@@ -34,6 +34,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
+import org.omg.CORBA.portable.ValueOutputStream;
 import org.openide.awt.UndoRedo;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
@@ -47,6 +48,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.ui.workspace.plot.BodePlot;
+import tw.edu.sju.ee.eea.utils.io.ValueOutput;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 import tw.edu.sju.ee.eea.utils.io.tools.IOChannel;
 
@@ -86,7 +88,7 @@ public final class IepeRealtimeSpectrumElement extends JPanel implements MultiVi
 
     }
 
-    private class FrequencyChannel extends XYSeries implements IOChannel.VoltageArrayOutout, FrequencyOutput {
+    private class FrequencyChannel extends XYSeries implements ValueOutput, FrequencyOutput {
 
         private FourierTransformerOutputStreeam stream;
         private int length;
@@ -144,21 +146,10 @@ public final class IepeRealtimeSpectrumElement extends JPanel implements MultiVi
 //                }
 //            }
 //        }
-        @Override
-        public void writeVoltageArray(double[] data) throws IOException {
-            for (double d : data) {
-                stream.writeValue(d);
-            }
-        }
 
         @Override
-        public void close() throws IOException {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        public void flush() throws IOException {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        public void writeValue(double value) throws IOException {
+                stream.writeValue(value);
         }
 
     }
