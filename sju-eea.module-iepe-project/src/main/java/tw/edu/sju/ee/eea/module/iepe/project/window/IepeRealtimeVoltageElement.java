@@ -210,7 +210,7 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
         toolbar.setEnabled(false);
         new Thread(this).start();
     }
-    private double t;
+    private double t = 1;
 
     @Override
     public void run() {
@@ -236,7 +236,7 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
         public VoltageChannel(Comparable key, int samplerate) {
             super(key);
             try {
-                PipedInputStream pipe = new PipedInputStream(1024000);
+                PipedInputStream pipe = new PipedInputStream((int) (properties.device().getSampleRate() * 32));
                 pipeOut = new ValueInputStream(pipe);
                 pipeIn = new ValueOutputStream(new PipedOutputStream(pipe));
             } catch (IOException ex) {
@@ -279,8 +279,8 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
                     if (count <= (index * rate)) {
                         value = pipeOut.readValue();
                         count++;
-                        if (count <= (index * rate)) {
-                            int skip = (int) Math.ceil((index * rate) - count);
+                        while (count <= (index * rate)) {
+                            int skip = (int) Math.ceil((index * rate) - count) + 1;
                             pipeOut.skip(skip);
                             count += skip;
                         }
@@ -343,6 +343,7 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
         axis = sampledChart.getXYPlot().getDomainAxis();
         axis.setAutoRange(true);
 //        axis.setFixedAutoRange(60000.0);  // 60 seconds
+        axis.setRange(0, t * 1000 * 1000);
 
         return sampledChart;
     }
