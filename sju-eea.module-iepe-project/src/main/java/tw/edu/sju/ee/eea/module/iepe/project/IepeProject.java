@@ -48,6 +48,7 @@ import tw.edu.sju.ee.eea.jni.mps.MPS140801;
 import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeAnalyzerObject;
+import tw.edu.sju.ee.eea.module.iepe.project.object.IepeFunctionObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.utils.io.tools.EEADevice;
@@ -154,7 +155,9 @@ public class IepeProject implements Project {
 
         public IepeProjectLogicalView() {
             if (chield == null) {
-                chield = new Child[]{new IepeRealtimeObject(IepeProject.this),
+                chield = new Child[]{
+                    new IepeRealtimeObject(IepeProject.this),
+                    new IepeFunctionObject(IepeProject.this),
                     new IepeHistoryObject(IepeProject.this),
                     new IepeAnalyzerObject(IepeProject.this)
                 };
