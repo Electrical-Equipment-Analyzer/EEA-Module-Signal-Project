@@ -44,7 +44,7 @@ import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
-import tw.edu.sju.ee.eea.jni.mps.MPS140801IEPE;
+import tw.edu.sju.ee.eea.jni.mps.MPS140801;
 import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeAnalyzerObject;
@@ -76,7 +76,7 @@ public class IepeProject implements Project {
         iepe = new EEAInput[(int) Math.ceil(properties.device().getChannels() / 8.0)];
         for (int i = 0; i < Math.ceil(properties.device().getChannels() / 8.0); i++) {
 //            devices.add(new MPS140801IEPE(i, properties.device().getSampleRate()));
-            iepe[i] = new EEAInput(new MPS140801IEPE(i, properties.device().getSampleRate()), new int[]{1});
+            iepe[i] = new EEAInput(new MPS140801(i, properties.device().getSampleRate()), new int[]{1});
         }
         list = new ChannelList();
         try {
