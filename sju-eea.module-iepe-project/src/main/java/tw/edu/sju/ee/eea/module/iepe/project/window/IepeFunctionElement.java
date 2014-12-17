@@ -63,8 +63,11 @@ import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 import tw.edu.sju.ee.eea.utils.io.ValueOutput;
 import tw.edu.sju.ee.eea.core.math.SpinnerPreferredNumberModel;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeFunctionObject;
+import tw.edu.sju.ee.eea.utils.io.ValueInput;
 import tw.edu.sju.ee.eea.utils.io.ValueInputStream;
 import tw.edu.sju.ee.eea.utils.io.ValueOutputStream;
+import tw.edu.sju.ee.eea.utils.io.function.RevolutionsInputStream;
+import tw.edu.sju.ee.eea.utils.io.function.RootMeanSquareInputStream;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_Oscilloscope_Function",
@@ -230,18 +233,21 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
 
     private class VoltageChannel extends XYSeries implements ValueOutput {
 
-        private ValueOutputStream pipeIn;
-        private ValueInputStream pipeOut;
+        private ValueOutputStream pipeOut;
+        private ValueInputStream pipeIn;
+        
+        private ValueInput in;
 
         public VoltageChannel(Comparable key, int samplerate) {
             super(key);
             try {
                 PipedInputStream pipe = new PipedInputStream((int) (properties.device().getSampleRate() * 32));
-                pipeOut = new ValueInputStream(pipe);
-                pipeIn = new ValueOutputStream(new PipedOutputStream(pipe));
+                pipeIn = new ValueInputStream(pipe);
+                pipeOut = new ValueOutputStream(new PipedOutputStream(pipe));
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
+            in = new RevolutionsInputStream(pipeIn, properties.device().getSampleRate()/100);
         }
 
         @Override
@@ -264,35 +270,25 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
             return null;
         }
 
+        public double rms(double[] nums) {
+            double ms = 0;
+            for (int i = 0; i < nums.length; i++) {
+                ms += nums[i] * nums[i];
+            }
+            ms /= nums.length;
+            return Math.sqrt(ms);
+        }
+
         public void update(double t) {
             int target = 1000;
             int unit = 1000000;
             this.clear();
             try {
-                double input = t * properties.device().getSampleRate();
-                double rate = input / target;
-
-                int index = 0;
-                double count = 0;
-                double value = 0;
-                while (index < target && count < input) {
-                    if (count <= (index * rate)) {
-                        value = pipeOut.readValue();
-                        count++;
-                        while (count <= (index * rate)) {
-                            int skip = (int) Math.ceil((index * rate) - count) + 1;
-                            pipeOut.skip(skip);
-                            count += skip;
-                        }
-                    }
-                    if (index < (count / rate)) {
-                        int position = (int) (index * t * unit / target);
-                        add(position, value);
-                        index = (int) Math.ceil(count / rate);
-                    }
+                for (int i = 0; i < 100; i++) {
+                    add(i, in.readValue()*100*60);
                 }
-                while (pipeOut.available() > properties.device().getSampleRate()) {
-                    pipeOut.skip(properties.device().getSampleRate());
+                while (pipeIn.available() > properties.device().getSampleRate()) {
+                    pipeIn.skip(properties.device().getSampleRate());
                 }
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
@@ -301,7 +297,7 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
 
         @Override
         public void writeValue(double value) throws IOException {
-            pipeIn.writeValue(value);
+            pipeOut.writeValue(value);
         }
 
     }
