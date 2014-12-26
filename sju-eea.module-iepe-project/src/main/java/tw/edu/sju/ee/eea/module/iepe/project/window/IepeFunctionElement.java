@@ -235,7 +235,7 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
 
         private ValueOutputStream pipeOut;
         private ValueInputStream pipeIn;
-        
+
         private ValueInput in;
 
         public VoltageChannel(Comparable key, int samplerate) {
@@ -247,7 +247,7 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
-            in = new RevolutionsInputStream(pipeIn, properties.device().getSampleRate()/100);
+            in = new RevolutionsInputStream(pipeIn, properties.device().getSampleRate() / 100);
         }
 
         @Override
@@ -284,9 +284,28 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
             int unit = 1000000;
             this.clear();
             try {
-                for (int i = 0; i < 100; i++) {
-                    add(i, in.readValue()*100*60);
+                int j = 0;
+                System.out.println("==========");
+
+//                while (j < properties.device().getSampleRate()) {
+//                    double read = in.readValue();
+//                    if (Double.isNaN(read)) {
+//                        continue;
+//                    }
+//                    System.out.println(read);
+//                    j += read;
+//                    add(j, read / 1);
+//                }
+                for (int i = 0; j < 32000;) {
+                    double readValue = in.readValue();
+                    if (!Double.isNaN(readValue )) {
+//                        j += readValue%100;
+                        add(1000000* j /32000, 60*32000/readValue);
+                    } else {
+                        j+=100;
+                    }
                 }
+                System.out.println(j);
                 while (pipeIn.available() > properties.device().getSampleRate()) {
                     pipeIn.skip(properties.device().getSampleRate());
                 }
@@ -324,7 +343,7 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
 
     private JFreeChart createChart() {
 
-        SampledChart sampledChart = new SampledChart("Voltage Oscillogram");
+        SampledChart sampledChart = new SampledChart("Function Oscillogram");
         XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
         renderer = SampledChart.creatrRenderer();
 
