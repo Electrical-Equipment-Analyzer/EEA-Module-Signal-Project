@@ -19,6 +19,7 @@ package tw.edu.sju.ee.eea.module.iepe.project.window;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -42,6 +43,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.data.xy.XYDataItem;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.netbeans.core.spi.multiview.CloseOperationState;
@@ -66,6 +68,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.object.IepeFunctionObject;
 import tw.edu.sju.ee.eea.utils.io.ValueInput;
 import tw.edu.sju.ee.eea.utils.io.ValueInputStream;
 import tw.edu.sju.ee.eea.utils.io.ValueOutputStream;
+import tw.edu.sju.ee.eea.utils.io.function.PlotInput;
 import tw.edu.sju.ee.eea.utils.io.function.RevolutionsInputStream;
 import tw.edu.sju.ee.eea.utils.io.function.RootMeanSquareInputStream;
 
@@ -236,7 +239,7 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
         private ValueOutputStream pipeOut;
         private ValueInputStream pipeIn;
 
-        private ValueInput in;
+        private PlotInput in;
 
         public VoltageChannel(Comparable key, int samplerate) {
             super(key);
@@ -247,7 +250,9 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
-            in = new RevolutionsInputStream(pipeIn, properties.device().getSampleRate() / 100);
+            in = new RevolutionsInputStream(pipeIn, properties.device().getSampleRate(), 1000000);
+            in.setLength(1);
+            in.setInterval(100);
         }
 
         @Override
@@ -284,28 +289,10 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
             int unit = 1000000;
             this.clear();
             try {
-                int j = 0;
-                System.out.println("==========");
-
-//                while (j < properties.device().getSampleRate()) {
-//                    double read = in.readValue();
-//                    if (Double.isNaN(read)) {
-//                        continue;
-//                    }
-//                    System.out.println(read);
-//                    j += read;
-//                    add(j, read / 1);
-//                }
-                for (int i = 0; j < 32000;) {
-                    double readValue = in.readValue();
-                    if (!Double.isNaN(readValue )) {
-//                        j += readValue%100;
-                        add(1000000* j /32000, 60*32000/readValue);
-                    } else {
-                        j+=100;
-                    }
+                XYDataItem p;
+                while ((p = in.readPlot()) != null ) {
+                    add(p);
                 }
-                System.out.println(j);
                 while (pipeIn.available() > properties.device().getSampleRate()) {
                     pipeIn.skip(properties.device().getSampleRate());
                 }
