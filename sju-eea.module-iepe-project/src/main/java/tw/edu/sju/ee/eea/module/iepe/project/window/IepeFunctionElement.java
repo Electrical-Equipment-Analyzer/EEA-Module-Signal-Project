@@ -155,6 +155,9 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
                 public void stateChanged(ChangeEvent e) {
                     t = (Double) _spinner_horizontal.getValue();
                     axis.setRange(0, t * 1000 * 1000);
+                    for (int i = 0; i < channels.length; i++) {
+                        channels[i].setLength(t);
+                    }
                 }
             });
             this.add(_label_horizontal);
@@ -255,6 +258,10 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
             in.setInterval(100);
         }
 
+        public void setLength(double t) {
+            in.setLength(t);
+        }
+
         @Override
         public Number getX(int index) {
             try {
@@ -290,7 +297,7 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
             this.clear();
             try {
                 XYDataItem p;
-                while ((p = in.readPlot()) != null ) {
+                while ((p = in.readPlot()) != null) {
                     add(p);
                 }
                 while (pipeIn.available() > properties.device().getSampleRate()) {
