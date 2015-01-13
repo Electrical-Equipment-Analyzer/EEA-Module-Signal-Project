@@ -17,6 +17,7 @@
  */
 package tw.edu.sju.ee.eea.module.temp;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,6 +35,9 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Exceptions;
+import org.openide.windows.IOColorLines;
+import org.openide.windows.IOProvider;
+import org.openide.windows.InputOutput;
 import tw.edu.sju.ee.eea.utils.io.tools.EEADevice;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAException;
 
@@ -147,6 +151,8 @@ public class TCPDevice implements EEADevice {
         private static final int _HEAD = 2;
         private static final int _LENGTH = 100;
 
+        private final String[] _TXT = new String[]{"Subsidence:", "Crevasse:"};
+
         private double x[];
         private double y[];
         private double z[];
@@ -154,8 +160,13 @@ public class TCPDevice implements EEADevice {
         public DataPacket(String line) {
             StringTokenizer st = new StringTokenizer(line);
 //            System.out.println(st.countTokens());
+            InputOutput io = IOProvider.getDefault().getIO("TCP", false);
             for (int i = 0; st.hasMoreTokens() && i < 2; i++) {
-                st.nextToken();
+                try {
+                    IOColorLines.println(io, _TXT[i] + st.nextToken(), Color.BLACK);
+                } catch (IOException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             }
 //            System.out.println("==========");
             x = token(st);
