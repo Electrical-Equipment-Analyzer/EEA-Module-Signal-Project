@@ -51,6 +51,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.object.IepeAnalyzerObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeFunctionObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
+import tw.edu.sju.ee.eea.module.temp.TCPDevice;
 import tw.edu.sju.ee.eea.utils.io.tools.EEADevice;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 
@@ -77,7 +78,8 @@ public class IepeProject implements Project {
         input = new EEAInput[(int) Math.ceil(properties.device().getChannels() / 8.0)];
         for (int i = 0; i < Math.ceil(properties.device().getChannels() / 8.0); i++) {
 //            devices.add(new MPS140801IEPE(i, properties.device().getSampleRate()));
-            input[i] = new EEAInput(new MPS140801(i, properties.device().getSampleRate()), new int[]{1});
+//            input[i] = new EEAInput(new MPS140801(i, properties.device().getSampleRate()), new int[]{1});
+            input[i] = new EEAInput(new TCPDevice(8090), new int[]{1});
         }
         list = new ChannelList(lkp);
         try {
