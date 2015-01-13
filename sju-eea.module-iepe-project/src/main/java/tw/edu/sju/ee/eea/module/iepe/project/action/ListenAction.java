@@ -31,7 +31,7 @@ import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.RequestProcessor;
 import org.openide.util.TaskListener;
-import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.module.iepe.channel.SourceChannel;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.utils.io.ValueOutput;
@@ -51,11 +51,11 @@ import tw.edu.sju.ee.eea.utils.io.tools.IOChannel;
 @Messages("CTL_ListenAction=Listen")
 public final class ListenAction implements ActionListener {
 
-    private final Channel channel;
+    private final SourceChannel channel;
     private final static RequestProcessor RP = new RequestProcessor("interruptible tasks", 1, true);
     private ProgressHandle progr;
 
-    public ListenAction(Channel context) {
+    public ListenAction(SourceChannel context) {
         this.channel = context;
     }
 
@@ -66,13 +66,13 @@ public final class ListenAction implements ActionListener {
             final IepeProject project = this.channel.getLookup().lookup(IepeProject.class);
             int sampleRate = project.getProperties().device().getSampleRate();
             IEPEPlayer player = new IEPEPlayer(sampleRate, 16, 1, 2, sampleRate);
-            final ValueOutput stream = project.getIepe()[channel.getDevice()].getIOChannel(channel.getChannel()).addStream(new ValueOutputStream(player.getOutputStream()));
+            final ValueOutput stream = project.getInput()[channel.getDevice()].getIOChannel(channel.getChannel()).addStream(new ValueOutputStream(player.getOutputStream()));
             RequestProcessor.Task task = RP.create(player);
             progr = ProgressHandleFactory.createHandle("Play task", task);
             task.addTaskListener(new TaskListener() {
                 public void taskFinished(org.openide.util.Task task) {
                     System.out.println("fin");
-                    project.getIepe()[channel.getDevice()].getIOChannel(channel.getChannel()).removeStream(stream);
+                    project.getInput()[channel.getDevice()].getIOChannel(channel.getChannel()).removeStream(stream);
                     progr.finish();
                 }
             });

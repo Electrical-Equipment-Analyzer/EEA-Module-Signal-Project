@@ -35,20 +35,40 @@ import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.windows.TopComponent;
-import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.module.iepe.channel.SourceChannel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
+import tw.edu.sju.ee.eea.module.iepe.channel.FunctionChannel;
+import tw.edu.sju.ee.eea.module.iepe.channel.ListManager;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
+import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 
 /**
  *
  * @author Leo
  */
-public class IepeFunctionObject implements IepeProject.Child, Serializable, Lookup.Provider {
+public class IepeFunctionObject implements ListManager, IepeProject.Child, Serializable, Lookup.Provider {
 
     private Lookup lkp;
+    private ChannelList list;
 
     public IepeFunctionObject(Project project) {
         this.lkp = Lookups.fixed(project, this, new IepeNavigatorHint());
+        IepeProjectProperties properties = ((IepeProject) project).getProperties();
+        list = new ChannelList(lkp);
+        try {
+            for (int i = 0; i < properties.device().getChannels(); i++) {
+                int device = i / 8;
+                int channel = i % 8;
+                list.add(new FunctionChannel(null, device, channel, lkp));
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
+    
+    @Override
+    public ChannelList getChannelList() {
+        return list;
     }
 
     public String getDisplayName() {

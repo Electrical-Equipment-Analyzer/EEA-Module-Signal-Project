@@ -51,7 +51,7 @@ import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
-import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.module.iepe.channel.SourceChannel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.file.IepeFile;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
@@ -135,13 +135,13 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
             Logger.getLogger(IepeHistoryObject.class.getName()).log(Level.INFO, null, ex);
         }
         folder = projectDirectory.getFileObject("Record");
-        list = lkp.lookup(IepeProject.class).getList();
-        iepe = lkp.lookup(IepeProject.class).getIepe();
-        fileChannels = new FileChannel[list.size()];
+//        list = lkp.lookup(IepeProject.class).getList();
+        input = lkp.lookup(IepeProject.class).getInput();
+        fileChannels = new FileChannel[8];
     }
 
-    private EEAInput[] iepe;
-    private ChannelList list;
+    private EEAInput[] input;
+//    private ChannelList list;
     private FileObject folder;
     private FileChannel[] fileChannels;
 
@@ -149,14 +149,14 @@ public class IepeHistoryObject implements IepeProject.Child, Runnable, Serializa
         if (run) {
             long length = this.interval / 1000 * properties.device().getSampleRate();
             for (int i = 0; i < fileChannels.length; i++) {
-                Channel channel = list.get(i);
+//                Channel channel = list.get(i);
                 fileChannels[i] = new FileChannel(folder, i, length);
-                iepe[channel.getDevice()].getIOChannel(channel.getChannel()).addStream(fileChannels[i]);
+                input[0].getIOChannel(i).addStream(fileChannels[i]);
             }
         } else {
             for (int i = 0; i < fileChannels.length; i++) {
-                Channel channel = list.get(i);
-                iepe[channel.getDevice()].getIOChannel(channel.getChannel()).removeStream(fileChannels[i]);
+//                Channel channel = list.get(i);
+                input[0].getIOChannel(i).removeStream(fileChannels[i]);
                 fileChannels[i].close();
             }
         }

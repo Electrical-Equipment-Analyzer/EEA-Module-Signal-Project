@@ -33,13 +33,13 @@ import org.openide.util.lookup.Lookups;
  *
  * @author Leo
  */
-public class ChannelList extends ArrayList<Channel> implements Channel.Renderer {
+public class ChannelList extends ArrayList<Channel> implements SourceChannel.Renderer {
 
     private Lookup lkp;
     private List<ChannelsConfigure> list = new ArrayList<ChannelsConfigure>();
 
-    public ChannelList() {
-        this.lkp = Lookups.singleton(this);
+    public ChannelList(Lookup lkp) {
+        this.lkp = lkp;
     }
 
     public void addConfigure(ChannelsConfigure config) {
@@ -92,6 +92,8 @@ public class ChannelList extends ArrayList<Channel> implements Channel.Renderer 
                 return "Channel List";
             }
 
+            
+            
         };
     }
 

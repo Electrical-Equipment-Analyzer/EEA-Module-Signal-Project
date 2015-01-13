@@ -35,7 +35,7 @@ import org.openide.util.lookup.ProxyLookup;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 import org.openide.windows.TopComponent;
-import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.module.iepe.channel.SourceChannel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
@@ -54,13 +54,13 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
     private Lookup lkp;
     private IepeProjectProperties properties;
     private EEAInput[] iepe;
-    private ChannelList list;
+//    private ChannelList list;
 
     public IepeAnalyzerObject(IepeProject project) {
         this.lkp = new ProxyLookup(new Lookup[]{Lookups.singleton(project), Lookups.singleton(this)});
         properties = project.getProperties();
-        list = lkp.lookup(IepeProject.class).getList();
-        iepe = lkp.lookup(IepeProject.class).getIepe();
+//        list = lkp.lookup(IepeProject.class).getList();
+        iepe = lkp.lookup(IepeProject.class).getInput();
     }
 
     @Override
@@ -76,11 +76,11 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
     public void run() {
         IepeProject project = lkp.lookup(IepeProject.class);
 
-        IOChannel.IepePipeStream[] stream = new IOChannel.IepePipeStream[list.size()];
+        IOChannel.IepePipeStream[] stream = new IOChannel.IepePipeStream[8];
         for (int i = 0; i < stream.length; i++) {
-            Channel channel = list.get(i);
+//            Channel channel = list.get(i);
             try {
-                stream[i] = (IOChannel.IepePipeStream) iepe[channel.getDevice()].getIOChannel(channel.getChannel()).addStream(new IOChannel.IepePipeStream());
+                stream[i] = (IOChannel.IepePipeStream) iepe[0].getIOChannel(i).addStream(new IOChannel.IepePipeStream());
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
@@ -105,8 +105,8 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
         } while (!Thread.interrupted());
 
         for (int i = 0; i < stream.length; i++) {
-            Channel channel = list.get(i);
-            project.getIepe()[channel.getDevice()].getIOChannel(channel.getChannel()).removeStream(stream[i]);
+//            Channel channel = list.get(i);
+            project.getInput()[0].getIOChannel(i).removeStream(stream[i]);
         }
 
     }

@@ -45,7 +45,7 @@ import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
 import tw.edu.sju.ee.eea.jni.mps.MPS140801;
-import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.module.iepe.channel.SourceChannel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeAnalyzerObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeFunctionObject;
@@ -64,7 +64,7 @@ public class IepeProject implements Project {
     private final ProjectState state;
     private Lookup lkp;
     private Child[] chield;
-    private final EEAInput[] iepe;
+    private final EEAInput[] input;
     private IepeProjectProperties properties;
     private ChannelList list;
 
@@ -74,24 +74,30 @@ public class IepeProject implements Project {
         properties = new IepeProjectProperties(
                 new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath()));
 //        List<IEPEDevice> devices = new ArrayList();
-        iepe = new EEAInput[(int) Math.ceil(properties.device().getChannels() / 8.0)];
+        input = new EEAInput[(int) Math.ceil(properties.device().getChannels() / 8.0)];
         for (int i = 0; i < Math.ceil(properties.device().getChannels() / 8.0); i++) {
 //            devices.add(new MPS140801IEPE(i, properties.device().getSampleRate()));
-            iepe[i] = new EEAInput(new MPS140801(i, properties.device().getSampleRate()), new int[]{1});
+            input[i] = new EEAInput(new MPS140801(i, properties.device().getSampleRate()), new int[]{1});
         }
-        list = new ChannelList();
+        list = new ChannelList(lkp);
         try {
             for (int i = 0; i < properties.device().getChannels(); i++) {
-                list.add(new Channel(i / 8, i % 8, this));
+                int device = i / 8;
+                int channel = i % 8;
+                list.add(new SourceChannel(null, device, channel, lkp));
             }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
     }
 
-    public ChannelList getList() {
-        return list;
+    public EEAInput[] getInput() {
+        return input;
     }
+
+//    public ChannelList getList() {
+//        return list;
+//    }
 
     @Override
     public FileObject getProjectDirectory() {
@@ -112,10 +118,6 @@ public class IepeProject implements Project {
 
     public IepeProjectProperties getProperties() {
         return properties;
-    }
-
-    public EEAInput[] getIepe() {
-        return iepe;
     }
 
     private final class Info implements ProjectInformation {

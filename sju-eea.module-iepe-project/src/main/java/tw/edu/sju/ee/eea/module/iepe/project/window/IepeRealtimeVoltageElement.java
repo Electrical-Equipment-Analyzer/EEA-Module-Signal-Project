@@ -53,7 +53,7 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.core.math.MetricPrefixFormat;
-import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.module.iepe.channel.SourceChannel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelsConfigure;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
@@ -63,6 +63,7 @@ import tw.edu.sju.ee.eea.ui.chart.SampledChart;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 import tw.edu.sju.ee.eea.utils.io.ValueOutput;
 import tw.edu.sju.ee.eea.core.math.SpinnerPreferredNumberModel;
+import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.utils.io.ValueInputStream;
 import tw.edu.sju.ee.eea.utils.io.ValueOutputStream;
 
@@ -194,10 +195,11 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
         this.lkp = lkp;
         this.rt = lkp.lookup(IepeRealtimeObject.class);
         assert rt != null;
-        properties = lkp.lookup(IepeProject.class).getProperties();
+        IepeProject project = lkp.lookup(IepeProject.class);
+        properties = project.getProperties();
 
-        ChannelList list = lkp.lookup(IepeProject.class).getList();
-        EEAInput[] iepe = lkp.lookup(IepeProject.class).getIepe();
+        ChannelList list = rt.getChannelList();
+        EEAInput[] iepe = lkp.lookup(IepeProject.class).getInput();
         list.addConfigure(this);
         channels = new VoltageChannel[list.size()];
         for (int i = 0; i < channels.length; i++) {

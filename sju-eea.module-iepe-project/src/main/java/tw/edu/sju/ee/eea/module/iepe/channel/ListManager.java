@@ -17,29 +17,11 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.channel;
 
-import java.awt.Color;
-import org.openide.nodes.Node;
-
 /**
  *
  * @author Leo
  */
-public abstract class Channel {
-
-    public abstract int getDevice();
-
-    public abstract int getChannel();
-
-    public abstract String getName();
+public interface ListManager {
     
-    public abstract Node createNodeDelegate(final Channel.Renderer renderer);
-
-    interface Renderer {
-
-        public void setName(Channel channel, String name);
-
-        public void setColor(Channel channel, Color color);
-
-        public Color getColor(Channel channel);
-    }
+    public ChannelList getChannelList();
 }

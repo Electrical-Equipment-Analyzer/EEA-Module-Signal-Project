@@ -68,15 +68,15 @@ public final class AcqAction implements ActionListener, Runnable {
 
     @Override
     public void run() {
-        thread = new Thread[context.getIepe().length];
-        for (int i = 0; i < context.getIepe().length; i++) {
-            thread[i] = new Thread(context.getIepe()[i]);
+        thread = new Thread[context.getInput().length];
+        for (int i = 0; i < context.getInput().length; i++) {
+            thread[i] = new Thread(context.getInput()[i]);
             thread[i].start();
         }
         try {
             thread[0].join();
         } catch (InterruptedException ex) {
-            for (int i = 0; i < context.getIepe().length; i++) {
+            for (int i = 0; i < context.getInput().length; i++) {
                 thread[i].interrupt();
             }
         }

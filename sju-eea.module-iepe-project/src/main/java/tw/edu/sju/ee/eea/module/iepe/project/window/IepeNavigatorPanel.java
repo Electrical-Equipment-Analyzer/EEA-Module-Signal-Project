@@ -19,6 +19,8 @@ package tw.edu.sju.ee.eea.module.iepe.project.window;
 
 import java.awt.BorderLayout;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ActionMap;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -27,13 +29,13 @@ import org.netbeans.spi.navigator.NavigatorPanel;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
+import org.openide.nodes.Node;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
-import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
-import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
+import tw.edu.sju.ee.eea.module.iepe.channel.ListManager;
 
 /**
  * Top component which displays something.
@@ -45,7 +47,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 })
 public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, ExplorerManager.Provider, LookupListener {
 
-    private Lookup.Result<IepeRealtimeObject> result = null;
+    private Lookup.Result<ListManager> result = null;
 
     private ExplorerManager manager;
     private BeanTreeView listView;
@@ -104,7 +106,8 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
 
     @Override
     public void panelActivated(Lookup lkp) {
-        this.result = Utilities.actionsGlobalContext().lookupResult(IepeRealtimeObject.class);
+        Logger.getLogger(IepeNavigatorPanel.class.getName()).log(Level.INFO, "pa");
+        this.result = Utilities.actionsGlobalContext().lookupResult(ListManager.class);
         this.result.addLookupListener(this);
         ExplorerUtils.activateActions(manager, true);
         resultChanged(new LookupEvent(result));
@@ -112,6 +115,7 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
 
     @Override
     public void panelDeactivated() {
+        Logger.getLogger(IepeNavigatorPanel.class.getName()).log(Level.INFO, "pd");
         this.result.removeLookupListener(this);
         this.result = null;
         ExplorerUtils.activateActions(manager, false);
@@ -129,11 +133,14 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
 
     @Override
     public void resultChanged(LookupEvent le) {
-        Collection<? extends IepeRealtimeObject> allInstances = this.result.allInstances();
+        Logger.getLogger(IepeNavigatorPanel.class.getName()).log(Level.INFO, manager.getRootContext().getDisplayName());
+        Collection<? extends ListManager> allInstances = this.result.allInstances();
         if (!allInstances.isEmpty()) {
-            IepeRealtimeObject realtime = allInstances.iterator().next();
-            manager.setRootContext(realtime.getLookup().lookup(IepeProject.class).getList().createNodeDelegate());
+            ListManager realtime = allInstances.iterator().next();
+            manager.setRootContext(realtime.getChannelList().createNodeDelegate());
+            return ;
         }
+        manager.setRootContext(Node.EMPTY);
     }
 
 }

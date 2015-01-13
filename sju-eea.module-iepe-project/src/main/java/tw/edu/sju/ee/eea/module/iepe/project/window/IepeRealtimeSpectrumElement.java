@@ -36,10 +36,12 @@ import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
 import org.omg.CORBA.portable.ValueOutputStream;
 import org.openide.awt.UndoRedo;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.module.iepe.channel.SourceChannel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelsConfigure;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
@@ -71,11 +73,12 @@ public final class IepeRealtimeSpectrumElement extends JPanel implements MultiVi
     public IepeRealtimeSpectrumElement(Lookup lkp) {
         this.rt = lkp.lookup(IepeRealtimeObject.class);
         assert rt != null;
-        properties = lkp.lookup(IepeProject.class).getProperties();
+        IepeProject project = lkp.lookup(IepeProject.class);
+        properties = project.getProperties();
         toolbar.setFloatable(false);
 
-        ChannelList list = lkp.lookup(IepeProject.class).getList();
-        EEAInput[] iepe = lkp.lookup(IepeProject.class).getIepe();
+        ChannelList list = rt.getChannelList();
+        EEAInput[] iepe = lkp.lookup(IepeProject.class).getInput();
         list.addConfigure(this);
         channels = new FrequencyChannel[list.size()];
         for (int i = 0; i < channels.length; i++) {
@@ -146,10 +149,9 @@ public final class IepeRealtimeSpectrumElement extends JPanel implements MultiVi
 //                }
 //            }
 //        }
-
         @Override
         public void writeValue(double value) throws IOException {
-                stream.writeValue(value);
+            stream.writeValue(value);
         }
 
     }
