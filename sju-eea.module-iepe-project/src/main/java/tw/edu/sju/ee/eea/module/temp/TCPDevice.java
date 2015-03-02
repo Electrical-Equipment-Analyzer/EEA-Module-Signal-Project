@@ -84,7 +84,7 @@ public class TCPDevice implements EEADevice {
 
     @Override
     public int getChannelLength() throws EEAException {
-        return 3;
+        return 2;
     }
 
     @Override
@@ -99,29 +99,59 @@ public class TCPDevice implements EEADevice {
 //            gen(100, 3, 200, 32000),
 //            gen(100, 3, 500, 32000),
 //            gen(100, 3, 800, 32000)};
+        InputOutput io = IOProvider.getDefault().getIO("TCP", false);
         ServerSocket ss = null;
         Socket sc = null;
-        try {
-            ss = new ServerSocket(port);
-            sc = ss.accept();
-            BufferedReader br = new BufferedReader(new InputStreamReader(sc.getInputStream()));
-            String readLine = br.readLine();
-//            do {
-//                readLine = br.readLine();
-//            } while (readLine == null || readLine.length() < 100);
-            DataPacket packet = new DataPacket(readLine);
-            return packet.getData();
-        } catch (IOException ex) {
-            Logger.getLogger(TCPDevice.class.getName()).log(Level.SEVERE, null, ex);
-            throw new EEAException(ex);
-        } finally {
+        double v[] = null;
+        double x[] = null;
+        double y[] = null;
+        double z[] = null;
+        do {
             try {
-                sc.close();
-                ss.close();
+                ss = new ServerSocket(port);
+                sc = ss.accept();
+                BufferedReader br = new BufferedReader(new InputStreamReader(sc.getInputStream()));
+                String readLine = br.readLine();
+                String split[] = readLine.split(":");
+                if (split[0].equals("v")) {
+                    v = sp(split[1]);
+                } else if (split[0].equals("x")) {
+                    x = sp(split[1]);
+                } else if (split[0].equals("y")) {
+                    y = sp(split[1]);
+                } else if (split[0].equals("z")) {
+                    z = sp(split[1]);
+                }
+//            DataPacket packet = new DataPacket(readLine);
+//            return packet.getData();
             } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
+                Logger.getLogger(TCPDevice.class.getName()).log(Level.SEVERE, null, ex);
+                throw new EEAException(ex);
+            } finally {
+                try {
+                    sc.close();
+                    ss.close();
+                } catch (IOException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             }
+        } while (x == null || y == null || z == null);
+        String s = "V1:" + v[0] + ", V2:" + v[1] + ", X:" + x[0] + ", Y:" + y[0] + ", Z:" + z[0];
+        try {
+            IOColorLines.println(io, s, Color.BLACK);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
         }
+        return new double[][]{x, y, z};
+    }
+
+    private double[] sp(String s) {
+        String sp[] = s.split(" ");
+        double buff[] = new double[sp.length];
+        for (int i = 0; i < buff.length; i++) {
+            buff[i] = Double.parseDouble(sp[i]);
+        }
+        return buff;
     }
 
     @Override
