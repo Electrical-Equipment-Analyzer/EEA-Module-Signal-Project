@@ -84,7 +84,7 @@ public class TCPDevice implements EEADevice {
 
     @Override
     public int getChannelLength() throws EEAException {
-        return 2;
+        return 3;
     }
 
     @Override
