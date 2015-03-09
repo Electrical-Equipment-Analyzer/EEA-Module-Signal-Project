@@ -49,10 +49,10 @@ public class SerialDevice implements EEADevice, Runnable {
     private PipedOutputStream out;
     private Thread thread;
 
-    public SerialDevice() {
-        serialPort = new SerialPort("COM4");
+    public SerialDevice(String device) {
+        serialPort = new SerialPort(device);
         try {
-            serialPort.setParams(SerialPort.BAUDRATE_9600,
+            serialPort.setParams(SerialPort.BAUDRATE_115200,
                     SerialPort.DATABITS_8,
                     SerialPort.STOPBITS_1,
                     SerialPort.PARITY_NONE);
