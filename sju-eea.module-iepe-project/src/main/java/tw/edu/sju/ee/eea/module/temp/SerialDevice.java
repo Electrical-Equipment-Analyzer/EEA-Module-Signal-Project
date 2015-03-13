@@ -26,6 +26,7 @@ import java.io.PipedOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -135,7 +136,8 @@ public class SerialDevice implements EEADevice, Runnable {
 //                }
             }
         } while (v == null || x == null || y == null || z == null);
-        String s = "V1:" + v[0] + ", V2:" + v[1] + ", X:" + x[0] + ", Y:" + y[0] + ", Z:" + z[0];
+        
+        String s = new Date().toString() + " Bridge Expansion:" + v[0] + ", Bridge Subsidence:" + v[1] + ", X Level:" + x[0] + ", Y Level:" + y[0] + ", Z Level:" + z[0];
         try {
             IOColorLines.println(io, s, Color.BLACK);
         } catch (IOException ex) {

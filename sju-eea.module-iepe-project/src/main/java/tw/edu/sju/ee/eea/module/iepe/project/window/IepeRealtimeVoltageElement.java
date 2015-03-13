@@ -330,7 +330,7 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
 
     private JFreeChart createChart() {
 
-        SampledChart sampledChart = new SampledChart("Voltage Oscillogram");
+        SampledChart sampledChart = new SampledChart("Vibration Oscillogram");
         XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
         renderer = SampledChart.creatrRenderer();
 

@@ -83,7 +83,7 @@ public final class IepeRealtimeSpectrumElement extends JPanel implements MultiVi
         channels = new FrequencyChannel[list.size()];
         for (int i = 0; i < channels.length; i++) {
             Channel channel = list.get(i);
-            channels[i] = new FrequencyChannel(channel.getName(), properties.device().getSampleRate(), 4096);
+            channels[i] = new FrequencyChannel(channel.getName(), properties.device().getSampleRate(), 128);
             iepe[channel.getDevice()].getIOChannel(channel.getChannel()).addStream(channels[i]);
         }
 
