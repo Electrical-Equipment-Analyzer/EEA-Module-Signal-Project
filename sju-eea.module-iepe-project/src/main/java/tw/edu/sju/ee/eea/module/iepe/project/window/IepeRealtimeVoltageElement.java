@@ -80,6 +80,7 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
 
     private class IepeVisualToolBar extends JToolBar {
 
+        private JButton hold;
         private JButton head;
         private JButton tail;
         private JButton zoomIn;
@@ -92,6 +93,16 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
 
         public IepeVisualToolBar() {
             this.setFloatable(false);
+            this.addSeparator();
+            hold = new JButton("hold");
+            hold.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    IepeRealtimeVoltageElement.this.hold = !IepeRealtimeVoltageElement.this.hold;
+                }
+            });
+            this.add(hold);
             this.addSeparator();
             head = new JButton(new javax.swing.ImageIcon(getClass().getResource("/tw/edu/sju/ee/eea/module/iepe/file/iepe_visual_cursor_head.png")));
             head.addActionListener(new ActionListener() {
@@ -190,6 +201,7 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
     private IepeRealtimeObject rt;
     private JToolBar toolbar = new IepeVisualToolBar();
     private transient MultiViewElementCallback callback;
+    private boolean hold = false;
 
     public IepeRealtimeVoltageElement(Lookup lkp) {
         this.lkp = lkp;
@@ -217,11 +229,13 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
     @Override
     public void run() {
         while (!Thread.interrupted()) {
-            for (int i = 0; i < channels.length; i++) {
-                channels[i].update(t);
+            if (!hold) {
+                for (int i = 0; i < channels.length; i++) {
+                    channels[i].update(t);
+                }
+                channels[0].setNotify(true);
+                channels[0].setNotify(false);
             }
-            channels[0].setNotify(true);
-            channels[0].setNotify(false);
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
