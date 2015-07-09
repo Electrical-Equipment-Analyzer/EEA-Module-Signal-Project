@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>tw.edu.sju.ee.eea.module</groupId>
-    <artifactId>module-iepe-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>module-signal-parent</artifactId>
+    <version>1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
   
-    <name>EEA Module IEPE</name>
+    <name>EEA Module Signal</name>
     
     <parent>
         <groupId>tw.edu.sju.ee.eea</groupId>
@@ -80,8 +80,8 @@
     </build>
     
     <modules>
-        <module>sju-eea.module-iepe-file</module>
-        <module>sju-eea.module-iepe-project</module>
+        <module>sju-eea.module-signal-file</module>
+        <module>sju-eea.module-signal-project</module>
     </modules>
     <properties>
         <netbeans.version>RELEASE74</netbeans.version>

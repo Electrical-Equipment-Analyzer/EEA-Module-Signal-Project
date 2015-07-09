@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+OpenIDE-Module-Layer: tw/edu/sju/ee/eea/module/iepe/project/layer.xml
+OpenIDE-Module-Localizing-Bundle: tw/edu/sju/ee/eea/module/iepe/project/Bundle.properties
