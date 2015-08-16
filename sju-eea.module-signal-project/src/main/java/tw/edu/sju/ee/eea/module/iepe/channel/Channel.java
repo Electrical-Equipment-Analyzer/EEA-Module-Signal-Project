@@ -31,7 +31,9 @@ public abstract class Channel {
     public abstract int getChannel();
 
     public abstract String getName();
-    
+
+    public abstract void update(double t);
+
     public abstract Node createNodeDelegate(final Channel.Renderer renderer);
 
     interface Renderer {

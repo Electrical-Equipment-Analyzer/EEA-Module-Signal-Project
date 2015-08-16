@@ -57,7 +57,6 @@ import tw.edu.sju.ee.eea.module.iepe.file.IepeFile;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.data.Pattern;
 import tw.edu.sju.ee.eea.module.iepe.project.data.Warning;
-import tw.edu.sju.ee.eea.utils.io.tools.IOChannel;
 import tw.edu.sju.ee.eea.utils.io.ValueInputStream;
 import tw.edu.sju.ee.eea.utils.io.ValueOutput;
 

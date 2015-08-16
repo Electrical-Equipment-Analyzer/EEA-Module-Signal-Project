@@ -62,8 +62,11 @@ import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 import tw.edu.sju.ee.eea.utils.io.ValueOutput;
-import tw.edu.sju.ee.eea.core.math.SpinnerPreferredNumberModel;
 import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
+import tw.edu.sju.ee.eea.ui.conf.PlotConfigure;
+import tw.edu.sju.ee.eea.ui.io.SeriesOutputStream;
+import tw.edu.sju.ee.eea.ui.swing.SpinnerMetricModel;
+import tw.edu.sju.ee.eea.utils.io.ChannelInputStream;
 import tw.edu.sju.ee.eea.utils.io.ValueInputStream;
 import tw.edu.sju.ee.eea.utils.io.ValueOutputStream;
 
@@ -152,7 +155,7 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
             this.addSeparator();
             _label_horizontal = new JLabel("horizontal");
             _label_horizontal.setBorder(new EmptyBorder(0, 10, 0, 10));
-            _spinner_horizontal = new Spinner(new SpinnerPreferredNumberModel(0.000000001, 1000000));
+            _spinner_horizontal = new Spinner(new SpinnerMetricModel(1, 0.000000001, 1000000));
             _spinner_horizontal.setFormat(new MetricPrefixFormat("0.###"));
             _spinner_horizontal.setWidth(60);
             _spinner_horizontal.addChangeListener(new ChangeListener() {
@@ -203,6 +206,8 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
     private transient MultiViewElementCallback callback;
     private boolean hold = false;
 
+    ChannelList list;
+    
     public IepeRealtimeVoltageElement(Lookup lkp) {
         this.lkp = lkp;
         this.rt = lkp.lookup(IepeRealtimeObject.class);
@@ -210,31 +215,42 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
         IepeProject project = lkp.lookup(IepeProject.class);
         properties = project.getProperties();
 
-        ChannelList list = rt.getChannelList();
+        list = rt.getChannelList();
         EEAInput[] iepe = lkp.lookup(IepeProject.class).getInput();
         list.addConfigure(this);
-        channels = new VoltageChannel[list.size()];
-        for (int i = 0; i < channels.length; i++) {
-            Channel channel = list.get(i);
-            channels[i] = new VoltageChannel(channel.getName(), properties.device().getSampleRate());
-            iepe[channel.getDevice()].getIOChannel(channel.getChannel()).addStream(channels[i]);
+//        channels = new VoltageChannel[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            SourceChannel channel = (SourceChannel) list.get(i);
+            
+            try {
+                channel.inputStream = new ChannelInputStream((int) (properties.device().getSampleRate() * 32));
+                channel.series = new SeriesOutputStream(channel.getName());
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+//            channels[i] = new VoltageChannel(channel.getName(), properties.device().getSampleRate());
+            iepe[channel.getDevice()].getIOChannel(channel.getChannel()).addStream(channel.inputStream);
         }
 
         initComponents();
         toolbar.setEnabled(false);
         new Thread(this).start();
     }
+    
+    //display time t second
     private double t = 1;
+//    private PlotConfigure conf = new PlotConfigure(properties.device().getSampleRate(), t);
 
     @Override
     public void run() {
         while (!Thread.interrupted()) {
             if (!hold) {
-                for (int i = 0; i < channels.length; i++) {
-                    channels[i].update(t);
+                for (int i = 0; i < list.size(); i++) {
+                    list.get(i).update(t);
+//                    channels[i].update(t);
                 }
-                channels[0].setNotify(true);
-                channels[0].setNotify(false);
+//                channels[0].series.setNotify(true);
+//                channels[0].series.setNotify(false);
             }
             try {
                 Thread.sleep(1000);
@@ -244,87 +260,9 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
         }
     }
 
-    private class VoltageChannel extends XYSeries implements ValueOutput {
-
-        private ValueOutputStream pipeIn;
-        private ValueInputStream pipeOut;
-
-        public VoltageChannel(Comparable key, int samplerate) {
-            super(key);
-            try {
-                PipedInputStream pipe = new PipedInputStream((int) (properties.device().getSampleRate() * 32));
-                pipeOut = new ValueInputStream(pipe);
-                pipeIn = new ValueOutputStream(new PipedOutputStream(pipe));
-            } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-        }
-
-        @Override
-        public Number getX(int index) {
-            try {
-                return super.getX(index);
-            } catch (IndexOutOfBoundsException ex) {
-            } catch (NullPointerException ex) {
-            }
-            return null;
-        }
-
-        @Override
-        public Number getY(int index) {
-            try {
-                return super.getY(index);
-            } catch (IndexOutOfBoundsException ex) {
-            } catch (NullPointerException ex) {
-            }
-            return null;
-        }
-
-        public void update(double t) {
-            int target = 1000;
-            int unit = 1000000;
-            this.clear();
-            try {
-                double input = t * properties.device().getSampleRate();
-                double rate = input / target;
-
-                int index = 0;
-                double count = 0;
-                double value = 0;
-                while (index < target && count < input) {
-                    if (count <= (index * rate)) {
-                        value = pipeOut.readValue();
-                        count++;
-                        while (count <= (index * rate)) {
-                            int skip = (int) Math.ceil((index * rate) - count) + 1;
-                            pipeOut.skip(skip);
-                            count += skip;
-                        }
-                    }
-                    if (index < (count / rate)) {
-                        int position = (int) (index * t * unit / target);
-                        add(position, value);
-                        index = (int) Math.ceil(count / rate);
-                    }
-                }
-                while (pipeOut.available() > properties.device().getSampleRate()) {
-                    pipeOut.skip(properties.device().getSampleRate());
-                }
-            } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-        }
-
-        @Override
-        public void writeValue(double value) throws IOException {
-            pipeIn.writeValue(value);
-        }
-
-    }
-
     @Override
     public void setChannelName(int channel, String name) {
-        channels[channel].setKey(name);
+//        list.get(channel).series.setKey(name);
     }
 
     @Override
@@ -338,7 +276,7 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
     }
 
     private XYItemRenderer renderer;
-    private VoltageChannel[] channels;
+//    private VoltageChannel[] channels;
 
     private ValueAxis axis;
 
@@ -352,8 +290,8 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
         sampledChart.getXYPlot().mapDatasetToRangeAxis(0, 0);
         sampledChart.getXYPlot().setRenderer(0, renderer);
 
-        for (int i = 0; i < channels.length; i++) {
-            xySeriesCollection.addSeries(channels[i]);
+        for (int i = 0; i < list.size(); i++) {
+            xySeriesCollection.addSeries(((SourceChannel) list.get(i)).series);
         }
 
         axis = sampledChart.getXYPlot().getDomainAxis();

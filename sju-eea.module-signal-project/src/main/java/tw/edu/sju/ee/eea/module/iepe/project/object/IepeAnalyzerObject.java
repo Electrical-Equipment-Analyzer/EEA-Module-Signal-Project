@@ -42,8 +42,8 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.data.AnalyzerRule;
 import tw.edu.sju.ee.eea.module.iepe.project.data.Pattern;
 import tw.edu.sju.ee.eea.module.iepe.project.data.Warning;
+import tw.edu.sju.ee.eea.utils.io.ChannelInputStream;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
-import tw.edu.sju.ee.eea.utils.io.tools.IOChannel;
 
 /**
  *
@@ -76,11 +76,11 @@ public class IepeAnalyzerObject implements IepeProject.Child, Serializable, Look
     public void run() {
         IepeProject project = lkp.lookup(IepeProject.class);
 
-        IOChannel.IepePipeStream[] stream = new IOChannel.IepePipeStream[8];
+        ChannelInputStream[] stream = new ChannelInputStream[8];
         for (int i = 0; i < stream.length; i++) {
 //            Channel channel = list.get(i);
             try {
-                stream[i] = (IOChannel.IepePipeStream) iepe[0].getIOChannel(i).addStream(new IOChannel.IepePipeStream());
+                stream[i] = (ChannelInputStream) iepe[0].getIOChannel(i).addStream(new ChannelInputStream());
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }

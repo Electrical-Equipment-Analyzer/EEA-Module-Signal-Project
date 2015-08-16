@@ -27,11 +27,14 @@ import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.Lookups;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
+import tw.edu.sju.ee.eea.ui.io.SeriesOutputStream;
+import tw.edu.sju.ee.eea.utils.io.ChannelInputStream;
 import tw.edu.sju.ee.eea.utils.io.ValueInputStream;
 
 /**
@@ -84,6 +87,87 @@ public class SourceChannel extends Channel implements  Lookup.Provider {
     public Lookup getLookup() {
         return lkp;
     }
+    
+    
+//    class VoltageChannel {
+
+        public  ChannelInputStream inputStream;
+        public  SeriesOutputStream series;
+        double samplerate = 32000;
+        
+        
+//        private ValueOutputStream pipeIn;
+//        private ValueInputStream pipeOut;
+
+//        public VoltageChannel(Comparable key, int samplerate) {
+//                //            super(key);
+////            try {
+////                PipedInputStream pipe = new PipedInputStream((int) (properties.device().getSampleRate() * 32));
+////                pipeOut = new ValueInputStream(pipe);
+////                pipeIn = new ValueOutputStream(new PipedOutputStream(pipe));
+////            } catch (IOException ex) {
+////                Exceptions.printStackTrace(ex);
+////            }
+//            
+//            try {
+//                channel = new ChannelInputStream((int) (properties.device().getSampleRate() * 32));
+//                series = new SeriesOutputStream(key);
+//            } catch (IOException ex) {
+//                Exceptions.printStackTrace(ex);
+//            }
+//        }
+
+        public void update(double t) {
+            int target = 1000;
+            int unit = 1000000;
+            series.clear();
+            try {
+                double input = t * samplerate;
+                double rate = input / target;
+
+//                double value = 0;
+//                for (int i = 0; i < target; i++) {
+//                        value = channel.readValue();
+//                        channel.skip((int) Math.ceil(input / target)-1);
+//                    
+//                        int position = (int) (i * t * unit / target);
+//                        series.writeXY(position, value);
+////                        System.out.println(position);
+//                }
+                
+                int index = 0;
+                double count = 0;
+                double value = 0;
+                while (index < target && count < input) {
+                    if (count <= (index * rate)) {
+                        value = inputStream.readValue();
+                        count++;
+                        while (count < (index * rate)) {
+                            int skip = (int) Math.ceil((index * rate) - count);
+                            inputStream.skip(skip);
+                            count += skip;
+                        }
+                    }
+                    if (index <= (count / rate)) {
+                        int position = (int) (index * t * unit / target);
+                        series.writeXY(position, value);
+                        index = (int) Math.ceil(count / rate);
+                    }
+                }
+                while (inputStream.available() > samplerate) {
+                    inputStream.skip((long) samplerate);
+                }
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+
+//        @Override
+//        public void writeValue(double value) throws IOException {
+//            channel.writeValue(value);
+//        }
+
+//    }
     
     @NbBundle.Messages({
         "LBL_CH_title=Properties",

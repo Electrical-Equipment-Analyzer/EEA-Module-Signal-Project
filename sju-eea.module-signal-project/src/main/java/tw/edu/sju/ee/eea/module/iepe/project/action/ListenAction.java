@@ -38,7 +38,6 @@ import tw.edu.sju.ee.eea.utils.io.ValueOutput;
 import tw.edu.sju.ee.eea.utils.io.ValueOutputStream;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 import tw.edu.sju.ee.eea.utils.io.tools.IEPEPlayer;
-import tw.edu.sju.ee.eea.utils.io.tools.IOChannel;
 
 @ActionID(
         category = "IEPE",

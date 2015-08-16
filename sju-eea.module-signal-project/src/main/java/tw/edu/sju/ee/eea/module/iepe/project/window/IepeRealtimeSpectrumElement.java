@@ -52,7 +52,6 @@ import tw.edu.sju.ee.eea.utils.io.function.FourierTransformerOutputStreeam;
 import tw.edu.sju.ee.eea.utils.io.function.FrequencyOutput;
 import tw.edu.sju.ee.eea.utils.io.ValueOutput;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
-import tw.edu.sju.ee.eea.utils.io.tools.IOChannel;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_IEPE_Realtime_Spectrum",

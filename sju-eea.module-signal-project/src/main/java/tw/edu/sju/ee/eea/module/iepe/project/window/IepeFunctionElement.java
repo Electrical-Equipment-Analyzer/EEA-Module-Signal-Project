@@ -63,9 +63,9 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 import tw.edu.sju.ee.eea.utils.io.ValueOutput;
-import tw.edu.sju.ee.eea.core.math.SpinnerPreferredNumberModel;
 import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeFunctionObject;
+import tw.edu.sju.ee.eea.ui.swing.SpinnerMetricModel;
 import tw.edu.sju.ee.eea.utils.io.ValueInput;
 import tw.edu.sju.ee.eea.utils.io.ValueInputStream;
 import tw.edu.sju.ee.eea.utils.io.ValueOutputStream;
@@ -147,7 +147,7 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
             this.addSeparator();
             _label_horizontal = new JLabel("horizontal");
             _label_horizontal.setBorder(new EmptyBorder(0, 10, 0, 10));
-            _spinner_horizontal = new Spinner(new SpinnerPreferredNumberModel(0.000000001, 1000000));
+            _spinner_horizontal = new Spinner(new SpinnerMetricModel(1, 0.000000001, 1000000));
             _spinner_horizontal.setFormat(new MetricPrefixFormat("0.###"));
             _spinner_horizontal.setWidth(60);
             _spinner_horizontal.addChangeListener(new ChangeListener() {

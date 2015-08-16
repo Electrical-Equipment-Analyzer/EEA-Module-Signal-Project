@@ -181,4 +181,9 @@ public class FunctionChannel extends Channel implements  Lookup.Provider {
         };
     }
 
+    @Override
+    public void update(double t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }
