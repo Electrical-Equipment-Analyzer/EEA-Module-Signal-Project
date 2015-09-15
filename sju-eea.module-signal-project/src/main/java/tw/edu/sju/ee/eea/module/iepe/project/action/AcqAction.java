@@ -71,6 +71,7 @@ public final class AcqAction implements ActionListener, Runnable {
         thread = new Thread[context.getInput().length];
         for (int i = 0; i < context.getInput().length; i++) {
             thread[i] = new Thread(context.getInput()[i]);
+            thread[i].setPriority(Thread.MAX_PRIORITY);
             thread[i].start();
         }
         try {

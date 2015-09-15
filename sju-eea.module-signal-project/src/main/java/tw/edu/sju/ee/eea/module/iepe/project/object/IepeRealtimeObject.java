@@ -40,6 +40,7 @@ import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.channel.ListManager;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
+import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 
 /**
  *
@@ -53,18 +54,22 @@ public class IepeRealtimeObject implements ListManager, IepeProject.Child, Seria
     public IepeRealtimeObject(Project project) {
         this.lkp = Lookups.fixed(project, this, new IepeNavigatorHint());
         IepeProjectProperties properties = ((IepeProject) project).getProperties();
+        EEAInput[] iepe = lkp.lookup(IepeProject.class).getInput();
         list = new ChannelList(lkp);
         try {
             for (int i = 0; i < properties.device().getChannels(); i++) {
                 int device = i / 8;
                 int channel = i % 8;
-                list.add(new SourceChannel(null, device, channel, lkp));
+                SourceChannel sourceChannel = new SourceChannel(properties.device().getSampleRate(), device, channel, lkp);
+                iepe[device].getIOChannel(channel).addStream(sourceChannel.inputStream);
+                list.add(sourceChannel);
+
             }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
     }
-    
+
     @Override
     public ChannelList getChannelList() {
         return list;

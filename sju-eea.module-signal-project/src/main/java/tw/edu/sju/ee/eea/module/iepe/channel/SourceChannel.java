@@ -41,21 +41,29 @@ import tw.edu.sju.ee.eea.utils.io.ValueInputStream;
  *
  * @author Leo
  */
-public class SourceChannel extends Channel implements  Lookup.Provider {
+public class SourceChannel extends Channel implements Lookup.Provider {
 
     private Lookup lkp;
-    private ValueInputStream in;
+//    private ValueInputStream in;
     private int device;
     private int channel;
     private String name;
     private Color color;
 
-    public SourceChannel(ValueInputStream in, int device, int channel, Lookup lkp) throws IOException {
-        this.in = in;
+    public ChannelInputStream inputStream;
+    public SeriesOutputStream series;
+    private int samplerate = 32000;
+
+    public SourceChannel(int samplerate, int device, int channel, Lookup lkp) throws IOException {
+//        this.in = in;
+        this.samplerate = samplerate;
         this.device = device;
         this.channel = channel;
         setName("USB" + device + "/" + channel);
         this.lkp = lkp;
+        inputStream = new ChannelInputStream(samplerate * 10, 0);
+        series = new SeriesOutputStream(getName());
+        series.setNotify(false);
     }
 
     public void setName(String name) {
@@ -87,88 +95,51 @@ public class SourceChannel extends Channel implements  Lookup.Provider {
     public Lookup getLookup() {
         return lkp;
     }
-    
-    
-//    class VoltageChannel {
 
-        public  ChannelInputStream inputStream;
-        public  SeriesOutputStream series;
-        double samplerate = 32000;
-        
-        
-//        private ValueOutputStream pipeIn;
-//        private ValueInputStream pipeOut;
-
-//        public VoltageChannel(Comparable key, int samplerate) {
-//                //            super(key);
-////            try {
-////                PipedInputStream pipe = new PipedInputStream((int) (properties.device().getSampleRate() * 32));
-////                pipeOut = new ValueInputStream(pipe);
-////                pipeIn = new ValueOutputStream(new PipedOutputStream(pipe));
-////            } catch (IOException ex) {
-////                Exceptions.printStackTrace(ex);
-////            }
-//            
-//            try {
-//                channel = new ChannelInputStream((int) (properties.device().getSampleRate() * 32));
-//                series = new SeriesOutputStream(key);
-//            } catch (IOException ex) {
-//                Exceptions.printStackTrace(ex);
-//            }
-//        }
-
-        public void update(double t) {
-            int target = 1000;
-            int unit = 1000000;
-            series.clear();
-            try {
-                double input = t * samplerate;
-                double rate = input / target;
-
-//                double value = 0;
-//                for (int i = 0; i < target; i++) {
-//                        value = channel.readValue();
-//                        channel.skip((int) Math.ceil(input / target)-1);
-//                    
-//                        int position = (int) (i * t * unit / target);
-//                        series.writeXY(position, value);
-////                        System.out.println(position);
-//                }
-                
-                int index = 0;
-                double count = 0;
-                double value = 0;
-                while (index < target && count < input) {
-                    if (count <= (index * rate)) {
-                        value = inputStream.readValue();
-                        count++;
-                        while (count < (index * rate)) {
-                            int skip = (int) Math.ceil((index * rate) - count);
-                            inputStream.skip(skip);
-                            count += skip;
-                        }
-                    }
-                    if (index <= (count / rate)) {
-                        int position = (int) (index * t * unit / target);
-                        series.writeXY(position, value);
-                        index = (int) Math.ceil(count / rate);
+    @Override
+    public void update(double t) {
+        int target = 1000;
+        int unit = 1000000;
+        series.clear();
+        try {
+            double input = t * samplerate;
+            double rate = input / target;
+            int index = 0;
+            double count = 0;
+            double value = 0;
+            while (index < target && count < input) {
+                if (count <= (index * rate)) {
+                    value = inputStream.readValue();
+                    count++;
+                    while (count < (index * rate)) {
+                        int skip = (int) Math.ceil((index * rate) - count);
+                        inputStream.skip(skip);
+                        count += skip;
                     }
                 }
-                while (inputStream.available() > samplerate) {
-                    inputStream.skip((long) samplerate);
+                if (index < (count / rate)) {
+                    int position = (int) (index * t * unit / target);
+                    series.writeXY(position, value);
+                    index = (int) Math.ceil(count / rate);
                 }
-            } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
             }
+            inputStream.skip(inputStream.available());
+//            skip();
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
         }
+    }
 
-//        @Override
-//        public void writeValue(double value) throws IOException {
-//            channel.writeValue(value);
-//        }
+    public void skip() {
+        try {
+            while (inputStream.available() > samplerate) {
+                inputStream.skip((long) samplerate);
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
 
-//    }
-    
     @NbBundle.Messages({
         "LBL_CH_title=Properties",
         "LBL_CH_device=Device",

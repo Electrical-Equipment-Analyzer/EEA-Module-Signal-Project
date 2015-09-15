@@ -70,7 +70,7 @@ public class IepeProject implements Project {
     private Child[] chield;
     private final EEAInput[] input;
     private IepeProjectProperties properties;
-    private ChannelList list;
+//    private ChannelList list;
 
     public IepeProject(FileObject projectDirectory, ProjectState state) {
         this.projectDirectory = projectDirectory;
@@ -86,16 +86,16 @@ public class IepeProject implements Project {
 //            input[i] = new EEAInput(new SerialDevice(properties.device().getDeviceName()), new int[]{1});
 //            input[i] = new EEAInput(new MDESDevice(), new int[]{1});
         }
-        list = new ChannelList(lkp);
-        try {
-            for (int i = 0; i < properties.device().getChannels(); i++) {
-                int device = i / 8;
-                int channel = i % 8;
-                list.add(new SourceChannel(null, device, channel, lkp));
-            }
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
+//        list = new ChannelList(lkp);
+//        try {
+//            for (int i = 0; i < properties.device().getChannels(); i++) {
+//                int device = i / 8;
+//                int channel = i % 8;
+//                list.add(new SourceChannel(null, device, channel, lkp));
+//            }
+//        } catch (IOException ex) {
+//            Exceptions.printStackTrace(ex);
+//        }
     }
 
     public EEAInput[] getInput() {

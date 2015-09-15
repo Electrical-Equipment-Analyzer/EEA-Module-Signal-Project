@@ -21,9 +21,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.text.Format;
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -42,7 +39,6 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
@@ -60,15 +56,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.ui.chart.SampledChart;
-import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
-import tw.edu.sju.ee.eea.utils.io.ValueOutput;
-import tw.edu.sju.ee.eea.module.iepe.channel.Channel;
-import tw.edu.sju.ee.eea.ui.conf.PlotConfigure;
-import tw.edu.sju.ee.eea.ui.io.SeriesOutputStream;
 import tw.edu.sju.ee.eea.ui.swing.SpinnerMetricModel;
-import tw.edu.sju.ee.eea.utils.io.ChannelInputStream;
-import tw.edu.sju.ee.eea.utils.io.ValueInputStream;
-import tw.edu.sju.ee.eea.utils.io.ValueOutputStream;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_IEPE_Realtime_Voltage",
@@ -207,7 +195,7 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
     private boolean hold = false;
 
     ChannelList list;
-    
+
     public IepeRealtimeVoltageElement(Lookup lkp) {
         this.lkp = lkp;
         this.rt = lkp.lookup(IepeRealtimeObject.class);
@@ -216,33 +204,20 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
         properties = project.getProperties();
 
         list = rt.getChannelList();
-        EEAInput[] iepe = lkp.lookup(IepeProject.class).getInput();
         list.addConfigure(this);
-//        channels = new VoltageChannel[list.size()];
-        for (int i = 0; i < list.size(); i++) {
-            SourceChannel channel = (SourceChannel) list.get(i);
-            
-            try {
-                channel.inputStream = new ChannelInputStream((int) (properties.device().getSampleRate() * 32));
-                channel.series = new SeriesOutputStream(channel.getName());
-            } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-//            channels[i] = new VoltageChannel(channel.getName(), properties.device().getSampleRate());
-            iepe[channel.getDevice()].getIOChannel(channel.getChannel()).addStream(channel.inputStream);
-        }
 
         initComponents();
         toolbar.setEnabled(false);
         new Thread(this).start();
     }
-    
+
     //display time t second
     private double t = 1;
 //    private PlotConfigure conf = new PlotConfigure(properties.device().getSampleRate(), t);
 
     @Override
     public void run() {
+        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         while (!Thread.interrupted()) {
             if (!hold) {
                 for (int i = 0; i < list.size(); i++) {
@@ -251,6 +226,14 @@ public final class IepeRealtimeVoltageElement extends JPanel implements MultiVie
                 }
 //                channels[0].series.setNotify(true);
 //                channels[0].series.setNotify(false);
+                new Thread() {
+
+                    @Override
+                    public void run() {
+                        ((SourceChannel) list.get(0)).series.changed();
+                    }
+
+                }.start();
             }
             try {
                 Thread.sleep(1000);

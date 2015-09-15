@@ -315,6 +315,21 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
             pipeOut.writeValue(value);
         }
 
+        @Override
+        public void write(int b) throws IOException {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void write(byte[] b) throws IOException {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
     }
 
     @Override
