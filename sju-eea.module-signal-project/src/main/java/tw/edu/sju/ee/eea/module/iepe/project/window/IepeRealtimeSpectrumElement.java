@@ -17,12 +17,34 @@
  */
 package tw.edu.sju.ee.eea.module.iepe.project.window;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.animation.AnimationTimer;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javax.swing.Action;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import org.jfree.chart.ChartPanel;
@@ -87,18 +109,21 @@ public final class IepeRealtimeSpectrumElement extends JPanel implements MultiVi
         }
 
         initComponents();
+        initfx();
 
     }
 
     private class FrequencyChannel extends XYSeries implements ValueOutput, FrequencyOutput {
 
         private FourierTransformerOutputStreeam stream;
+//        private DataOutputStream d;
         private int length;
 
         public FrequencyChannel(Comparable key, int samplerate, int length) {
             super(key);
             this.length = length;
             stream = new FourierTransformerOutputStreeam(this, samplerate, length);
+//            d = = new DataOutputStream(stream);
         }
 
         @Override
@@ -153,6 +178,21 @@ public final class IepeRealtimeSpectrumElement extends JPanel implements MultiVi
             stream.writeValue(value);
         }
 
+        @Override
+        public void write(int b) throws IOException {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void write(byte[] b) throws IOException {
+            stream.writeValue(WIDTH);
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
     }
 
     @Override
@@ -194,6 +234,103 @@ public final class IepeRealtimeSpectrumElement extends JPanel implements MultiVi
         return chart;
     }
 
+    private  void initFX(JFXPanel fxPanel) {
+        // This method is invoked on the JavaFX thread
+        Scene scene = createScene();
+        fxPanel.setScene(scene);
+        
+        //-- Prepare Executor Services
+        executor = Executors.newCachedThreadPool();
+        addToQueue = new AddToQueue();
+        executor.execute(addToQueue);
+        //-- Prepare Timeline
+        prepareTimeline();
+    }
+    
+    private static final int MAX_DATA_POINTS = 50;
+
+    private XYChart.Series series;
+    private int xSeriesData = 0;
+    private ConcurrentLinkedQueue<Number> dataQ = new ConcurrentLinkedQueue<Number>();
+    private ExecutorService executor;
+    private AddToQueue addToQueue;
+    private Timeline timeline2;
+    private NumberAxis xAxis;
+
+    private  Scene createScene() {
+        
+        xAxis = new NumberAxis(0,MAX_DATA_POINTS,MAX_DATA_POINTS/10);
+        xAxis.setForceZeroInRange(false);
+        xAxis.setAutoRanging(false);
+        
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setAutoRanging(true);
+
+        //-- Chart
+        final LineChart<Number, Number> sc = new LineChart<Number, Number>(xAxis, yAxis) {
+            // Override to remove symbols on each data point
+            @Override protected void dataItemAdded(XYChart.Series<Number, Number> series, int itemIndex, XYChart.Data<Number, Number> item) {}
+        };
+        sc.setAnimated(false);
+        sc.setId("liveAreaChart");
+        sc.setTitle("Animated Area Chart");
+
+        //-- Chart Series
+        series = new LineChart.Series<Number, Number>();
+        series.setName("Area Chart Series");
+        sc.getData().add(series);
+
+        return new Scene(sc);
+    }
+
+    private class AddToQueue implements Runnable {
+        public void run() {
+            try {
+                // add a item of random data to queue
+                dataQ.add(Math.random());
+                Thread.sleep(50);
+                executor.execute(this);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(IepeRealtimeSpectrumElement.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
+    //-- Timeline gets called in the JavaFX Main thread
+    private void prepareTimeline() {
+        // Every frame to take any data from queue and add to chart
+        new AnimationTimer() {
+            @Override public void handle(long now) {
+                addDataToSeries();
+            }
+        }.start();
+    }
+
+    private void addDataToSeries() {
+        for (int i = 0; i < 20; i++) { //-- add 20 numbers to the plot+
+            if (dataQ.isEmpty()) break;
+            series.getData().add(new AreaChart.Data(xSeriesData++, dataQ.remove()));
+        }
+        // remove points to keep us at no more than MAX_DATA_POINTS
+        if (series.getData().size() > MAX_DATA_POINTS) {
+            series.getData().remove(0, series.getData().size() - MAX_DATA_POINTS);
+        }
+        // update 
+        xAxis.setLowerBound(xSeriesData-MAX_DATA_POINTS);
+        xAxis.setUpperBound(xSeriesData-1);
+    }
+
+    private void initfx() {
+        createChart();
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                initFX(jFXPanel1);
+
+            }
+        });
+    }
+
     @Override
     public String getName() {
         return "IepeVisualElement";
@@ -207,18 +344,9 @@ public final class IepeRealtimeSpectrumElement extends JPanel implements MultiVi
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        chartPanel = new ChartPanel(createChart());
+        jFXPanel1 = new javafx.embed.swing.JFXPanel();
 
-        javax.swing.GroupLayout chartPanelLayout = new javax.swing.GroupLayout(chartPanel);
-        chartPanel.setLayout(chartPanelLayout);
-        chartPanelLayout.setHorizontalGroup(
-            chartPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 620, Short.MAX_VALUE)
-        );
-        chartPanelLayout.setVerticalGroup(
-            chartPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 460, Short.MAX_VALUE)
-        );
+        setPreferredSize(new java.awt.Dimension(800, 600));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -226,20 +354,20 @@ public final class IepeRealtimeSpectrumElement extends JPanel implements MultiVi
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(chartPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jFXPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 780, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(chartPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jFXPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel chartPanel;
+    private javafx.embed.swing.JFXPanel jFXPanel1;
     // End of variables declaration//GEN-END:variables
     @Override
     public JComponent getVisualRepresentation() {
