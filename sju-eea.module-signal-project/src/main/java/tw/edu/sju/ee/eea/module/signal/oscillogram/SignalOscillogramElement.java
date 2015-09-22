@@ -15,12 +15,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package tw.edu.sju.ee.eea.module.iepe.project.window;
+package tw.edu.sju.ee.eea.module.signal.oscillogram;
 
+import com.sun.scenario.animation.AbstractMasterTimer;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.Format;
+import java.util.Calendar;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -59,20 +61,21 @@ import tw.edu.sju.ee.eea.core.math.MetricPrefixFormat;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
+import tw.edu.sju.ee.eea.module.iepe.project.window.IepeRealtimeSpectrumElement;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
-import tw.edu.sju.ee.eea.module.iepe.project.object.IepeFunctionObject;
+import tw.edu.sju.ee.eea.module.signal.oscillogram.SignalOscillogramObject;
 import tw.edu.sju.ee.eea.ui.swing.SpinnerMetricModel;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_Oscilloscope_Function",
         iconBase = "tw/edu/sju/ee/eea/module/iepe/file/iepe.png",
-        mimeType = "application/function",
+        mimeType = SignalOscillogramObject.MIMETYPE,
         persistenceType = TopComponent.PERSISTENCE_NEVER,
         preferredID = "FunctionVisual",
         position = 2000
 )
 @Messages("LBL_Oscilloscope_Function=Function Oscillogram")
-public final class IepeFunctionElement extends JPanel implements MultiViewElement, Runnable {
+public final class SignalOscillogramElement extends JPanel implements MultiViewElement, Runnable {
 
     private class IepeVisualToolBar extends JToolBar {
 
@@ -186,19 +189,19 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
 
     private IepeProjectProperties properties;
     private Lookup lkp;
-    private IepeFunctionObject rt;
+    private SignalOscillogramObject rt;
     private JToolBar toolbar = new IepeVisualToolBar();
     private transient MultiViewElementCallback callback;
 
-    public IepeFunctionElement(Lookup lkp) {
+    public SignalOscillogramElement(Lookup lkp) {
         this.lkp = lkp;
-        this.rt = lkp.lookup(IepeFunctionObject.class);
+        this.rt = lkp.lookup(SignalOscillogramObject.class);
         assert rt != null;
-        IepeProject project = lkp.lookup(IepeProject.class);
-        properties = project.getProperties();
+//        IepeProject project = lkp.lookup(IepeProject.class);
+        properties = rt.getProject().getProperties();
 
         ChannelList list = rt.getChannelList();
-        EEAInput[] iepe = lkp.lookup(IepeProject.class).getInput();
+        EEAInput[] iepe = rt.getProject().getInput();
 //        list.addConfigure(this);
 
         initComponents();
@@ -217,7 +220,12 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
 //        addToQueue = new AddToQueue();
         executor.execute(this);
         //-- Prepare Timeline
-        prepareTimeline();
+        new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                addDataToSeries();
+            }
+        }.start();
     }
 
     private static final int MAX_DATA_POINTS = 50;
@@ -262,24 +270,14 @@ public final class IepeFunctionElement extends JPanel implements MultiViewElemen
     public void run() {
         try {
             // add a item of random data to queue
-            dataQ.add(Math.random());
-            Thread.sleep(50);
+            double  t = Calendar.getInstance().getTimeInMillis() / 360.0 * 2;
+            dataQ.add(Math.sin(t) * 5);
+//            dataQ.add(Math.random());
+            Thread.sleep(100);
             executor.execute(this);
         } catch (InterruptedException ex) {
             Logger.getLogger(IepeRealtimeSpectrumElement.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-//    }
-
-    //-- Timeline gets called in the JavaFX Main thread
-    private void prepareTimeline() {
-        // Every frame to take any data from queue and add to chart
-        new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                addDataToSeries();
-            }
-        }.start();
     }
 
     private void addDataToSeries() {

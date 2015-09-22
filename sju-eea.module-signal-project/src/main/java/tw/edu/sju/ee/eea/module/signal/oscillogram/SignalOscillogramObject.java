@@ -15,9 +15,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package tw.edu.sju.ee.eea.module.iepe.project.object;
+package tw.edu.sju.ee.eea.module.signal.oscillogram;
 
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.Serializable;
@@ -28,14 +27,11 @@ import org.netbeans.core.api.multiview.MultiViews;
 import org.netbeans.spi.navigator.NavigatorLookupHint;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
-import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
-import org.openide.util.HelpCtx;
-import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.Lookups;
 import org.openide.windows.TopComponent;
-import tw.edu.sju.ee.eea.module.iepe.channel.SourceChannel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.channel.FunctionChannel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ListManager;
@@ -46,14 +42,24 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
  *
  * @author Leo
  */
-public class IepeFunctionObject implements ListManager, IepeProject.Child, Serializable, Lookup.Provider {
+//@NbBundle.Messages("MIME_TYPE_APPLICATION_OSCILLOGRAM=application/oscillogram")
+public class SignalOscillogramObject extends AbstractNode implements ListManager, NavigatorLookupHint, Serializable {
 
-    private Lookup lkp;
+    
+    public static final String MIMETYPE = "application/oscillogram";
+    private IepeProject project;
+//    private Lookup lkp;
     private ChannelList list;
+    TopComponent tc;
 
-    public IepeFunctionObject(Project project) {
-        this.lkp = Lookups.fixed(project, this, new IepeNavigatorHint());
-        IepeProjectProperties properties = ((IepeProject) project).getProperties();
+    public SignalOscillogramObject(Project project) {
+        super(Children.LEAF);
+//        super(Children.LEAF, Lookups.fixed(project, new IepeNavigatorHint()));
+
+        this.project = (IepeProject) project;
+
+        Lookup lkp = Lookups.fixed(project, this);
+        IepeProjectProperties properties = this.project.getProperties();
         list = new ChannelList(lkp);
         try {
             for (int i = 0; i < properties.device().getChannels(); i++) {
@@ -64,67 +70,37 @@ public class IepeFunctionObject implements ListManager, IepeProject.Child, Seria
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
+
+        setDisplayName("FFF");
+        setIconBaseWithExtension("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
     }
-    
+
+    public IepeProject getProject() {
+        return project;
+    }
+
     @Override
     public ChannelList getChannelList() {
         return list;
     }
 
-    public String getDisplayName() {
-        return "Function";
-    }
-
     @Override
-    public Lookup getLookup() {
-        return lkp;
-    }
-
-    TopComponent tc;
-
-    @Override
-    public Node createNodeDelegate() {
-        return new AbstractNode(Children.LEAF, lkp) {
+    public Action getPreferredAction() {
+        return new AbstractAction() {
 
             @Override
-            public Action getPreferredAction() {
-                return new AbstractAction() {
-
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        if (tc == null) {
-                            tc = MultiViews.createMultiView("application/function", IepeFunctionObject.this);
-                        }
-                        tc.open();
-                        tc.requestActive();
-                    }
-                };
+            public void actionPerformed(ActionEvent e) {
+                if (tc == null) {
+                    tc = MultiViews.createMultiView(MIMETYPE, SignalOscillogramObject.this);
+                }
+                tc.open();
+                tc.requestActive();
             }
-
-            @Override
-            public Image getIcon(int type) {
-                return ImageUtilities.loadImage("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
-            }
-
-            @Override
-            public Image getOpenedIcon(int type) {
-                return getIcon(type);
-            }
-
-            @Override
-            public String getDisplayName() {
-                return IepeFunctionObject.this.getDisplayName();
-            }
-
         };
     }
 
-    private static final class IepeNavigatorHint implements NavigatorLookupHint {
-
-        @Override
-        public String getContentType() {
-            return "application/function"; // NOI18N
-        }
-
+    @Override
+    public String getContentType() {
+        return MIMETYPE; // NOI18N
     }
 }

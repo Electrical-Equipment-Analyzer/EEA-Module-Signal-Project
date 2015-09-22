@@ -48,9 +48,11 @@ import tw.edu.sju.ee.eea.jni.mps.MPS140801;
 import tw.edu.sju.ee.eea.module.iepe.channel.SourceChannel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeAnalyzerObject;
-import tw.edu.sju.ee.eea.module.iepe.project.object.IepeFunctionObject;
+import tw.edu.sju.ee.eea.module.signal.oscillogram.SignalOscillogramObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
+import tw.edu.sju.ee.eea.module.signal.SignalProjectLogicalView;
+import tw.edu.sju.ee.eea.module.signal.oscillogram.VNodeList;
 import tw.edu.sju.ee.eea.module.temp.EmulatorDevice;
 import tw.edu.sju.ee.eea.module.temp.MDESDevice;
 import tw.edu.sju.ee.eea.module.temp.SerialDevice;
@@ -71,6 +73,8 @@ public class IepeProject implements Project {
     private final EEAInput[] input;
     private IepeProjectProperties properties;
 //    private ChannelList list;
+
+    private VNodeList oscillogramList;
 
     public IepeProject(FileObject projectDirectory, ProjectState state) {
         this.projectDirectory = projectDirectory;
@@ -96,6 +100,17 @@ public class IepeProject implements Project {
 //        } catch (IOException ex) {
 //            Exceptions.printStackTrace(ex);
 //        }
+
+        oscillogramList = new VNodeList("TimeDomain", "FrequencyDomain", "TimeMes");
+        oscillogramList.add(new SignalOscillogramObject(IepeProject.this));
+
+        r = new IepeRealtimeObject(IepeProject.this);
+        h = new IepeHistoryObject(IepeProject.this);
+        a = new IepeAnalyzerObject(IepeProject.this);
+    }
+
+    public VNodeList getOscillogramList() {
+        return oscillogramList;
     }
 
     public EEAInput[] getInput() {
@@ -105,7 +120,6 @@ public class IepeProject implements Project {
 //    public ChannelList getList() {
 //        return list;
 //    }
-
     @Override
     public FileObject getProjectDirectory() {
         return projectDirectory;
@@ -116,7 +130,8 @@ public class IepeProject implements Project {
         if (lkp == null) {
             lkp = Lookups.fixed(new Object[]{
                 new Info(),
-                new IepeProjectLogicalView(),
+                //                new IepeProjectLogicalView(),
+                new SignalProjectLogicalView(this),
                 new IepeCustomizerProvider(this)
             });
         }
@@ -158,6 +173,10 @@ public class IepeProject implements Project {
         }
     }
 
+    public IepeRealtimeObject r;
+    public IepeHistoryObject h;
+    public IepeAnalyzerObject a;
+
     public class IepeProjectLogicalView implements LogicalViewProvider, Lookup.Provider {
 
         private Lookup lkp;
@@ -166,7 +185,7 @@ public class IepeProject implements Project {
             if (chield == null) {
                 chield = new Child[]{
                     new IepeRealtimeObject(IepeProject.this),
-                    new IepeFunctionObject(IepeProject.this),
+                    //                    new IepeFunctionObject(IepeProject.this),
                     new IepeHistoryObject(IepeProject.this),
                     new IepeAnalyzerObject(IepeProject.this)
                 };

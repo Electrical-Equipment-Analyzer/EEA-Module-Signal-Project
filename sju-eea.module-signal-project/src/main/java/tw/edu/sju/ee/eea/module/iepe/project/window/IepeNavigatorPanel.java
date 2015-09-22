@@ -40,6 +40,7 @@ import tw.edu.sju.ee.eea.module.iepe.channel.ListManager;
 /**
  * Top component which displays something.
  */
+@NavigatorPanel.Registration(displayName = "iepe-eee", mimeType = "application/oscillogram")
 @Messages({
     "CTL_NavigatorAction=Navigator",
     "CTL_NavigatorTopComponent=Navigator Window",
