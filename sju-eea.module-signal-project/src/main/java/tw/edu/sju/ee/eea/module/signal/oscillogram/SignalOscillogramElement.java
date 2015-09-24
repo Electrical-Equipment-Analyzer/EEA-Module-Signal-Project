@@ -200,7 +200,7 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
 //        IepeProject project = lkp.lookup(IepeProject.class);
         properties = rt.getProject().getProperties();
 
-        ChannelList list = rt.getChannelList();
+//        ChannelList list = rt.getChannelList();
         EEAInput[] iepe = rt.getProject().getInput();
 //        list.addConfigure(this);
 

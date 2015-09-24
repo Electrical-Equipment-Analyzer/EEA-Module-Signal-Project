@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package tw.edu.sju.ee.eea.module.iepe.project.window;
+package tw.edu.sju.ee.eea.module.signal;
 
 import java.awt.BorderLayout;
 import java.util.Collection;
@@ -29,32 +29,34 @@ import org.netbeans.spi.navigator.NavigatorPanel;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
-import org.openide.nodes.Node;
+import org.openide.nodes.AbstractNode;
+import org.openide.nodes.Children;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
-import tw.edu.sju.ee.eea.module.iepe.channel.ListManager;
+import tw.edu.sju.ee.eea.module.signal.io.ChannelChildFactory;
+import tw.edu.sju.ee.eea.module.signal.io.ChannelList;
 
 /**
  * Top component which displays something.
  */
-@NavigatorPanel.Registration(displayName = "iepe-eee", mimeType = "application/iepe-realtime")
+@NavigatorPanel.Registration(displayName = "ssss", mimeType = "application/oscillogram")
 @Messages({
     "CTL_NavigatorAction=Navigator",
     "CTL_NavigatorTopComponent=Navigator Window",
     "HINT_NavigatorTopComponent=This is a Navigator window"
 })
-public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, ExplorerManager.Provider, LookupListener {
+public final class SignalNavigatorPanel extends JPanel implements NavigatorPanel, ExplorerManager.Provider, LookupListener {
 
-    private Lookup.Result<ListManager> result = null;
+    private Lookup.Result<ChannelList> result = null;
 
     private ExplorerManager manager;
     private BeanTreeView listView;
     private Lookup lookup;
 
-    public IepeNavigatorPanel() {
+    public SignalNavigatorPanel() {
 
         setLayout(new BorderLayout());
         manager = new ExplorerManager();
@@ -107,8 +109,8 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
 
     @Override
     public void panelActivated(Lookup lkp) {
-        Logger.getLogger(IepeNavigatorPanel.class.getName()).log(Level.INFO, "pa");
-        this.result = Utilities.actionsGlobalContext().lookupResult(ListManager.class);
+        Logger.getLogger(SignalNavigatorPanel.class.getName()).log(Level.INFO, "pa");
+        this.result = Utilities.actionsGlobalContext().lookupResult(ChannelList.class);
         this.result.addLookupListener(this);
         ExplorerUtils.activateActions(manager, true);
         resultChanged(new LookupEvent(result));
@@ -116,7 +118,7 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
 
     @Override
     public void panelDeactivated() {
-        Logger.getLogger(IepeNavigatorPanel.class.getName()).log(Level.INFO, "pd");
+        Logger.getLogger(SignalNavigatorPanel.class.getName()).log(Level.INFO, "pd");
         this.result.removeLookupListener(this);
         this.result = null;
         ExplorerUtils.activateActions(manager, false);
@@ -134,14 +136,19 @@ public final class IepeNavigatorPanel extends JPanel implements NavigatorPanel, 
 
     @Override
     public void resultChanged(LookupEvent le) {
-        Logger.getLogger(IepeNavigatorPanel.class.getName()).log(Level.INFO, manager.getRootContext().getDisplayName());
-        Collection<? extends ListManager> allInstances = this.result.allInstances();
+        Logger.getLogger(SignalNavigatorPanel.class.getName()).log(Level.INFO, manager.getRootContext().getDisplayName());
+        Collection<? extends ChannelList> allInstances = this.result.allInstances();
         if (!allInstances.isEmpty()) {
-            ListManager realtime = allInstances.iterator().next();
-            manager.setRootContext(realtime.getChannelList().createNodeDelegate());
+            ChannelList list = allInstances.iterator().next();
+            AbstractNode rn = new AbstractNode(Children.create(new ChannelChildFactory(list.getChannels()), false));
+            rn.setName(list.getName());
+            rn.setIconBaseWithExtension("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
+            manager.setRootContext(rn);
             return ;
         }
-        manager.setRootContext(Node.EMPTY);
+//        manager.setRootContext(Node.EMPTY);
     }
+    
+    
 
 }

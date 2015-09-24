@@ -20,11 +20,14 @@ package tw.edu.sju.ee.eea.module.signal.oscillogram;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.netbeans.api.project.Project;
 import org.netbeans.core.api.multiview.MultiViews;
 import org.netbeans.spi.navigator.NavigatorLookupHint;
+import org.netbeans.spi.project.ui.support.CommonProjectActions;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.util.Exceptions;
@@ -32,47 +35,42 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.Lookups;
 import org.openide.windows.TopComponent;
-import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
+//import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.channel.FunctionChannel;
 import tw.edu.sju.ee.eea.module.iepe.channel.ListManager;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
+import tw.edu.sju.ee.eea.module.signal.temp.Channel;
+import tw.edu.sju.ee.eea.module.signal.io.ChannelList;
 
 /**
  *
  * @author Leo
  */
-//@NbBundle.Messages("MIME_TYPE_APPLICATION_OSCILLOGRAM=application/oscillogram")
-public class SignalOscillogramObject extends AbstractNode implements ListManager, NavigatorLookupHint, Serializable {
+public class SignalOscillogramObject extends AbstractNode implements ChannelList, NavigatorLookupHint, Serializable {
 
     
     public static final String MIMETYPE = "application/oscillogram";
     private IepeProject project;
 //    private Lookup lkp;
-    private ChannelList list;
+//    private ChannelList list;
+    private ArrayList<Channel> channels;
     TopComponent tc;
 
     public SignalOscillogramObject(Project project) {
         super(Children.LEAF);
-//        super(Children.LEAF, Lookups.fixed(project, new IepeNavigatorHint()));
-
+        
         this.project = (IepeProject) project;
-
-        Lookup lkp = Lookups.fixed(project, this);
-        IepeProjectProperties properties = this.project.getProperties();
-        list = new ChannelList(lkp);
-        try {
-            for (int i = 0; i < properties.device().getChannels(); i++) {
-                int device = i / 8;
-                int channel = i % 8;
-                list.add(new FunctionChannel(null, device, channel, lkp));
-            }
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-
-        setDisplayName("FFF");
+        channels = new ArrayList<Channel>();
+        
+        setName("FFF");
         setIconBaseWithExtension("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
+    }
+    
+    private void addDefault() {
+        channels.add(new Channel("A0"));
+        channels.add(new Channel("A1"));
+        channels.add(new Channel("A2"));
     }
 
     public IepeProject getProject() {
@@ -80,8 +78,21 @@ public class SignalOscillogramObject extends AbstractNode implements ListManager
     }
 
     @Override
-    public ChannelList getChannelList() {
-        return list;
+    public List<Channel> getChannels() {
+        return channels;
+    }
+
+    @Override
+    public Action[] getActions(boolean context) {
+            List<Action> actions = new ArrayList<Action>();
+            actions.add(new AbstractAction("Add Default") {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    addDefault();
+                }
+            });
+            return actions.toArray(new AbstractAction[actions.size()]);
     }
 
     @Override
