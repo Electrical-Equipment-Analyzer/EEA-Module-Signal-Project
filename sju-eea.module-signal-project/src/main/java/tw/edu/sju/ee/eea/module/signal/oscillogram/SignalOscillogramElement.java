@@ -17,7 +17,6 @@
  */
 package tw.edu.sju.ee.eea.module.signal.oscillogram;
 
-import com.sun.scenario.animation.AbstractMasterTimer;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -33,10 +32,10 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
-import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.util.converter.NumberStringConverter;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -58,12 +57,9 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.core.math.MetricPrefixFormat;
-import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
-import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.window.IepeRealtimeSpectrumElement;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
-import tw.edu.sju.ee.eea.module.signal.oscillogram.SignalOscillogramObject;
 import tw.edu.sju.ee.eea.ui.swing.SpinnerMetricModel;
 
 @MultiViewElement.Registration(
@@ -208,24 +204,21 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
         initfx();
         toolbar.setEnabled(false);
     }
-    private double t = 1;
 
     private static final int MAX_DATA_POINTS = 1000;
+    private double t = 1;
 
     private XYChart.Series<Number, Number> series;
-    private int xSeriesData = 0;
-//    private ConcurrentLinkedQueue<Number> dataQ = new ConcurrentLinkedQueue<Number>();
     private ConcurrentLinkedQueue<XYChart.Data> cc = new ConcurrentLinkedQueue<XYChart.Data>();
     private ExecutorService executor;
-//    private AddToQueue addToQueue;
-    private Timeline timeline2;
     private NumberAxis xAxis;
-
+        
     private Scene createScene() {
 
         xAxis = new NumberAxis(0, MAX_DATA_POINTS, MAX_DATA_POINTS / 10);
-        xAxis.setForceZeroInRange(false);
+        xAxis.setForceZeroInRange(true);
         xAxis.setAutoRanging(false);
+        xAxis.setTickLabelFormatter(new NumberStringConverter(new MetricPrefixFormat("#.##")));
 
         NumberAxis yAxis = new NumberAxis();
         yAxis.setAutoRanging(true);
@@ -256,8 +249,8 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
 
         //-- Prepare Executor Services
         executor = Executors.newCachedThreadPool();
-//        addToQueue = new AddToQueue();
         executor.execute(this);
+
         //-- Prepare Timeline
         new AnimationTimer() {
             @Override
@@ -271,57 +264,42 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
     @Override
     public void run() {
         try {
-            // add a item of random data to queue
-            long timeInMillis = Calendar.getInstance().getTimeInMillis();
-            xSeriesData = MAX_DATA_POINTS;
-            for (int i = 0; i <= MAX_DATA_POINTS; i++) {
-
-                double t = (timeInMillis + i) / 360.0 * 2;
-
-                double x = i/100.0;
-                double y = Math.sin(t) * 5;
-                cc.add(new XYChart.Data(x, y));
+            while (!Thread.interrupted()) {
+                // add a item of random data to queue
+                long timeInMillis = Calendar.getInstance().getTimeInMillis();
+                for (int i = 0; i <= MAX_DATA_POINTS; i++) {
+                    double t = (timeInMillis + i) / 360.0 * 2;
+                    double x = i / 1000.0;
+                    double y = Math.sin(t) * 5;
+                    cc.add(new XYChart.Data(x, y));
+                }
+                Thread.sleep(1000);
             }
-
-//            double t = Calendar.getInstance().getTimeInMillis() / 360.0 * 2;
-//
-//            double x = xSeriesData++;
-//            double y = Math.sin(t) * 5;
-//            cc.add(new XYChart.Data(x, y));
-//            dataQ.add(y);
-//            dataQ.add(Math.random());
-            Thread.sleep(1000);
-            executor.execute(this);
+//            executor.execute(this);
         } catch (InterruptedException ex) {
             Logger.getLogger(IepeRealtimeSpectrumElement.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     private void addDataToSeries() {
-//        for (int i = 0; i < 20; i++) { //-- add 20 numbers to the plot+
-//            if (cc.isEmpty()) {
-//                break;
-//            }
-////            series.getData().add(new XYChart.ata(xSeriesData++, dataQ.remove()));
-//            series.getData().add(cc.remove());Vo
-//        }
         while (!cc.isEmpty()) {
-//            series.getData().removeAll();
             series.getData().add(cc.remove());
         }
 
-        System.out.println(series.getData().size());
+        if (series.getData().size() == 0) {
+            return;
+        }
+
         // remove points to keep us at no more than MAX_DATA_POINTS
         if (series.getData().size() > MAX_DATA_POINTS) {
             series.getData().remove(0, series.getData().size() - MAX_DATA_POINTS);
         }
+
         // update 
-//        xAxis.setLowerBound(xSeriesData - MAX_DATA_POINTS);
-//        xAxis.setUpperBound(xSeriesData);
-        System.out.println(series.getData().get(0).getXValue().doubleValue());
-        System.out.println(series.getData().get(series.getData().size()-1).getXValue().doubleValue());
-        xAxis.setLowerBound(series.getData().get(0).getXValue().doubleValue());
-        xAxis.setUpperBound(series.getData().get(series.getData().size()-1).getXValue().doubleValue());
+        double m = series.getData().get(series.getData().size() - 1).getXValue().doubleValue();
+        xAxis.setLowerBound(0);
+        xAxis.setUpperBound(m);
+        xAxis.setTickUnit(m / 10);
     }
 
     private void initfx() {
