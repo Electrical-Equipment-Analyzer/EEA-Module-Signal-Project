@@ -57,6 +57,7 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.core.math.MetricPrefixFormat;
+import tw.edu.sju.ee.eea.core.math.SineSimulator;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.window.IepeRealtimeSpectrumElement;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
@@ -266,12 +267,9 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
         try {
             while (!Thread.interrupted()) {
                 // add a item of random data to queue
-                long timeInMillis = Calendar.getInstance().getTimeInMillis();
+                SineSimulator s = new SineSimulator(1000, 10, 5);
                 for (int i = 0; i <= MAX_DATA_POINTS; i++) {
-                    double t = (timeInMillis + i) / 360.0 * 2;
-                    double x = i / 1000.0;
-                    double y = Math.sin(t) * 5;
-                    cc.add(new XYChart.Data(x, y));
+                    cc.add(new XYChart.Data(s.getX(i), s.getY(i)));
                 }
                 Thread.sleep(1000);
             }
