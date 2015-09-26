@@ -210,29 +210,12 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
     }
     private double t = 1;
 
-    private void initFX(JFXPanel fxPanel) {
-        // This method is invoked on the JavaFX thread
-        Scene scene = createScene();
-        fxPanel.setScene(scene);
+    private static final int MAX_DATA_POINTS = 1000;
 
-        //-- Prepare Executor Services
-        executor = Executors.newCachedThreadPool();
-//        addToQueue = new AddToQueue();
-        executor.execute(this);
-        //-- Prepare Timeline
-        new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                addDataToSeries();
-            }
-        }.start();
-    }
-
-    private static final int MAX_DATA_POINTS = 50;
-
-    private XYChart.Series series;
+    private XYChart.Series<Number, Number> series;
     private int xSeriesData = 0;
-    private ConcurrentLinkedQueue<Number> dataQ = new ConcurrentLinkedQueue<Number>();
+//    private ConcurrentLinkedQueue<Number> dataQ = new ConcurrentLinkedQueue<Number>();
+    private ConcurrentLinkedQueue<XYChart.Data> cc = new ConcurrentLinkedQueue<XYChart.Data>();
     private ExecutorService executor;
 //    private AddToQueue addToQueue;
     private Timeline timeline2;
@@ -266,14 +249,48 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
         return new Scene(sc);
     }
 
+    private void initFX(JFXPanel fxPanel) {
+        // This method is invoked on the JavaFX thread
+        Scene scene = createScene();
+        fxPanel.setScene(scene);
+
+        //-- Prepare Executor Services
+        executor = Executors.newCachedThreadPool();
+//        addToQueue = new AddToQueue();
+        executor.execute(this);
+        //-- Prepare Timeline
+        new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                addDataToSeries();
+            }
+        }.start();
+    }
+
 //    private class AddToQueue implements Runnable {
+    @Override
     public void run() {
         try {
             // add a item of random data to queue
-            double  t = Calendar.getInstance().getTimeInMillis() / 360.0 * 2;
-            dataQ.add(Math.sin(t) * 5);
+            long timeInMillis = Calendar.getInstance().getTimeInMillis();
+            xSeriesData = MAX_DATA_POINTS;
+            for (int i = 0; i <= MAX_DATA_POINTS; i++) {
+
+                double t = (timeInMillis + i) / 360.0 * 2;
+
+                double x = i/100.0;
+                double y = Math.sin(t) * 5;
+                cc.add(new XYChart.Data(x, y));
+            }
+
+//            double t = Calendar.getInstance().getTimeInMillis() / 360.0 * 2;
+//
+//            double x = xSeriesData++;
+//            double y = Math.sin(t) * 5;
+//            cc.add(new XYChart.Data(x, y));
+//            dataQ.add(y);
 //            dataQ.add(Math.random());
-            Thread.sleep(100);
+            Thread.sleep(1000);
             executor.execute(this);
         } catch (InterruptedException ex) {
             Logger.getLogger(IepeRealtimeSpectrumElement.class.getName()).log(Level.SEVERE, null, ex);
@@ -281,19 +298,30 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
     }
 
     private void addDataToSeries() {
-        for (int i = 0; i < 20; i++) { //-- add 20 numbers to the plot+
-            if (dataQ.isEmpty()) {
-                break;
-            }
-            series.getData().add(new AreaChart.Data(xSeriesData++, dataQ.remove()));
+//        for (int i = 0; i < 20; i++) { //-- add 20 numbers to the plot+
+//            if (cc.isEmpty()) {
+//                break;
+//            }
+////            series.getData().add(new XYChart.ata(xSeriesData++, dataQ.remove()));
+//            series.getData().add(cc.remove());Vo
+//        }
+        while (!cc.isEmpty()) {
+//            series.getData().removeAll();
+            series.getData().add(cc.remove());
         }
+
+        System.out.println(series.getData().size());
         // remove points to keep us at no more than MAX_DATA_POINTS
         if (series.getData().size() > MAX_DATA_POINTS) {
             series.getData().remove(0, series.getData().size() - MAX_DATA_POINTS);
         }
         // update 
-        xAxis.setLowerBound(xSeriesData - MAX_DATA_POINTS);
-        xAxis.setUpperBound(xSeriesData - 1);
+//        xAxis.setLowerBound(xSeriesData - MAX_DATA_POINTS);
+//        xAxis.setUpperBound(xSeriesData);
+        System.out.println(series.getData().get(0).getXValue().doubleValue());
+        System.out.println(series.getData().get(series.getData().size()-1).getXValue().doubleValue());
+        xAxis.setLowerBound(series.getData().get(0).getXValue().doubleValue());
+        xAxis.setUpperBound(series.getData().get(series.getData().size()-1).getXValue().doubleValue());
     }
 
     private void initfx() {
@@ -306,11 +334,10 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
         });
     }
 
-    @Override
-    public String getName() {
-        return "IepeVisualElement";
-    }
-
+//    @Override
+//    public String getName() {
+//        return "IepeVisualElement";
+//    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
