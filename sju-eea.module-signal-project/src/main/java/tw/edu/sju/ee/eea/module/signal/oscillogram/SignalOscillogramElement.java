@@ -62,6 +62,7 @@ import tw.edu.sju.ee.eea.core.math.MetricPrefixFormat;
 import tw.edu.sju.ee.eea.core.math.SineSimulator;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.window.IepeRealtimeSpectrumElement;
+import tw.edu.sju.ee.eea.module.signal.temp.Channel;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 import tw.edu.sju.ee.eea.ui.swing.SpinnerMetricModel;
 import tw.edu.sju.ee.eea.utils.io.ValueInputStream;
@@ -189,19 +190,20 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
 
     private IepeProjectProperties properties;
     private Lookup lkp;
-    private SignalOscillogramObject rt;
+    private SignalOscillogramObject object;
     private JToolBar toolbar = new IepeVisualToolBar();
     private transient MultiViewElementCallback callback;
 
     public SignalOscillogramElement(Lookup lkp) {
         this.lkp = lkp;
-        this.rt = lkp.lookup(SignalOscillogramObject.class);
-        assert rt != null;
+        this.object = lkp.lookup(SignalOscillogramObject.class);
+        assert object != null;
 //        IepeProject project = lkp.lookup(IepeProject.class);
-        properties = rt.getProject().getProperties();
+        properties = object.getProject().getProperties();
 
+//        object.getChannels();
 //        ChannelList list = rt.getChannelList();
-        EEAInput[] iepe = rt.getProject().getInput();
+        EEAInput[] iepe = object.getProject().getInput();
 //        list.addConfigure(this);
 
         initComponents();
@@ -212,11 +214,12 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
     private static final int MAX_DATA_POINTS = 1000;
     private double t = 1;
 
-    private XYChart.Series<Number, Number> series;
-    private ConcurrentLinkedQueue<XYChart.Data> cc = new ConcurrentLinkedQueue<XYChart.Data>();
+//    private XYChart.Series<Number, Number> series;
+    private LineChart<Number, Number> chart;
+//    private ConcurrentLinkedQueue<XYChart.Data> queue = new ConcurrentLinkedQueue<XYChart.Data>();
     private ExecutorService executor;
     private NumberAxis xAxis;
-        
+
     private Scene createScene() {
 
         xAxis = new NumberAxis(0, MAX_DATA_POINTS, MAX_DATA_POINTS / 10);
@@ -228,22 +231,22 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
         yAxis.setAutoRanging(true);
 
         //-- Chart
-        final LineChart<Number, Number> sc = new LineChart<Number, Number>(xAxis, yAxis) {
+        chart = new LineChart<Number, Number>(xAxis, yAxis) {
             // Override to remove symbols on each data point
             @Override
             protected void dataItemAdded(XYChart.Series<Number, Number> series, int itemIndex, XYChart.Data<Number, Number> item) {
             }
         };
-        sc.setAnimated(false);
-        sc.setId("liveAreaChart");
-        sc.setTitle("Animated Area Chart");
+        chart.setAnimated(false);
+        chart.setId("liveAreaChart");
+        chart.setTitle("Animated Area Chart");
+        chart.setCreateSymbols(false);
 
         //-- Chart Series
-        series = new LineChart.Series<Number, Number>();
-        series.setName("Area Chart Series");
-        sc.getData().add(series);
-
-        return new Scene(sc);
+//        series = new LineChart.Series<Number, Number>();
+//        series.setName("Area Chart Series");
+//        sc.getData().add(series);
+        return new Scene(chart);
     }
 
     private void initFX(JFXPanel fxPanel) {
@@ -259,59 +262,46 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
         new AnimationTimer() {
             @Override
             public void handle(long now) {
-                addDataToSeries();
+                for (Channel channel : object.getChannels()) {
+                    chart.getData().remove(channel.getSeries());
+                    chart.getData().add(channel.getSeries());
+                }
+                for (Channel channel : object.getChannels()) {
+                    addDataToSeries(channel.getSeries(), channel.getQueue());
+                }
+                xAxis.setLowerBound(0);
+                xAxis.setUpperBound(t);
+                xAxis.setTickUnit(t / 10);
             }
         }.start();
     }
 
-//    private class AddToQueue implements Runnable {
     @Override
     public void run() {
         try {
             while (!Thread.interrupted()) {
                 // add a item of random data to queue
-                int samplerate = 10000;
-                SineSimulator s = new SineSimulator(samplerate, 100, 5);
-                SineInputStream si = new SineInputStream(s);
-                ZoomInputStream zi = new ZoomInputStream(si, samplerate);
-//                zi.setTime(t);
-                zi.update(cc, t);
-//                for (int i = 0; i <= MAX_DATA_POINTS; i++) {
-//                    double x = i / (double) samplerate;
-//                    try {
-//                        //                    cc.add(new XYChart.Data(x, s.getY(i)));
-//                        cc.add(new XYChart.Data(x, zi.readValue()));
-//                    } catch (IOException ex) {
-//                        Exceptions.printStackTrace(ex);
-//                    }
-//                }
+                for (Channel channel : object.getChannels()) {
+                    channel.update(t);
+                }
                 Thread.sleep(1000);
             }
-//            executor.execute(this);
         } catch (InterruptedException ex) {
             Logger.getLogger(IepeRealtimeSpectrumElement.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private void addDataToSeries() {
-        while (!cc.isEmpty()) {
-            series.getData().add(cc.remove());
+    private static void addDataToSeries(XYChart.Series<Number, Number> series, ConcurrentLinkedQueue<XYChart.Data> queue) {
+        while (!queue.isEmpty()) {
+            series.getData().add(queue.remove());
         }
-
         if (series.getData().size() == 0) {
             return;
         }
-
         // remove points to keep us at no more than MAX_DATA_POINTS
         if (series.getData().size() > MAX_DATA_POINTS) {
             series.getData().remove(0, series.getData().size() - MAX_DATA_POINTS);
         }
-
-        // update 
-        double m = series.getData().get(series.getData().size() - 1).getXValue().doubleValue();
-        xAxis.setLowerBound(0);
-        xAxis.setUpperBound(m);
-        xAxis.setTickUnit(m / 10);
     }
 
     private void initfx() {
@@ -411,7 +401,7 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
     @Override
     public void setMultiViewCallback(MultiViewElementCallback callback) {
         this.callback = callback;
-        callback.getTopComponent().setDisplayName(rt.getDisplayName());
+        callback.getTopComponent().setDisplayName(object.getDisplayName());
     }
 
     @Override

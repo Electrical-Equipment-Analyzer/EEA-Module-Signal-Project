@@ -18,20 +18,47 @@
 package tw.edu.sju.ee.eea.module.signal.temp;
 
 import java.awt.Color;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
+import tw.edu.sju.ee.eea.core.math.SineSimulator;
+import tw.edu.sju.ee.eea.module.signal.oscillogram.SineInputStream;
+import tw.edu.sju.ee.eea.module.signal.oscillogram.ZoomInputStream;
 
 /**
  *
  * @author D10307009
  */
 public class Channel {
-    
+
+    private XYChart.Series<Number, Number> series = new LineChart.Series<Number, Number>();
+    private ConcurrentLinkedQueue<XYChart.Data> queue = new ConcurrentLinkedQueue<XYChart.Data>();
     private String device;
     private int channel;
-    private String name;
+//    private String name;
     private Color color;
 
-    public Channel(String name) {
-        this.name = name;
+    public Channel(String device, int channel) {
+        this.device = device;
+        this.channel = channel;
+        this.setName(device + "/" + channel);
+        
+    }
+
+    public void update(double t) {
+        int samplerate = 10000;
+        SineSimulator s = new SineSimulator(samplerate, 100 * getChannel() + 100, 5);
+        SineInputStream si = new SineInputStream(s);
+        ZoomInputStream zi = new ZoomInputStream(si, samplerate);
+        zi.update(queue, t);
+    }
+
+    public XYChart.Series<Number, Number> getSeries() {
+        return series;
+    }
+
+    public ConcurrentLinkedQueue<XYChart.Data> getQueue() {
+        return queue;
     }
 
     public String getDevice() {
@@ -43,7 +70,7 @@ public class Channel {
     }
 
     public String getName() {
-        return name;
+        return this.series.getName();
     }
 
     public Color getColor() {
@@ -51,11 +78,11 @@ public class Channel {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.series.setName(name);
     }
 
     public void setColor(Color color) {
         this.color = color;
     }
-    
+
 }

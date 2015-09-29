@@ -54,23 +54,21 @@ public class SignalOscillogramObject extends AbstractNode implements ChannelList
     private IepeProject project;
 //    private Lookup lkp;
 //    private ChannelList list;
-    private ArrayList<Channel> channels;
+    private ArrayList<Channel> channels = new ArrayList<Channel>();
     TopComponent tc;
 
-    public SignalOscillogramObject(Project project) {
+    public SignalOscillogramObject(Project project, String name) {
         super(Children.LEAF);
-        
         this.project = (IepeProject) project;
-        channels = new ArrayList<Channel>();
         
-        setName("FFF");
+        setName(name);
         setIconBaseWithExtension("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
     }
     
     private void addDefault() {
-        channels.add(new Channel("A0"));
-        channels.add(new Channel("A1"));
-        channels.add(new Channel("A2"));
+        channels.add(new Channel("A", channels.size()));
+        channels.add(new Channel("A", channels.size()));
+        channels.add(new Channel("A", channels.size()));
     }
 
     public IepeProject getProject() {

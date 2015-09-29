@@ -20,7 +20,6 @@ package tw.edu.sju.ee.eea.module.signal;
 import java.util.List;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Node;
-import tw.edu.sju.ee.eea.module.signal.oscillogram.VNodeList;
 
 /**
  *
@@ -28,9 +27,9 @@ import tw.edu.sju.ee.eea.module.signal.oscillogram.VNodeList;
  */
 public class SignalChildFactory extends ChildFactory<Node> {
 
-    private VNodeList list;
+    private List<Node> list;
     
-    SignalChildFactory(VNodeList list) {
+    SignalChildFactory(List<Node> list) {
         this.list = list;
     }
 
