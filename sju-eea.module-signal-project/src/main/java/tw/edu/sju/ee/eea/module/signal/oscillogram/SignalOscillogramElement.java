@@ -20,6 +20,7 @@ package tw.edu.sju.ee.eea.module.signal.oscillogram;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.text.Format;
 import java.util.Calendar;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -53,6 +54,7 @@ import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
 import org.openide.awt.UndoRedo;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
@@ -62,6 +64,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.window.IepeRealtimeSpectrumElement;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 import tw.edu.sju.ee.eea.ui.swing.SpinnerMetricModel;
+import tw.edu.sju.ee.eea.utils.io.ValueInputStream;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_Oscilloscope_Function",
@@ -267,10 +270,21 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
         try {
             while (!Thread.interrupted()) {
                 // add a item of random data to queue
-                SineSimulator s = new SineSimulator(1000, 10, 5);
-                for (int i = 0; i <= MAX_DATA_POINTS; i++) {
-                    cc.add(new XYChart.Data(s.getX(i), s.getY(i)));
-                }
+                int samplerate = 10000;
+                SineSimulator s = new SineSimulator(samplerate, 100, 5);
+                SineInputStream si = new SineInputStream(s);
+                ZoomInputStream zi = new ZoomInputStream(si, samplerate);
+//                zi.setTime(t);
+                zi.update(cc, t);
+//                for (int i = 0; i <= MAX_DATA_POINTS; i++) {
+//                    double x = i / (double) samplerate;
+//                    try {
+//                        //                    cc.add(new XYChart.Data(x, s.getY(i)));
+//                        cc.add(new XYChart.Data(x, zi.readValue()));
+//                    } catch (IOException ex) {
+//                        Exceptions.printStackTrace(ex);
+//                    }
+//                }
                 Thread.sleep(1000);
             }
 //            executor.execute(this);
