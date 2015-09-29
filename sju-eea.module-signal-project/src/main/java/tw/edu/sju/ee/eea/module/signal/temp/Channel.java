@@ -35,14 +35,12 @@ public class Channel {
     private ConcurrentLinkedQueue<XYChart.Data> queue = new ConcurrentLinkedQueue<XYChart.Data>();
     private String device;
     private int channel;
-//    private String name;
     private Color color;
 
     public Channel(String device, int channel) {
         this.device = device;
         this.channel = channel;
         this.setName(device + "/" + channel);
-        
     }
 
     public void update(double t) {

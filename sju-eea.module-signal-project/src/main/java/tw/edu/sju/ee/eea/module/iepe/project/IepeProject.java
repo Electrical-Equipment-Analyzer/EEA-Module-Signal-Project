@@ -74,7 +74,7 @@ public class IepeProject implements Project {
     private IepeProjectProperties properties;
 //    private ChannelList list;
 
-    private VNodeList oscillogramList;
+    private ArrayList<Node> oscillogramList = new ArrayList<Node>();
 
     public IepeProject(FileObject projectDirectory, ProjectState state) {
         this.projectDirectory = projectDirectory;
@@ -101,15 +101,27 @@ public class IepeProject implements Project {
 //            Exceptions.printStackTrace(ex);
 //        }
 
-        oscillogramList = new VNodeList("TimeDomain", "FrequencyDomain", "TimeMes");
-        oscillogramList.add(new SignalOscillogramObject(IepeProject.this));
+//        oscillogramList = new VNodeList("TimeDomain", "FrequencyDomain", "TimeMes");
+        oscillogramList.add(new SignalOscillogramObject(IepeProject.this, "TimeDomain"));
+        oscillogramList.add(new TestNode("FrequencyDomain"));
+        oscillogramList.add(new TestNode("TimeMes"));
 
         r = new IepeRealtimeObject(IepeProject.this);
         h = new IepeHistoryObject(IepeProject.this);
         a = new IepeAnalyzerObject(IepeProject.this);
     }
 
-    public VNodeList getOscillogramList() {
+    public static class TestNode extends AbstractNode {
+
+        public TestNode(String name) {
+            super(Children.LEAF);
+            setDisplayName(name);
+            setIconBaseWithExtension("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
+        }
+
+    }
+
+    public List<Node> getOscillogramList() {
         return oscillogramList;
     }
 

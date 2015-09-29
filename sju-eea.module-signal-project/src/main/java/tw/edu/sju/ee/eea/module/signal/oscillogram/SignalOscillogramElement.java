@@ -20,16 +20,13 @@ package tw.edu.sju.ee.eea.module.signal.oscillogram;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.text.Format;
-import java.util.Calendar;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.AnimationTimer;
-import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -54,18 +51,15 @@ import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
 import org.openide.awt.UndoRedo;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.core.math.MetricPrefixFormat;
-import tw.edu.sju.ee.eea.core.math.SineSimulator;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.iepe.project.window.IepeRealtimeSpectrumElement;
 import tw.edu.sju.ee.eea.module.signal.temp.Channel;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 import tw.edu.sju.ee.eea.ui.swing.SpinnerMetricModel;
-import tw.edu.sju.ee.eea.utils.io.ValueInputStream;
 
 @MultiViewElement.Registration(
         displayName = "#LBL_Oscilloscope_Function",
@@ -214,14 +208,11 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
     private static final int MAX_DATA_POINTS = 1000;
     private double t = 1;
 
-//    private XYChart.Series<Number, Number> series;
     private LineChart<Number, Number> chart;
-//    private ConcurrentLinkedQueue<XYChart.Data> queue = new ConcurrentLinkedQueue<XYChart.Data>();
     private ExecutorService executor;
     private NumberAxis xAxis;
 
     private Scene createScene() {
-
         xAxis = new NumberAxis(0, MAX_DATA_POINTS, MAX_DATA_POINTS / 10);
         xAxis.setForceZeroInRange(true);
         xAxis.setAutoRanging(false);
@@ -238,14 +229,9 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
             }
         };
         chart.setAnimated(false);
-        chart.setId("liveAreaChart");
-        chart.setTitle("Animated Area Chart");
+        chart.setId(object.getName());
+        chart.setTitle(object.getName());
         chart.setCreateSymbols(false);
-
-        //-- Chart Series
-//        series = new LineChart.Series<Number, Number>();
-//        series.setName("Area Chart Series");
-//        sc.getData().add(series);
         return new Scene(chart);
     }
 
@@ -314,10 +300,6 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
         });
     }
 
-//    @Override
-//    public String getName() {
-//        return "IepeVisualElement";
-//    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
