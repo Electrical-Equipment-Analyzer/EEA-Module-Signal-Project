@@ -18,12 +18,16 @@
 package tw.edu.sju.ee.eea.module.signal.temp;
 
 import java.awt.Color;
+import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import tw.edu.sju.ee.eea.core.math.SineSimulator;
+import tw.edu.sju.ee.eea.module.signal.oscillogram.FourierTransformerRenderer;
+import tw.edu.sju.ee.eea.module.signal.oscillogram.SignalRenderer;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.SineInputStream;
-import tw.edu.sju.ee.eea.module.signal.oscillogram.ZoomInputStream;
+import tw.edu.sju.ee.eea.module.signal.oscillogram.ZoomRenderer;
+import tw.edu.sju.ee.eea.utils.io.ValueInput;
 
 /**
  *
@@ -36,19 +40,21 @@ public class Channel {
     private String device;
     private int channel;
     private Color color;
-
+    
     public Channel(String device, int channel) {
         this.device = device;
         this.channel = channel;
         this.setName(device + "/" + channel);
     }
 
+    private static final int[] f = {100, 200, 300};
+
     public void update(double t) {
-        int samplerate = 10000;
-        SineSimulator s = new SineSimulator(samplerate, 100 * getChannel() + 100, 5);
+        int samplerate = 16384;
+        SineSimulator s = new SineSimulator(samplerate, f[getChannel()], 5);
         SineInputStream si = new SineInputStream(s);
-        ZoomInputStream zi = new ZoomInputStream(si, samplerate);
-        zi.update(queue, t);
+        SignalRenderer sr = new ZoomRenderer();
+        sr.renderer(queue, t, si, samplerate);
     }
 
     public XYChart.Series<Number, Number> getSeries() {

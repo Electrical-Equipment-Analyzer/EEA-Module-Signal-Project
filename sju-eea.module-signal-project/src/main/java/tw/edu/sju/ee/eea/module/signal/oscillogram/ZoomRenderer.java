@@ -27,23 +27,16 @@ import tw.edu.sju.ee.eea.utils.io.ValueInput;
  *
  * @author D10307009
  */
-public class ZoomInputStream implements ValueInput {
+public class ZoomRenderer implements SignalRenderer {
 
-    private ValueInput vi;
-    private int samplerate;
-//    private double time;
     private static final int POINT = 1000;
 
-    public ZoomInputStream(ValueInput vi, int samplerate) {
-        this.vi = vi;
-        this.samplerate = samplerate;
-    }
-
-//    public void setTime(double time) {
-//        this.time = time;
+//    public ZoomRenderer(ValueInput vi, int samplerate) {
+//        super(vi, samplerate);
 //    }
 
-    public void update(ConcurrentLinkedQueue<XYChart.Data> queue, double time) {
+    @Override
+    public void renderer(ConcurrentLinkedQueue<XYChart.Data> queue, double time, ValueInput vi, int samplerate) {
         try {
             double rate = time * samplerate / POINT;
             int index = 0;
@@ -55,23 +48,13 @@ public class ZoomInputStream implements ValueInput {
                     queue.add(new XYChart.Data(position, value));
                     index++;
                 } else {
-                    value = readValue();
+                    value = vi.readValue();
                     count++;
                 }
             }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
-    }
-
-    @Override
-    public double readValue() throws IOException {
-        return vi.readValue();
-    }
-
-    @Override
-    public int available() throws IOException {
-        return vi.available();
     }
 
 }

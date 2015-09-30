@@ -278,6 +278,9 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
     }
 
     private static void addDataToSeries(XYChart.Series<Number, Number> series, ConcurrentLinkedQueue<XYChart.Data> queue) {
+        if (queue.size() > 0) {
+        series.getData().remove(0, series.getData().size());            
+        }
         while (!queue.isEmpty()) {
             series.getData().add(queue.remove());
         }
@@ -285,9 +288,9 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
             return;
         }
         // remove points to keep us at no more than MAX_DATA_POINTS
-        if (series.getData().size() > MAX_DATA_POINTS) {
-            series.getData().remove(0, series.getData().size() - MAX_DATA_POINTS);
-        }
+//        if (series.getData().size() > MAX_DATA_POINTS) {
+//            series.getData().remove(0, series.getData().size() - MAX_DATA_POINTS);
+//        }
     }
 
     private void initfx() {
