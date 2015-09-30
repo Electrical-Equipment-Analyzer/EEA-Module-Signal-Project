@@ -275,6 +275,7 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
         } catch (InterruptedException ex) {
             Logger.getLogger(IepeRealtimeSpectrumElement.class.getName()).log(Level.SEVERE, null, ex);
         }
+        System.out.println("===== STOP =====");
     }
 
     private static void addDataToSeries(XYChart.Series<Number, Number> series, ConcurrentLinkedQueue<XYChart.Data> queue) {

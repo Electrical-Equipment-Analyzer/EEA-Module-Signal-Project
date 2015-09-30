@@ -40,10 +40,12 @@ public class Channel {
     private String device;
     private int channel;
     private Color color;
-    
-    public Channel(String device, int channel) {
+    private SignalRenderer renderer;
+
+    public Channel(String device, int channel, SignalRenderer renderer) {
         this.device = device;
         this.channel = channel;
+        this.renderer = renderer;
         this.setName(device + "/" + channel);
     }
 
@@ -53,8 +55,7 @@ public class Channel {
         int samplerate = 16384;
         SineSimulator s = new SineSimulator(samplerate, f[getChannel()], 5);
         SineInputStream si = new SineInputStream(s);
-        SignalRenderer sr = new ZoomRenderer();
-        sr.renderer(queue, t, si, samplerate);
+        renderer.renderer(queue, t, si, samplerate);
     }
 
     public XYChart.Series<Number, Number> getSeries() {

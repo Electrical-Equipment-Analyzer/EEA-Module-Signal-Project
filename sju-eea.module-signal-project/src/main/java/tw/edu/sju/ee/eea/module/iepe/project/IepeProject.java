@@ -52,7 +52,9 @@ import tw.edu.sju.ee.eea.module.signal.oscillogram.SignalOscillogramObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.module.signal.SignalProjectLogicalView;
+import tw.edu.sju.ee.eea.module.signal.oscillogram.FourierTransformerRenderer;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.VNodeList;
+import tw.edu.sju.ee.eea.module.signal.oscillogram.ZoomRenderer;
 import tw.edu.sju.ee.eea.module.temp.EmulatorDevice;
 import tw.edu.sju.ee.eea.module.temp.MDESDevice;
 import tw.edu.sju.ee.eea.module.temp.SerialDevice;
@@ -102,8 +104,9 @@ public class IepeProject implements Project {
 //        }
 
 //        oscillogramList = new VNodeList("TimeDomain", "FrequencyDomain", "TimeMes");
-        oscillogramList.add(new SignalOscillogramObject(IepeProject.this, "TimeDomain"));
-        oscillogramList.add(new TestNode("FrequencyDomain"));
+        oscillogramList.add(new SignalOscillogramObject(IepeProject.this, "TimeDomain", new ZoomRenderer()));
+        oscillogramList.add(new SignalOscillogramObject(IepeProject.this, "FrequencyDomain", new FourierTransformerRenderer()));
+//        oscillogramList.add(new TestNode("FrequencyDomain"));
         oscillogramList.add(new TestNode("TimeMes"));
 
         r = new IepeRealtimeObject(IepeProject.this);

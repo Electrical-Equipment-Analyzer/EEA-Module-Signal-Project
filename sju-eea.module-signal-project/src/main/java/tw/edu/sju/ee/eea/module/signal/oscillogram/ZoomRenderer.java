@@ -39,7 +39,7 @@ public class ZoomRenderer implements SignalRenderer {
     public void renderer(ConcurrentLinkedQueue<XYChart.Data> queue, double time, ValueInput vi, int samplerate) {
         try {
             double rate = time * samplerate / POINT;
-            int index = 0;
+            int index = 1;
             double count = 0;
             double value = 0;
             while (index <= POINT) {
