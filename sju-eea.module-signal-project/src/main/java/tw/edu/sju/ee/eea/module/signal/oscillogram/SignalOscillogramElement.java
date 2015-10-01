@@ -17,6 +17,8 @@
  */
 package tw.edu.sju.ee.eea.module.signal.oscillogram;
 
+import com.sun.javafx.tk.Toolkit;
+import com.sun.scenario.animation.AbstractMasterTimer;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -56,7 +58,6 @@ import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.core.math.MetricPrefixFormat;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
-import tw.edu.sju.ee.eea.module.iepe.project.window.IepeRealtimeSpectrumElement;
 import tw.edu.sju.ee.eea.module.signal.temp.Channel;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 import tw.edu.sju.ee.eea.ui.swing.SpinnerMetricModel;
@@ -235,52 +236,74 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
         return new Scene(chart);
     }
 
+    private AnimationTimer timer;
+    private boolean update = false;
+    private Scene scene;
+
     private void initFX(JFXPanel fxPanel) {
         // This method is invoked on the JavaFX thread
-        Scene scene = createScene();
+        scene = createScene();
         fxPanel.setScene(scene);
 
         //-- Prepare Executor Services
         executor = Executors.newCachedThreadPool();
         executor.execute(this);
+//        new Thread(this).start();
 
         //-- Prepare Timeline
-        new AnimationTimer() {
+        timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
+                SignalOscillogramElement.this.handle();
+            }
+        };
+        timer.start();
+    }
+
+    public void handle() {
+        if (update) {
+            System.out.println("at");
+            if (chart.getData().size() == 0) {
                 for (Channel channel : object.getChannels()) {
-                    chart.getData().remove(channel.getSeries());
+//                    chart.getData().remove(channel.getSeries());
                     chart.getData().add(channel.getSeries());
                 }
-                for (Channel channel : object.getChannels()) {
-                    addDataToSeries(channel.getSeries(), channel.getQueue());
-                }
-                xAxis.setLowerBound(0);
-                xAxis.setUpperBound(t);
-                xAxis.setTickUnit(t / 10);
             }
-        }.start();
+            for (Channel channel : object.getChannels()) {
+                addDataToSeries(channel.getSeries(), channel.getQueue());
+            }
+            xAxis.setLowerBound(0);
+            xAxis.setUpperBound(t);
+            xAxis.setTickUnit(t / 10);
+            update = false;
+        }
     }
 
     @Override
     public void run() {
         try {
             while (!Thread.interrupted()) {
+                System.out.println("run");
                 // add a item of random data to queue
                 for (Channel channel : object.getChannels()) {
                     channel.update(t);
                 }
+                update = true;
+//                Platform.setImplicitExit(false);
+//                Platform.runLater(()
+//                        -> handle()
+//                );
                 Thread.sleep(1000);
             }
         } catch (InterruptedException ex) {
-            Logger.getLogger(IepeRealtimeSpectrumElement.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SignalOscillogramElement.class.getName()).log(Level.SEVERE, null, ex);
         }
         System.out.println("===== STOP =====");
     }
 
     private static void addDataToSeries(XYChart.Series<Number, Number> series, ConcurrentLinkedQueue<XYChart.Data> queue) {
         if (queue.size() > 0) {
-        series.getData().remove(0, series.getData().size());            
+            series.getData().remove(0, series.getData().size());
         }
         while (!queue.isEmpty()) {
             series.getData().add(queue.remove());
@@ -295,6 +318,7 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
     }
 
     private void initfx() {
+        Platform.setImplicitExit(false);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -357,26 +381,32 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
 
     @Override
     public void componentOpened() {
+        Logger.getLogger(SignalOscillogramElement.class.getName()).log(Level.INFO, "open");
     }
 
     @Override
     public void componentClosed() {
+        Logger.getLogger(SignalOscillogramElement.class.getName()).log(Level.INFO, "close");
     }
 
     @Override
     public void componentShowing() {
+        Logger.getLogger(SignalOscillogramElement.class.getName()).log(Level.INFO, "show");
     }
 
     @Override
     public void componentHidden() {
+        Logger.getLogger(SignalOscillogramElement.class.getName()).log(Level.INFO, "hide");
     }
 
     @Override
     public void componentActivated() {
+        Logger.getLogger(SignalOscillogramElement.class.getName()).log(Level.INFO, "active");
     }
 
     @Override
     public void componentDeactivated() {
+        Logger.getLogger(SignalOscillogramElement.class.getName()).log(Level.INFO, "deactive");
     }
 
     @Override
