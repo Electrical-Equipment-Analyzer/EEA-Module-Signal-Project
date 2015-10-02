@@ -23,7 +23,7 @@ import tw.edu.sju.ee.eea.core.math.SineSimulator;
 import tw.edu.sju.ee.eea.jni.mps.MPS140801;
 import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.ZoomRenderer;
-import tw.edu.sju.ee.eea.module.signal.temp.Channel;
+import tw.edu.sju.ee.eea.module.signal.temp.OscillogramChannel;
 import tw.edu.sju.ee.eea.module.signal.temp.SineInputStream;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 
@@ -35,7 +35,7 @@ public class SignalDeviceObject extends AbstractNode implements tw.edu.sju.ee.ee
 
     public static final String MIMETYPE = "application/device";
     private TopComponent tc;
-    private ArrayList<Channel> channels = new ArrayList<Channel>();
+    private ArrayList<OscillogramChannel> channels = new ArrayList<OscillogramChannel>();
     private EEAInput input;
 
     public SignalDeviceObject(Project project) {
@@ -43,12 +43,12 @@ public class SignalDeviceObject extends AbstractNode implements tw.edu.sju.ee.ee
         setName("NI1234");
         setIconBaseWithExtension("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
         input = new EEAInput(new MPS140801(0, 16384));
-        channels.add(new Channel("A", channels.size(), new ZoomRenderer(),
+        channels.add(new OscillogramChannel("A", channels.size(), new ZoomRenderer(),
                 new SineInputStream(new SineSimulator(16384, 200, 5))));
     }
 
     @Override
-    public List<Channel> getChannels() {
+    public List<OscillogramChannel> getChannels() {
         return channels;
     }
 

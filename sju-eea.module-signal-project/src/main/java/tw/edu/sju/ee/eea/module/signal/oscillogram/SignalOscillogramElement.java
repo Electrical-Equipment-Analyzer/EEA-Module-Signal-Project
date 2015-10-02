@@ -58,7 +58,7 @@ import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.core.math.MetricPrefixFormat;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
-import tw.edu.sju.ee.eea.module.signal.temp.Channel;
+import tw.edu.sju.ee.eea.module.signal.temp.OscillogramChannel;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 import tw.edu.sju.ee.eea.ui.swing.SpinnerMetricModel;
 
@@ -264,12 +264,12 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
         if (update) {
             System.out.println("at");
             if (chart.getData().size() == 0) {
-                for (Channel channel : object.getChannels()) {
+                for (OscillogramChannel channel : object.getChannels()) {
 //                    chart.getData().remove(channel.getSeries());
                     chart.getData().add(channel.getSeries());
                 }
             }
-            for (Channel channel : object.getChannels()) {
+            for (OscillogramChannel channel : object.getChannels()) {
                 addDataToSeries(channel.getSeries(), channel.getQueue());
             }
             xAxis.setLowerBound(0);
@@ -285,7 +285,7 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
             while (!Thread.interrupted()) {
                 System.out.println("run");
                 // add a item of random data to queue
-                for (Channel channel : object.getChannels()) {
+                for (OscillogramChannel channel : object.getChannels()) {
                     channel.update(t);
                 }
                 update = true;

@@ -17,16 +17,23 @@
  */
 package tw.edu.sju.ee.eea.module.signal.io;
 
-import java.util.List;
+import java.awt.Color;
 
 /**
  *
  * @author D10307009
  */
-public interface ChannelList<T extends Channel> {
-    
+public interface Channel {
+
     public String getName();
-    
-    public List<T> getChannels();
-    
+
+    public void setName(String name);
+
+    public String getDevice();
+
+    public int getChannel();
+
+    public Color getColor();
+
+    public void setColor(Color color);
 }

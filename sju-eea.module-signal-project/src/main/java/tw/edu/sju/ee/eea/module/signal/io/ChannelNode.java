@@ -17,7 +17,6 @@
  */
 package tw.edu.sju.ee.eea.module.signal.io;
 
-import tw.edu.sju.ee.eea.module.signal.temp.Channel;
 import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
 import org.openide.nodes.AbstractNode;

@@ -35,7 +35,7 @@ import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.core.math.SineSimulator;
 //import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
-import tw.edu.sju.ee.eea.module.signal.temp.Channel;
+import tw.edu.sju.ee.eea.module.signal.temp.OscillogramChannel;
 import tw.edu.sju.ee.eea.module.signal.io.ChannelList;
 import tw.edu.sju.ee.eea.utils.io.ChannelInputStream;
 
@@ -43,13 +43,13 @@ import tw.edu.sju.ee.eea.utils.io.ChannelInputStream;
  *
  * @author Leo
  */
-public class SignalOscillogramObject extends AbstractNode implements ChannelList, NavigatorLookupHint, Serializable {
+public class SignalOscillogramObject extends AbstractNode implements ChannelList<OscillogramChannel>, NavigatorLookupHint, Serializable {
 
     public static final String MIMETYPE = "application/oscillogram";
     private IepeProject project;
 //    private Lookup lkp;
 //    private ChannelList list;
-    private ArrayList<Channel> channels = new ArrayList<Channel>();
+    private ArrayList<OscillogramChannel> channels = new ArrayList<OscillogramChannel>();
     TopComponent tc;
     private SignalRenderer renderer;
 
@@ -65,15 +65,15 @@ public class SignalOscillogramObject extends AbstractNode implements ChannelList
         try {
             ChannelInputStream c0 = new ChannelInputStream(163840, 0);
             project.getInput()[0].getIOChannel(0).addStream(c0);
-            channels.add(new Channel("A", channels.size(), renderer, c0));
+            channels.add(new OscillogramChannel("A", channels.size(), renderer, c0));
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
 //        channels.add(new Channel("A", channels.size(), renderer,
 //                new SineInputStream(new SineSimulator(16384, 100, 5))));
-        channels.add(new Channel("A", channels.size(), renderer,
+        channels.add(new OscillogramChannel("A", channels.size(), renderer,
                 new SineInputStream(new SineSimulator(16384, 200, 5))));
-        channels.add(new Channel("A", channels.size(), renderer,
+        channels.add(new OscillogramChannel("A", channels.size(), renderer,
                 new SineInputStream(new SineSimulator(16384, 300, 5))));
     }
 
@@ -82,7 +82,7 @@ public class SignalOscillogramObject extends AbstractNode implements ChannelList
     }
 
     @Override
-    public List<Channel> getChannels() {
+    public List<OscillogramChannel> getChannels() {
         return channels;
     }
 

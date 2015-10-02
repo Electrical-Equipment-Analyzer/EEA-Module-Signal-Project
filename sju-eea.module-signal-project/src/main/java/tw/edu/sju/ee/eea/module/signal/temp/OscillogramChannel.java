@@ -24,6 +24,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import org.openide.util.Exceptions;
 import tw.edu.sju.ee.eea.core.math.SineSimulator;
+import tw.edu.sju.ee.eea.module.signal.io.Channel;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.FourierTransformerRenderer;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.SignalRenderer;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.ZoomRenderer;
@@ -33,7 +34,7 @@ import tw.edu.sju.ee.eea.utils.io.ValueInput;
  *
  * @author D10307009
  */
-public class Channel {
+public class OscillogramChannel implements Channel {
 
     private XYChart.Series<Number, Number> series = new LineChart.Series<Number, Number>();
     private ConcurrentLinkedQueue<XYChart.Data> queue = new ConcurrentLinkedQueue<XYChart.Data>();
@@ -44,7 +45,7 @@ public class Channel {
     int samplerate = 16384;
     private ValueInput vi;
 
-    public Channel(String device, int channel, SignalRenderer renderer, ValueInput vi) {
+    public OscillogramChannel(String device, int channel, SignalRenderer renderer, ValueInput vi) {
         this.device = device;
         this.channel = channel;
         this.renderer = renderer;

@@ -17,12 +17,9 @@
  */
 package tw.edu.sju.ee.eea.module.signal.io;
 
-import tw.edu.sju.ee.eea.module.signal.temp.Channel;
 import java.util.List;
 import org.openide.nodes.ChildFactory;
-import org.openide.nodes.Children;
 import org.openide.nodes.Node;
-import tw.edu.sju.ee.eea.module.signal.temp.VNodeList;
 
 /**
  *
@@ -31,7 +28,7 @@ import tw.edu.sju.ee.eea.module.signal.temp.VNodeList;
 public class ChannelChildFactory extends ChildFactory<Channel> {
 
     private List<Channel> list;
-    
+
     public ChannelChildFactory(List<Channel> list) {
         this.list = list;
     }
