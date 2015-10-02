@@ -27,21 +27,16 @@ import javax.swing.Action;
 import org.netbeans.api.project.Project;
 import org.netbeans.core.api.multiview.MultiViews;
 import org.netbeans.spi.navigator.NavigatorLookupHint;
-import org.netbeans.spi.project.ui.support.CommonProjectActions;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.util.Exceptions;
-import org.openide.util.Lookup;
-import org.openide.util.NbBundle;
-import org.openide.util.lookup.Lookups;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.core.math.SineSimulator;
 //import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
-import tw.edu.sju.ee.eea.module.iepe.channel.FunctionChannel;
-import tw.edu.sju.ee.eea.module.iepe.channel.ListManager;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
-import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
 import tw.edu.sju.ee.eea.module.signal.temp.Channel;
 import tw.edu.sju.ee.eea.module.signal.io.ChannelList;
+import tw.edu.sju.ee.eea.utils.io.ChannelInputStream;
 
 /**
  *
@@ -49,7 +44,6 @@ import tw.edu.sju.ee.eea.module.signal.io.ChannelList;
  */
 public class SignalOscillogramObject extends AbstractNode implements ChannelList, NavigatorLookupHint, Serializable {
 
-    
     public static final String MIMETYPE = "application/oscillogram";
     private IepeProject project;
 //    private Lookup lkp;
@@ -65,11 +59,21 @@ public class SignalOscillogramObject extends AbstractNode implements ChannelList
         setName(name);
         setIconBaseWithExtension("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
     }
-    
+
     private void addDefault() {
-        channels.add(new Channel("A", channels.size(), renderer));
-        channels.add(new Channel("A", channels.size(), renderer));
-        channels.add(new Channel("A", channels.size(), renderer));
+        try {
+            ChannelInputStream c0 = new ChannelInputStream(163840, 0);
+            project.getInput()[0].getIOChannel(0).addStream(c0);
+            channels.add(new Channel("A", channels.size(), renderer, c0));
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+//        channels.add(new Channel("A", channels.size(), renderer,
+//                new SineInputStream(new SineSimulator(16384, 100, 5))));
+        channels.add(new Channel("A", channels.size(), renderer,
+                new SineInputStream(new SineSimulator(16384, 200, 5))));
+        channels.add(new Channel("A", channels.size(), renderer,
+                new SineInputStream(new SineSimulator(16384, 300, 5))));
     }
 
     public IepeProject getProject() {
@@ -83,15 +87,15 @@ public class SignalOscillogramObject extends AbstractNode implements ChannelList
 
     @Override
     public Action[] getActions(boolean context) {
-            List<Action> actions = new ArrayList<Action>();
-            actions.add(new AbstractAction("Add Default") {
+        List<Action> actions = new ArrayList<Action>();
+        actions.add(new AbstractAction("Add Default") {
 
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    addDefault();
-                }
-            });
-            return actions.toArray(new AbstractAction[actions.size()]);
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addDefault();
+            }
+        });
+        return actions.toArray(new AbstractAction[actions.size()]);
     }
 
     @Override

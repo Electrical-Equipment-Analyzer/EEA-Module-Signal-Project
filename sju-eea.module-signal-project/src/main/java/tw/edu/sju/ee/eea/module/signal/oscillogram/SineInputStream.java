@@ -43,4 +43,8 @@ public class SineInputStream implements ValueInput {
         return Integer.MAX_VALUE;
     }
 
+    @Override
+    public long skip(long n) throws IOException {
+        return 0;
+    }
 }

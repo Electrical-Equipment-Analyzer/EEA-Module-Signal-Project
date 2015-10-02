@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
+import org.openide.util.Exceptions;
 import tw.edu.sju.ee.eea.core.math.SineSimulator;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.FourierTransformerRenderer;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.SignalRenderer;
@@ -41,21 +42,28 @@ public class Channel {
     private int channel;
     private Color color;
     private SignalRenderer renderer;
+    int samplerate = 16384;
+    private ValueInput vi;
 
-    public Channel(String device, int channel, SignalRenderer renderer) {
+    public Channel(String device, int channel, SignalRenderer renderer, ValueInput vi) {
         this.device = device;
         this.channel = channel;
         this.renderer = renderer;
         this.setName(device + "/" + channel);
+//        SineSimulator s = new SineSimulator(samplerate, f[getChannel()], 5);
+//        vi = new SineInputStream(s);
+        this.vi = vi;
     }
 
     private static final int[] f = {100, 200, 300};
 
     public void update(double t) {
-        int samplerate = 16384;
-        SineSimulator s = new SineSimulator(samplerate, f[getChannel()], 5);
-        SineInputStream si = new SineInputStream(s);
-        renderer.renderer(queue, t, si, samplerate);
+        renderer.renderer(queue, t, vi, samplerate);
+        try {
+            vi.skip(vi.available());
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     public XYChart.Series<Number, Number> getSeries() {
