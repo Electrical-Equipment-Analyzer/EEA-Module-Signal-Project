@@ -89,8 +89,8 @@ public class IepeProject implements Project {
         input = new EEAInput[(int) Math.ceil(properties.device().getChannels() / 8.0)];
         for (int i = 0; i < Math.ceil(properties.device().getChannels() / 8.0); i++) {
 //            devices.add(new MPS140801IEPE(i, properties.device().getSampleRate()));
-//            input[i] = new EEAInput(new EmulatorDevice(), new int[]{1});
-            input[i] = new EEAInput(new MPS140801(i, properties.device().getSampleRate()), new int[]{1});
+            input[i] = new EEAInput(new EmulatorDevice(), new int[]{1});
+//            input[i] = new EEAInput(new MPS140801(i, properties.device().getSampleRate()), new int[]{1});
 //            input[i] = new EEAInput(new SerialDevice(properties.device().getDeviceName()), new int[]{1});
 //            input[i] = new EEAInput(new MDESDevice(), new int[]{1});
         }
