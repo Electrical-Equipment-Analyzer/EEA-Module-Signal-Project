@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package tw.edu.sju.ee.eea.module.signal;
+package tw.edu.sju.ee.eea.module.signal.oscillogram;
 
 import java.awt.BorderLayout;
 import java.util.Collection;
@@ -48,7 +48,7 @@ import tw.edu.sju.ee.eea.module.signal.io.ChannelList;
     "CTL_NavigatorTopComponent=Navigator Window",
     "HINT_NavigatorTopComponent=This is a Navigator window"
 })
-public final class SignalNavigatorPanel extends JPanel implements NavigatorPanel, ExplorerManager.Provider, LookupListener {
+public final class OscillogramNavigatorPanel extends JPanel implements NavigatorPanel, ExplorerManager.Provider, LookupListener {
 
     private Lookup.Result<ChannelList> result = null;
 
@@ -56,7 +56,7 @@ public final class SignalNavigatorPanel extends JPanel implements NavigatorPanel
     private BeanTreeView listView;
     private Lookup lookup;
 
-    public SignalNavigatorPanel() {
+    public OscillogramNavigatorPanel() {
 
         setLayout(new BorderLayout());
         manager = new ExplorerManager();
@@ -109,7 +109,7 @@ public final class SignalNavigatorPanel extends JPanel implements NavigatorPanel
 
     @Override
     public void panelActivated(Lookup lkp) {
-        Logger.getLogger(SignalNavigatorPanel.class.getName()).log(Level.INFO, "pa");
+        Logger.getLogger(OscillogramNavigatorPanel.class.getName()).log(Level.INFO, "pa");
         this.result = Utilities.actionsGlobalContext().lookupResult(ChannelList.class);
         this.result.addLookupListener(this);
         ExplorerUtils.activateActions(manager, true);
@@ -118,7 +118,7 @@ public final class SignalNavigatorPanel extends JPanel implements NavigatorPanel
 
     @Override
     public void panelDeactivated() {
-        Logger.getLogger(SignalNavigatorPanel.class.getName()).log(Level.INFO, "pd");
+        Logger.getLogger(OscillogramNavigatorPanel.class.getName()).log(Level.INFO, "pd");
         this.result.removeLookupListener(this);
         this.result = null;
         ExplorerUtils.activateActions(manager, false);
@@ -136,7 +136,7 @@ public final class SignalNavigatorPanel extends JPanel implements NavigatorPanel
 
     @Override
     public void resultChanged(LookupEvent le) {
-        Logger.getLogger(SignalNavigatorPanel.class.getName()).log(Level.INFO, manager.getRootContext().getDisplayName());
+        Logger.getLogger(OscillogramNavigatorPanel.class.getName()).log(Level.INFO, manager.getRootContext().getDisplayName());
         Collection<? extends ChannelList> allInstances = this.result.allInstances();
         if (!allInstances.isEmpty()) {
             ChannelList list = allInstances.iterator().next();

@@ -52,6 +52,7 @@ import tw.edu.sju.ee.eea.module.signal.oscillogram.SignalOscillogramObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.module.signal.SignalProjectLogicalView;
+import tw.edu.sju.ee.eea.module.signal.device.SignalDeviceObject;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.FourierTransformerRenderer;
 import tw.edu.sju.ee.eea.module.signal.temp.VNodeList;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.ZoomRenderer;
@@ -104,7 +105,8 @@ public class IepeProject implements Project {
 //            Exceptions.printStackTrace(ex);
 //        }
 
-        deviceList = new VNodeList("mdes", "ee305");
+        deviceList.add(new SignalDeviceObject(this));
+        oscillogramList.add(new TestNode("tt"));
 
         oscillogramList.add(new SignalOscillogramObject(IepeProject.this, "TimeDomain", new ZoomRenderer()));
         oscillogramList.add(new SignalOscillogramObject(IepeProject.this, "FrequencyDomain", new FourierTransformerRenderer()));
