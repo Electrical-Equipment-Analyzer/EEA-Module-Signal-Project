@@ -22,7 +22,7 @@ import java.util.List;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
-import tw.edu.sju.ee.eea.module.signal.oscillogram.VNodeList;
+import tw.edu.sju.ee.eea.module.signal.temp.VNodeList;
 
 /**
  *

@@ -15,13 +15,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package tw.edu.sju.ee.eea.module.signal.oscillogram;
+package tw.edu.sju.ee.eea.module.signal.temp;
 
 import java.util.ArrayList;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
-import tw.edu.sju.ee.eea.module.signal.oscillogram.VNodeList.TestNode;
+import tw.edu.sju.ee.eea.module.signal.temp.VNodeList.TestNode;
 
 /**
  *

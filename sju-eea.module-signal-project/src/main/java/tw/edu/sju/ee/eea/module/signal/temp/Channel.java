@@ -26,7 +26,6 @@ import org.openide.util.Exceptions;
 import tw.edu.sju.ee.eea.core.math.SineSimulator;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.FourierTransformerRenderer;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.SignalRenderer;
-import tw.edu.sju.ee.eea.module.signal.oscillogram.SineInputStream;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.ZoomRenderer;
 import tw.edu.sju.ee.eea.utils.io.ValueInput;
 

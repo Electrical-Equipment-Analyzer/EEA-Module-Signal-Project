@@ -25,7 +25,6 @@ import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.util.NbBundle;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
-import tw.edu.sju.ee.eea.module.signal.oscillogram.VNodeList;
 
 /**
  *
@@ -42,11 +41,8 @@ public class SignalNodeFactory implements NodeFactory {
     public NodeList<?> createNodes(Project project) {
         if (project instanceof IepeProject) {
             IepeProject prj = (IepeProject) project;
-            SignalNode n1 = new SignalNode(Children.create(new SignalChildFactory(
-                    new VNodeList("PXIslot1/NI-5105", "PXIslot2/NI-5105")), false), "Device");
-
-//            VNodeList oscillogramList = new VNodeList("TimeDomain", "FrequencyDomain", "TimeMes");
-//            oscillogramList.add(prj.f);
+            SignalNode n1 = new SignalNode(Children.create(
+                    new SignalChildFactory(prj.getDeviceList()), false), "Device");
             SignalNode n2 = new SignalNode(Children.create(
                     new SignalChildFactory(prj.getOscillogramList()), false), "Oscillogram");
 

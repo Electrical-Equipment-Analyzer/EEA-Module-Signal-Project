@@ -17,6 +17,7 @@
  */
 package tw.edu.sju.ee.eea.module.signal.oscillogram;
 
+import tw.edu.sju.ee.eea.module.signal.temp.SineInputStream;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.Serializable;
