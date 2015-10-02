@@ -37,7 +37,7 @@ public class SignalDeviceObject extends AbstractNode implements tw.edu.sju.ee.ee
 
     public SignalDeviceObject(Project project) {
         super(Children.LEAF);
-        setDisplayName("NI1234");
+        setName("NI1234");
         setIconBaseWithExtension("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
         
         channels.add(new Channel("A", channels.size(), new ZoomRenderer(),

@@ -106,7 +106,7 @@ public class IepeProject implements Project {
 //        }
 
         deviceList.add(new SignalDeviceObject(this));
-        oscillogramList.add(new TestNode("tt"));
+        deviceList.add(new TestNode("tt"));
 
         oscillogramList.add(new SignalOscillogramObject(IepeProject.this, "TimeDomain", new ZoomRenderer()));
         oscillogramList.add(new SignalOscillogramObject(IepeProject.this, "FrequencyDomain", new FourierTransformerRenderer()));
