@@ -42,7 +42,15 @@ public class FourierTransformerRenderer implements SignalRenderer {
 
     public void renderer(ConcurrentLinkedQueue<XYChart.Data> queue, double time, ValueInput vi, int samplerate) {
         try {
-            double[] array = new double[8192];
+            if (vi.available() < 10) {
+                return;
+            }
+            while (vi.readValue() != Double.POSITIVE_INFINITY) {
+                if (vi.available() < 10) {
+                    return;
+                }
+            }
+            double[] array = new double[1024];
             for (int i = 0; i < array.length; i++) {
                 array[i] = vi.readValue();
             }
@@ -60,6 +68,8 @@ public class FourierTransformerRenderer implements SignalRenderer {
             for (int i = 0; i < absolute.length; i++) {
                 queue.add(new XYChart.Data(i * x, absolute[i] / transform.length));
             }
+            vi.skip(vi.available() - array.length);
+            System.out.println(vi.available());
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }

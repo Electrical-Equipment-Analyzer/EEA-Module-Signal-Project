@@ -68,6 +68,11 @@ public class MDESDevice implements EEADevice {
     public double[][] read(int length) throws EEAException {
         try {
             ArrayList<Double>[] readAcc = mdes.readAcc();
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                Exceptions.printStackTrace(ex);
+            }
             MDESFile file = new MDESFile(readAcc);
             return file.getData();
         } catch (IOException ex) {

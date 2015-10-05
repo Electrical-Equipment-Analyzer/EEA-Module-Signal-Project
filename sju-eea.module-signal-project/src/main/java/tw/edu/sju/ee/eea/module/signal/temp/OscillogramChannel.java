@@ -42,7 +42,7 @@ public class OscillogramChannel implements Channel {
     private int channel;
     private Color color;
     private SignalRenderer renderer;
-    int samplerate = 16384;
+    int samplerate = 10000;
     private ValueInput vi;
 
     public OscillogramChannel(String device, int channel, SignalRenderer renderer, ValueInput vi) {
@@ -59,11 +59,11 @@ public class OscillogramChannel implements Channel {
 
     public void update(double t) {
         renderer.renderer(queue, t, vi, samplerate);
-        try {
-            vi.skip(vi.available());
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
+//        try {
+//            vi.skip(vi.available());
+//        } catch (IOException ex) {
+//            Exceptions.printStackTrace(ex);
+//        }
     }
 
     public XYChart.Series<Number, Number> getSeries() {

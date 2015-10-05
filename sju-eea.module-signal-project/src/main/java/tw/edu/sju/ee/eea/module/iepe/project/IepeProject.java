@@ -86,14 +86,15 @@ public class IepeProject implements Project {
         properties = new IepeProjectProperties(
                 new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath()));
 //        List<IEPEDevice> devices = new ArrayList();
-        input = new EEAInput[(int) Math.ceil(properties.device().getChannels() / 8.0)];
-        for (int i = 0; i < Math.ceil(properties.device().getChannels() / 8.0); i++) {
+        input = new EEAInput[1];
+//        input = new EEAInput[(int) Math.ceil(properties.device().getChannels() / 8.0)];
+//        for (int i = 0; i < Math.ceil(properties.device().getChannels() / 8.0); i++) {
 //            devices.add(new MPS140801IEPE(i, properties.device().getSampleRate()));
-            input[i] = new EEAInput(new EmulatorDevice(), new int[]{1});
+//            input[i] = new EEAInput(new EmulatorDevice(), new int[]{1});
 //            input[i] = new EEAInput(new MPS140801(i, properties.device().getSampleRate()), new int[]{1});
 //            input[i] = new EEAInput(new SerialDevice(properties.device().getDeviceName()), new int[]{1});
-//            input[i] = new EEAInput(new MDESDevice(), new int[]{1});
-        }
+            input[0] = new EEAInput(new MDESDevice(), new int[]{1});
+//        }
 //        list = new ChannelList(lkp);
 //        try {
 //            for (int i = 0; i < properties.device().getChannels(); i++) {
@@ -105,7 +106,7 @@ public class IepeProject implements Project {
 //            Exceptions.printStackTrace(ex);
 //        }
 
-        deviceList.add(new SignalDeviceObject(this));
+//        deviceList.add(new SignalDeviceObject(this));
         deviceList.add(new TestNode("tt"));
 
         oscillogramList.add(new SignalOscillogramObject(IepeProject.this, "TimeDomain", new ZoomRenderer()));

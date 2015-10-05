@@ -37,6 +37,10 @@ public class DeviceChannel implements Channel {
         this.channel = channel;
     }
 
+    public InputChannel getInput() {
+        return ic;
+    }
+
     @Override
     public String getName() {
         return ic.getName();

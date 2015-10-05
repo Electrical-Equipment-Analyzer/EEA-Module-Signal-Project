@@ -34,15 +34,22 @@ public class ZoomRenderer implements SignalRenderer {
 //    public ZoomRenderer(ValueInput vi, int samplerate) {
 //        super(vi, samplerate);
 //    }
-
     @Override
     public void renderer(ConcurrentLinkedQueue<XYChart.Data> queue, double time, ValueInput vi, int samplerate) {
         try {
+            if (vi.available() < 10) {
+                return;
+            }
+            while (vi.readValue() != Double.POSITIVE_INFINITY) {
+                if (vi.available() < 10) {
+                    return;
+                }
+            }
             double rate = time * samplerate / POINT;
             int index = 1;
             double count = 0;
             double value = 0;
-            while (index <= POINT) {
+            while (index <= POINT && value != Double.POSITIVE_INFINITY) {
                 if (index <= (count / rate)) {
                     double position = count / samplerate;
                     queue.add(new XYChart.Data(position, value));
@@ -52,6 +59,8 @@ public class ZoomRenderer implements SignalRenderer {
                     count++;
                 }
             }
+            vi.skip(vi.available() - POINT);
+            System.out.println(vi.available());
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
