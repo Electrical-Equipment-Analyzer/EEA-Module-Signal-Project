@@ -54,6 +54,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
 import tw.edu.sju.ee.eea.module.signal.SignalProjectLogicalView;
 import tw.edu.sju.ee.eea.module.signal.device.SignalDeviceObject;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.FourierTransformerRenderer;
+import tw.edu.sju.ee.eea.module.signal.oscillogram.surface.SurfaceObject;
 import tw.edu.sju.ee.eea.module.signal.temp.VNodeList;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.ZoomRenderer;
 import tw.edu.sju.ee.eea.module.temp.EmulatorDevice;
@@ -111,6 +112,7 @@ public class IepeProject implements Project {
 
         oscillogramList.add(new SignalOscillogramObject(IepeProject.this, "TimeDomain", new ZoomRenderer()));
         oscillogramList.add(new SignalOscillogramObject(IepeProject.this, "FrequencyDomain", new FourierTransformerRenderer()));
+        oscillogramList.add(new SurfaceObject(IepeProject.this, "TimeFDomain", new FourierTransformerRenderer()));
         oscillogramList.add(new TestNode("TimeMes"));
 
         r = new IepeRealtimeObject(IepeProject.this);
