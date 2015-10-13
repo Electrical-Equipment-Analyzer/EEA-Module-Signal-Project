@@ -74,9 +74,7 @@ public class IepeProject implements Project {
     private final ProjectState state;
     private Lookup lkp;
     private Child[] chield;
-    private final EEAInput[] input;
     private IepeProjectProperties properties;
-//    private ChannelList list;
 
     private ArrayList<Node> deviceList = new ArrayList<Node>();
     private ArrayList<Node> oscillogramList = new ArrayList<Node>();
@@ -86,29 +84,9 @@ public class IepeProject implements Project {
         this.state = state;
         properties = new IepeProjectProperties(
                 new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath()));
-//        List<IEPEDevice> devices = new ArrayList();
-        input = new EEAInput[1];
-//        input = new EEAInput[(int) Math.ceil(properties.device().getChannels() / 8.0)];
-//        for (int i = 0; i < Math.ceil(properties.device().getChannels() / 8.0); i++) {
-//            devices.add(new MPS140801IEPE(i, properties.device().getSampleRate()));
-//            input[i] = new EEAInput(new EmulatorDevice(), new int[]{1});
-//            input[i] = new EEAInput(new MPS140801(i, properties.device().getSampleRate()), new int[]{1});
-//            input[i] = new EEAInput(new SerialDevice(properties.device().getDeviceName()), new int[]{1});
-            input[0] = new EEAInput(new MDESDevice(), new int[]{1});
-//        }
-//        list = new ChannelList(lkp);
-//        try {
-//            for (int i = 0; i < properties.device().getChannels(); i++) {
-//                int device = i / 8;
-//                int channel = i % 8;
-//                list.add(new SourceChannel(null, device, channel, lkp));
-//            }
-//        } catch (IOException ex) {
-//            Exceptions.printStackTrace(ex);
-//        }
 
-//        deviceList.add(new SignalDeviceObject(this));
-        deviceList.add(new TestNode("tt"));
+        deviceList.add(new SignalDeviceObject(this));
+//        deviceList.add(new TestNode("tt"));
 
         oscillogramList.add(new SignalOscillogramObject(IepeProject.this, "TimeDomain", new ZoomRenderer()));
         oscillogramList.add(new SignalOscillogramObject(IepeProject.this, "FrequencyDomain", new FourierTransformerRenderer()));
@@ -139,12 +117,9 @@ public class IepeProject implements Project {
     }
 
     public EEAInput[] getInput() {
-        return input;
+        return new EEAInput[]{((SignalDeviceObject)deviceList.get(0)).getInput()};
     }
 
-//    public ChannelList getList() {
-//        return list;
-//    }
     @Override
     public FileObject getProjectDirectory() {
         return projectDirectory;

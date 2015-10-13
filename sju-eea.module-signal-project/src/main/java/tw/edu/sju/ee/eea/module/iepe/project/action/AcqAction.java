@@ -29,6 +29,7 @@ import org.openide.util.NbBundle.Messages;
 import org.openide.util.RequestProcessor;
 import org.openide.util.TaskListener;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
+import tw.edu.sju.ee.eea.module.signal.device.SignalDeviceObject;
 
 @ActionID(
         category = "Acoustic",
@@ -41,11 +42,11 @@ import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 @Messages("CTL_AcqAction=Acq")
 public final class AcqAction implements ActionListener, Runnable {
 
-    private final IepeProject context;
+    private final SignalDeviceObject context;
     private final static RequestProcessor RP = new RequestProcessor("interruptible tasks", 1, true);
     private ProgressHandle progr;
 
-    public AcqAction(IepeProject context) {
+    public AcqAction(SignalDeviceObject context) {
         this.context = context;
     }
 
@@ -64,22 +65,22 @@ public final class AcqAction implements ActionListener, Runnable {
         task.schedule(0);
     }
 
-    Thread[] thread;
+    Thread thread;
 
     @Override
     public void run() {
-        thread = new Thread[context.getInput().length];
-        for (int i = 0; i < context.getInput().length; i++) {
-            thread[i] = new Thread(context.getInput()[i]);
-            thread[i].setPriority(Thread.MAX_PRIORITY);
-            thread[i].start();
-        }
+//        thread = new Thread();
+//        for (int i = 0; i < context.getInput().length; i++) {
+            thread = new Thread(context.getInput());
+            thread.setPriority(Thread.MAX_PRIORITY);
+            thread.start();
+//        }
         try {
-            thread[0].join();
+            thread.join();
         } catch (InterruptedException ex) {
-            for (int i = 0; i < context.getInput().length; i++) {
-                thread[i].interrupt();
-            }
+//            for (int i = 0; i < context.getInput().length; i++) {
+                thread.interrupt();
+//            }
         }
     }
 

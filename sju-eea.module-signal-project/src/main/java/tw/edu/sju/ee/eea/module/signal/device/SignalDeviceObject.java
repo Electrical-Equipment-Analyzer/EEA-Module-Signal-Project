@@ -18,6 +18,7 @@ import org.openide.nodes.Children;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.jni.mps.MPS140801;
 import tw.edu.sju.ee.eea.module.signal.io.ChannelList;
+import tw.edu.sju.ee.eea.module.temp.MDESDevice;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 
 /**
@@ -35,13 +36,18 @@ public class SignalDeviceObject extends AbstractNode implements ChannelList<Devi
         super(Children.LEAF);
         setName("NI1234");
         setIconBaseWithExtension("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
-        input = new EEAInput(new MPS140801(0, 16384));
+//        input = new EEAInput(new MPS140801(0, 16384));
+        input = new EEAInput(new MDESDevice());
 //        input.getIOChannel()
 //        channels.add(new OscillogramChannel("A", channels.size(), new ZoomRenderer(),
 //                new SineInputStream(new SineSimulator(16384, 200, 5))));
         for (int i = 0; i < input.getIOChannel().length; i++) {
             channels.add(new DeviceChannel(input.getIOChannel(i), "dd", i));
         }
+    }
+
+    public EEAInput getInput() {
+        return input;
     }
 
     @Override
