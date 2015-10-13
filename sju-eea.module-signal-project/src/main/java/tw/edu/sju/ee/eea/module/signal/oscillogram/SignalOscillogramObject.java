@@ -67,7 +67,7 @@ public class SignalOscillogramObject extends AbstractNode implements ChannelList
             for (int i = 0; i < 3; i++) {
                 ChannelInputStream ci = new ChannelInputStream(163840, i);
 //            ((SignalDeviceObject) project.getDeviceList().get(0)).getChannels().get(0).getInput().addStream(c0);
-                project.getInput()[0].getIOChannel(i).addStream(ci);
+                project.getDeviceList().get(0).getChannels().get(i).getInput().addStream(ci);
                 channels.add(new OscillogramChannel("MDES", i, renderer, ci));
             }
         } catch (IOException ex) {

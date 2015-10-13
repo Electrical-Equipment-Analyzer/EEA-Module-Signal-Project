@@ -76,7 +76,7 @@ public class IepeProject implements Project {
     private Child[] chield;
     private IepeProjectProperties properties;
 
-    private ArrayList<Node> deviceList = new ArrayList<Node>();
+    private ArrayList<SignalDeviceObject> deviceList = new ArrayList<SignalDeviceObject>();
     private ArrayList<Node> oscillogramList = new ArrayList<Node>();
 
     public IepeProject(FileObject projectDirectory, ProjectState state) {
@@ -108,7 +108,7 @@ public class IepeProject implements Project {
 
     }
 
-    public List<Node> getDeviceList() {
+    public List<SignalDeviceObject> getDeviceList() {
         return deviceList;
     }
 
@@ -117,6 +117,7 @@ public class IepeProject implements Project {
     }
 
     public EEAInput[] getInput() {
+//        return null;
         return new EEAInput[]{((SignalDeviceObject)deviceList.get(0)).getInput()};
     }
 

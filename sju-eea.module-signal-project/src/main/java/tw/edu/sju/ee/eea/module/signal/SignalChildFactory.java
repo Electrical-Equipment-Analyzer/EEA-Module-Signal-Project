@@ -25,11 +25,11 @@ import org.openide.nodes.Node;
  *
  * @author D10307009
  */
-public class SignalChildFactory extends ChildFactory<Node> {
+public class SignalChildFactory<N extends Node> extends ChildFactory<Node> {
 
-    private List<Node> list;
+    private List<N> list;
     
-    SignalChildFactory(List<Node> list) {
+    SignalChildFactory(List<N> list) {
         this.list = list;
     }
 
