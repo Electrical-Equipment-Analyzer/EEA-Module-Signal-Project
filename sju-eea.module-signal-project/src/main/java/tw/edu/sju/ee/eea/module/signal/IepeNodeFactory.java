@@ -41,7 +41,7 @@ public class IepeNodeFactory implements NodeFactory {
         if (prjct instanceof IepeProject) {
             IepeProject p = (IepeProject) prjct;
             return NodeFactorySupport.fixedNodeList(
-                    p.r.createNodeDelegate(),
+//                    p.r.createNodeDelegate(),
 //                    p.f.createNodeDelegate(),
                     p.h.createNodeDelegate(),
                     p.a.createNodeDelegate()

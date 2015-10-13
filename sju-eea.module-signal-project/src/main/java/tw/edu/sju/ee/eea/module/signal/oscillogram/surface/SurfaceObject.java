@@ -64,22 +64,6 @@ public class SurfaceObject extends AbstractNode implements ChannelList<Oscillogr
     }
 
     private void addDefault() {
-        try {
-            for (int i = 0; i < 1; i++) {
-                ChannelInputStream ci = new ChannelInputStream(163840, i);
-//            ((SignalDeviceObject) project.getDeviceList().get(0)).getChannels().get(0).getInput().addStream(c0);
-                project.getInput()[0].getIOChannel(i).addStream(ci);
-                channels.add(new OscillogramChannel("MDES", i, renderer, ci));
-            }
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-//        channels.add(new OscillogramChannel("A", channels.size(), renderer,
-//                new SineInputStream(new SineSimulator(16384, 100, 5))));
-//        channels.add(new OscillogramChannel("A", channels.size(), renderer,
-//                new SineInputStream(new SineSimulator(16384, 200, 5))));
-//        channels.add(new OscillogramChannel("A", channels.size(), renderer,
-//                new SineInputStream(new SineSimulator(16384, 300, 5))));
     }
 
     public IepeProject getProject() {

@@ -93,7 +93,7 @@ public class IepeProject implements Project {
         oscillogramList.add(new SurfaceObject(IepeProject.this, "TimeFDomain", new FourierTransformerRenderer()));
         oscillogramList.add(new TestNode("TimeMes"));
 
-        r = new IepeRealtimeObject(IepeProject.this);
+//        r = new IepeRealtimeObject(IepeProject.this);
         h = new IepeHistoryObject(IepeProject.this);
         a = new IepeAnalyzerObject(IepeProject.this);
     }
@@ -174,7 +174,7 @@ public class IepeProject implements Project {
         }
     }
 
-    public IepeRealtimeObject r;
+//    public IepeRealtimeObject r;
     public IepeHistoryObject h;
     public IepeAnalyzerObject a;
 

@@ -17,27 +17,18 @@
  */
 package tw.edu.sju.ee.eea.module.signal.oscillogram.surface;
 
-import com.sun.javafx.tk.Toolkit;
-import com.sun.scenario.animation.AbstractMasterTimer;
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.Format;
-import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.AnimationTimer;
-import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
-import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.util.converter.NumberStringConverter;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -58,12 +49,9 @@ import org.openide.awt.UndoRedo;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
-import org.sf.surfaceplot.SurfaceCanvas;
 import tw.edu.sju.ee.eea.core.math.MetricPrefixFormat;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProjectProperties;
-import tw.edu.sju.ee.eea.module.signal.oscillogram.surface.ExampleSurfaceModel;
 import tw.edu.sju.ee.eea.module.signal.temp.OscillogramChannel;
-import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 import tw.edu.sju.ee.eea.ui.swing.SpinnerMetricModel;
 
 @MultiViewElement.Registration(
@@ -199,14 +187,7 @@ public final class SurfaceElement extends JPanel implements MultiViewElement, Ru
         this.lkp = lkp;
         this.object = lkp.lookup(SurfaceObject.class);
         assert object != null;
-//        IepeProject project = lkp.lookup(IepeProject.class);
         properties = object.getProject().getProperties();
-
-//        object.getChannels();
-//        ChannelList list = rt.getChannelList();
-        EEAInput[] iepe = object.getProject().getInput();
-//        list.addConfigure(this);
-
         initComponents();
 
         model = new ExampleSurfaceModel();
