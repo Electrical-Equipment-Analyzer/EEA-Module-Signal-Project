@@ -4,21 +4,24 @@
  */
 package tw.edu.sju.ee.eea.module.signal.device;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import org.netbeans.api.project.Project;
 import org.netbeans.core.api.multiview.MultiViews;
 import org.netbeans.spi.navigator.NavigatorLookupHint;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
+import org.openide.nodes.PropertySupport;
+import org.openide.nodes.Sheet;
+import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
-import tw.edu.sju.ee.eea.jni.mps.MPS140801;
 import tw.edu.sju.ee.eea.module.signal.io.ChannelList;
-import tw.edu.sju.ee.eea.module.temp.MDESDevice;
+import tw.edu.sju.ee.eea.utils.io.tools.EEADevice;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 
 /**
@@ -31,18 +34,16 @@ public class SignalDeviceObject extends AbstractNode implements ChannelList<Devi
     private TopComponent tc;
     private ArrayList<DeviceChannel> channels = new ArrayList<DeviceChannel>();
     private EEAInput input;
+    private EEADevice device;
 
-    public SignalDeviceObject(Project project) {
+    public SignalDeviceObject(EEADevice device) {
         super(Children.LEAF);
-        setName("NI1234");
+        this.device = device;
+        setName(this.device.getDeviceName());
         setIconBaseWithExtension("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
-//        input = new EEAInput(new MPS140801(0, 16384));
-        input = new EEAInput(new MDESDevice());
-//        input.getIOChannel()
-//        channels.add(new OscillogramChannel("A", channels.size(), new ZoomRenderer(),
-//                new SineInputStream(new SineSimulator(16384, 200, 5))));
+        input = new EEAInput(device);
         for (int i = 0; i < input.getIOChannel().length; i++) {
-            channels.add(new DeviceChannel(input.getIOChannel(i), "dd", i));
+            channels.add(new DeviceChannel(input.getIOChannel(i), this.device.getDeviceName(), i));
         }
     }
 
@@ -73,5 +74,67 @@ public class SignalDeviceObject extends AbstractNode implements ChannelList<Devi
     @Override
     public String getContentType() {
         return MIMETYPE; // NOI18N
+    }
+
+    @NbBundle.Messages({
+        "LBL_title=Device Properties",
+        "LBL_name=Name",
+        "LBL_model=Model",
+        "LBL_serialnumber=Serial Number",
+        "LBL_samplerate=Samplerate"
+    })
+    @Override
+    protected Sheet createSheet() {
+        Sheet.Set set = new Sheet.Set();
+        set.setName(Bundle.LBL_title());
+        set.put(new PropertySupport.ReadOnly(
+                Bundle.LBL_name(),
+                String.class,
+                Bundle.LBL_name(),
+                Bundle.LBL_name()) {
+                    @Override
+                    public String getValue() throws IllegalAccessException, InvocationTargetException {
+                        return SignalDeviceObject.this.device.getDeviceName();
+                    }
+                });
+        set.put(new PropertySupport.ReadOnly(
+                Bundle.LBL_model(),
+                String.class,
+                Bundle.LBL_model(),
+                Bundle.LBL_model()) {
+                    @Override
+                    public String getValue() throws IllegalAccessException, InvocationTargetException {
+                        return SignalDeviceObject.this.device.getDeviceModel();
+                    }
+                });
+        set.put(new PropertySupport.ReadOnly(
+                Bundle.LBL_serialnumber(),
+                String.class,
+                Bundle.LBL_serialnumber(),
+                Bundle.LBL_serialnumber()) {
+                    @Override
+                    public String getValue() throws IllegalAccessException, InvocationTargetException {
+                        return SignalDeviceObject.this.device.getSerialNumber();
+                    }
+                });
+        set.put(new PropertySupport.ReadWrite<Integer>(
+                Bundle.LBL_samplerate(),
+                Integer.class,
+                Bundle.LBL_samplerate(),
+                Bundle.LBL_samplerate()) {
+                    @Override
+                    public Integer getValue() throws IllegalAccessException, InvocationTargetException {
+                        return 10000;
+                    }
+
+                    @Override
+                    public void setValue(Integer val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+                        
+                    }
+
+                });
+        Sheet sheet = super.createSheet();
+        sheet.put(set);
+        return sheet;
     }
 }

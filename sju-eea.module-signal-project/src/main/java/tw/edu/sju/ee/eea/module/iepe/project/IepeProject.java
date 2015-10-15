@@ -85,7 +85,7 @@ public class IepeProject implements Project {
         properties = new IepeProjectProperties(
                 new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath()));
 
-        deviceList.add(new SignalDeviceObject(this));
+        deviceList.add(new SignalDeviceObject(new MDESDevice()));
 //        deviceList.add(new TestNode("tt"));
 
         oscillogramList.add(new SignalOscillogramObject(IepeProject.this, "TimeDomain", new ZoomRenderer()));

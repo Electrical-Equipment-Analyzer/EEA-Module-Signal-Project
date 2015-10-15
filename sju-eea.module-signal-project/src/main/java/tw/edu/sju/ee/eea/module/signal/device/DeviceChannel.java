@@ -43,7 +43,7 @@ public class DeviceChannel implements Channel {
 
     @Override
     public String getName() {
-        return ic.getName();
+        return this.device + "/" + this.channel;
     }
 
     @Override

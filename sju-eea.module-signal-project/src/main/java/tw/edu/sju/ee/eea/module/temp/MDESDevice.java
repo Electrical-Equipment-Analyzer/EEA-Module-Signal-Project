@@ -38,6 +38,21 @@ public class MDESDevice implements EEADevice {
     }
 
     @Override
+    public String getDeviceName() {
+        return "ss";
+    }
+
+    @Override
+    public String getDeviceModel() {
+        return "NTUST-EE305-MDES";
+    }
+
+    @Override
+    public String getSerialNumber() {
+        return "aabbcc";
+    }
+
+    @Override
     public void openDevice() throws EEAException {
         try {
             mdes = new MDESDrive(HIDManager.getInstance());

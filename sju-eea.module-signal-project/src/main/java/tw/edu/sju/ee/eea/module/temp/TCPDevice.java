@@ -56,6 +56,21 @@ public class TCPDevice implements EEADevice {
     }
 
     @Override
+    public String getDeviceName() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getDeviceModel() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getSerialNumber() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
     public void openDevice() throws EEAException {
 //        try {
 //            ss = new ServerSocket(port);
