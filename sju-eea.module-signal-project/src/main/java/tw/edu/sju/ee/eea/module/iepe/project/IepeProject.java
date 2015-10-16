@@ -59,6 +59,7 @@ import tw.edu.sju.ee.eea.module.signal.temp.VNodeList;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.ZoomRenderer;
 import tw.edu.sju.ee.eea.module.temp.EmulatorDevice;
 import tw.edu.sju.ee.eea.module.temp.MDESDevice;
+import tw.edu.sju.ee.eea.module.temp.NIDevice;
 import tw.edu.sju.ee.eea.module.temp.SerialDevice;
 import tw.edu.sju.ee.eea.module.temp.TCPDevice;
 import tw.edu.sju.ee.eea.utils.io.tools.EEADevice;
@@ -85,7 +86,8 @@ public class IepeProject implements Project {
         properties = new IepeProjectProperties(
                 new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath()));
 
-        deviceList.add(new SignalDeviceObject(new MDESDevice()));
+//        deviceList.add(new SignalDeviceObject(new MDESDevice()));
+        deviceList.add(new SignalDeviceObject(new NIDevice()));
 //        deviceList.add(new TestNode("tt"));
 
         oscillogramList.add(new SignalOscillogramObject(IepeProject.this, "TimeDomain", new ZoomRenderer()));
