@@ -17,46 +17,46 @@
  */
 package tw.edu.sju.ee.eea.module.signal;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Node;
 
 /**
  *
  * @author D10307009
  */
-public class SignalChildFactory<N extends Node> extends ChildFactory<Node> implements ChangeListener {
+public class NodeList<N extends Node> extends ArrayList<N> {
 
-    private NodeList<N> list;
-    
-    SignalChildFactory(NodeList<N> list) {
-        this.list = list;
-        list.addChangeListener(this);
+    private List<ChangeListener> listener = new ArrayList<ChangeListener>();
+
+    public boolean addChangeListener(ChangeListener listener) {
+        return this.listener.add(listener);
     }
 
-    @Override
-    protected Node createNodeForKey(Node key) {
-        return key;
+    public boolean removeChangeListener(ChangeListener listener) {
+        return this.listener.remove(listener);
     }
 
-    @Override
-    protected boolean createKeys(List<Node> list) {
-        System.out.println("ck");
-        for (Node node : this.list) {
-            list.add(node);
+    private void changed(Object source) {
+        for (ChangeListener listener : this.listener) {
+            listener.stateChanged(new ChangeEvent(source));
         }
-        return true;
     }
-    
-//    public void u() {
-//        refresh(true);
-//    }
 
     @Override
-    public void stateChanged(ChangeEvent e) {
-        refresh(true);
+    public boolean add(N e) {
+        boolean add = super.add(e); //To change body of generated methods, choose Tools | Templates.
+        changed(e);
+        return add;
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        boolean remove = super.remove(o); //To change body of generated methods, choose Tools | Templates.
+        changed(o);
+        return remove;
     }
 
 }

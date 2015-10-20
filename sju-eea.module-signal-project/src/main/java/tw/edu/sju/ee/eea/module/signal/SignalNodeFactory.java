@@ -17,14 +17,24 @@
  */
 package tw.edu.sju.ee.eea.module.signal;
 
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ui.support.NodeFactory;
 import org.netbeans.spi.project.ui.support.NodeFactorySupport;
 import org.netbeans.spi.project.ui.support.NodeList;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
+import org.openide.nodes.Node;
 import org.openide.util.NbBundle;
+import tw.edu.sju.ee.eea.jni.mps.MPS140801;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
+import tw.edu.sju.ee.eea.module.signal.device.SignalDeviceObject;
+import tw.edu.sju.ee.eea.module.temp.MDESDevice;
+import tw.edu.sju.ee.eea.module.temp.NIDevice;
 
 /**
  *
@@ -41,8 +51,41 @@ public class SignalNodeFactory implements NodeFactory {
     public NodeList<?> createNodes(Project project) {
         if (project instanceof IepeProject) {
             IepeProject prj = (IepeProject) project;
+
+            SignalChildFactory signalChildFactory = new SignalChildFactory(prj.getDeviceList());
             SignalNode n1 = new SignalNode(Children.create(
-                    new SignalChildFactory(prj.getDeviceList()), false), "Device");
+                    signalChildFactory, false), "Device") {
+
+                        @Override
+                        public Action[] getActions(boolean context) {
+                            List<Action> actions = new ArrayList<Action>();
+                            actions.add(new AbstractAction("Add NI") {
+
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    prj.getDeviceList().add(new SignalDeviceObject(new NIDevice(), prj.getDeviceList()));
+//                                    signalChildFactory.u();
+                                }
+                            });
+                            actions.add(new AbstractAction("Add MDES") {
+
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    prj.getDeviceList().add(new SignalDeviceObject(new MDESDevice(), prj.getDeviceList()));
+//                                    signalChildFactory.u();
+                                }
+                            });
+                            actions.add(new AbstractAction("Add MPS") {
+
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    prj.getDeviceList().add(new SignalDeviceObject(new MPS140801(0, 10000), prj.getDeviceList()));
+//                                    signalChildFactory.u();
+                                }
+                            });
+                            return actions.toArray(new AbstractAction[actions.size()]);
+                        }
+                    };
             SignalNode n2 = new SignalNode(Children.create(
                     new SignalChildFactory(prj.getOscillogramList()), false), "Oscillogram");
 

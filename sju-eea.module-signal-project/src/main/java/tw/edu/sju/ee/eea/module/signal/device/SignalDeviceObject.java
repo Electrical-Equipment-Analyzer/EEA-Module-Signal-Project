@@ -20,7 +20,10 @@ import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
+import tw.edu.sju.ee.eea.jni.mps.MPS140801;
 import tw.edu.sju.ee.eea.module.signal.io.ChannelList;
+import tw.edu.sju.ee.eea.module.temp.MDESDevice;
+import tw.edu.sju.ee.eea.module.temp.NIDevice;
 import tw.edu.sju.ee.eea.utils.io.tools.EEADevice;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 
@@ -35,10 +38,12 @@ public class SignalDeviceObject extends AbstractNode implements ChannelList<Devi
     private ArrayList<DeviceChannel> channels = new ArrayList<DeviceChannel>();
     private EEAInput input;
     private EEADevice device;
+    private List list;
 
-    public SignalDeviceObject(EEADevice device) {
+    public SignalDeviceObject(EEADevice device, List list) {
         super(Children.LEAF);
         this.device = device;
+        this.list = list;
         setName(this.device.getDeviceName());
         setIconBaseWithExtension("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
         input = new EEAInput(device);
@@ -54,6 +59,19 @@ public class SignalDeviceObject extends AbstractNode implements ChannelList<Devi
     @Override
     public List<DeviceChannel> getChannels() {
         return channels;
+    }
+
+    @Override
+    public Action[] getActions(boolean context) {
+        List<Action> actions = new ArrayList<Action>();
+        actions.add(new AbstractAction("Delete") {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                list.remove(SignalDeviceObject.this);
+            }
+        });
+        return actions.toArray(new AbstractAction[actions.size()]);
     }
 
     @Override
@@ -129,7 +147,7 @@ public class SignalDeviceObject extends AbstractNode implements ChannelList<Devi
 
                     @Override
                     public void setValue(Integer val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-                        
+
                     }
 
                 });

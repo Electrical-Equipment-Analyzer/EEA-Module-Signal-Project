@@ -51,6 +51,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.object.IepeAnalyzerObject;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.SignalOscillogramObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
+import tw.edu.sju.ee.eea.module.signal.NodeList;
 import tw.edu.sju.ee.eea.module.signal.SignalProjectLogicalView;
 import tw.edu.sju.ee.eea.module.signal.device.SignalDeviceObject;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.FourierTransformerRenderer;
@@ -77,8 +78,8 @@ public class IepeProject implements Project {
     private Child[] chield;
     private IepeProjectProperties properties;
 
-    private ArrayList<SignalDeviceObject> deviceList = new ArrayList<SignalDeviceObject>();
-    private ArrayList<Node> oscillogramList = new ArrayList<Node>();
+    private NodeList<SignalDeviceObject> deviceList = new NodeList<SignalDeviceObject>();
+    private NodeList<Node> oscillogramList = new NodeList<Node>();
 
     public IepeProject(FileObject projectDirectory, ProjectState state) {
         this.projectDirectory = projectDirectory;
@@ -87,7 +88,8 @@ public class IepeProject implements Project {
                 new File(projectDirectory.getFileObject(IepeProjectFactory.PROJECT_FILE).getPath()));
 
 //        deviceList.add(new SignalDeviceObject(new MDESDevice()));
-        deviceList.add(new SignalDeviceObject(new NIDevice()));
+        deviceList.add(new SignalDeviceObject(new NIDevice(), null));
+        
 //        deviceList.add(new TestNode("tt"));
 
         oscillogramList.add(new SignalOscillogramObject(IepeProject.this, "TimeDomain", new ZoomRenderer()));
@@ -110,11 +112,11 @@ public class IepeProject implements Project {
 
     }
 
-    public List<SignalDeviceObject> getDeviceList() {
+    public NodeList<SignalDeviceObject> getDeviceList() {
         return deviceList;
     }
 
-    public List<Node> getOscillogramList() {
+    public NodeList<Node> getOscillogramList() {
         return oscillogramList;
     }
 
