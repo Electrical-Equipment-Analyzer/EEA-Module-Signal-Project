@@ -47,6 +47,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 import org.netbeans.core.spi.multiview.CloseOperationState;
@@ -71,7 +73,7 @@ import tw.edu.sju.ee.eea.ui.swing.SpinnerMetricModel;
         position = 2000
 )
 @Messages("LBL_Oscilloscope_Function=Function Oscillogram")
-public final class SignalOscillogramElement extends JPanel implements MultiViewElement, Runnable {
+public final class SignalOscillogramElement extends JPanel implements MultiViewElement, Runnable, ListDataListener {
 
     private class IepeVisualToolBar extends JToolBar {
 
@@ -200,12 +202,43 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
 //        ChannelList list = rt.getChannelList();
 //        EEAInput[] iepe = object.getProject().getInput();
 //        list.addConfigure(this);
-
+        object.getChannels().addChangeListener(this);
         initComponents();
         initfx();
         toolbar.setEnabled(false);
     }
 
+    @Override
+    public void intervalAdded(ListDataEvent e) {
+        if (e.getSource() instanceof OscillogramChannel) {
+            OscillogramChannel channel = (OscillogramChannel) e.getSource();
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    chart.getData().add(channel.getSeries());
+                }
+            });
+        }
+    }
+
+    @Override
+    public void intervalRemoved(ListDataEvent e) {
+        if (e.getSource() instanceof OscillogramChannel) {
+            OscillogramChannel channel = (OscillogramChannel) e.getSource();
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    chart.getData().remove(channel.getSeries());
+                }
+            });
+        }
+    }
+
+    @Override
+    public void contentsChanged(ListDataEvent e) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
     private static final int MAX_DATA_POINTS = 1000;
     private double t = 1;
 
@@ -263,12 +296,6 @@ public final class SignalOscillogramElement extends JPanel implements MultiViewE
     public void handle() {
         if (update) {
             System.out.println("at");
-            if (chart.getData().size() == 0) {
-                for (OscillogramChannel channel : object.getChannels()) {
-//                    chart.getData().remove(channel.getSeries());
-                    chart.getData().add(channel.getSeries());
-                }
-            }
             for (OscillogramChannel channel : object.getChannels()) {
                 addDataToSeries(channel.getSeries(), channel.getQueue());
             }

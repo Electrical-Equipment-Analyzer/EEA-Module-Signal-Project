@@ -22,6 +22,8 @@ import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -31,13 +33,16 @@ import org.netbeans.spi.navigator.NavigatorLookupHint;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.util.Exceptions;
+import org.openide.util.Utilities;
 import org.openide.windows.TopComponent;
 import tw.edu.sju.ee.eea.core.math.SineSimulator;
 //import tw.edu.sju.ee.eea.module.iepe.channel.ChannelList;
 import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
+import tw.edu.sju.ee.eea.module.signal.device.DeviceChannel;
 import tw.edu.sju.ee.eea.module.signal.device.SignalDeviceObject;
 import tw.edu.sju.ee.eea.module.signal.temp.OscillogramChannel;
 import tw.edu.sju.ee.eea.module.signal.io.ChannelList;
+import tw.edu.sju.ee.eea.module.temp.ListenerList;
 import tw.edu.sju.ee.eea.utils.io.ChannelInputStream;
 
 /**
@@ -50,12 +55,15 @@ public class SignalOscillogramObject extends AbstractNode implements ChannelList
     private IepeProject project;
 //    private Lookup lkp;
 //    private ChannelList list;
-    private ArrayList<OscillogramChannel> channels = new ArrayList<OscillogramChannel>();
+    private ListenerList<OscillogramChannel> channels = new ListenerList<OscillogramChannel>();
     TopComponent tc;
     private SignalRenderer renderer;
 
     public SignalOscillogramObject(Project project, String name, SignalRenderer renderer) {
         super(Children.LEAF);
+        System.out.println("==========fffff");
+        Collection<? extends Object> lookupAll = super.getLookup().lookupAll(Object.class);
+        System.out.println(Arrays.toString(lookupAll.toArray()));
         this.project = (IepeProject) project;
         this.renderer = renderer;
         setName(name);
@@ -81,26 +89,40 @@ public class SignalOscillogramObject extends AbstractNode implements ChannelList
 //                new SineInputStream(new SineSimulator(16384, 300, 5))));
     }
 
+    public void add(DeviceChannel channel) {
+        ChannelInputStream ci = null;
+        try {
+            ci = new ChannelInputStream(163840, 0);
+            channel.getInput().addStream(ci);
+            channels.add(new OscillogramChannel(channel.getDevice(), channel.getChannel(), renderer, ci));
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
+
     public IepeProject getProject() {
         return project;
     }
 
     @Override
-    public List<OscillogramChannel> getChannels() {
+    public ListenerList<OscillogramChannel> getChannels() {
         return channels;
     }
 
     @Override
     public Action[] getActions(boolean context) {
-        List<Action> actions = new ArrayList<Action>();
-        actions.add(new AbstractAction("Add Default") {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addDefault();
-            }
-        });
-        return actions.toArray(new AbstractAction[actions.size()]);
+        List<? extends Action> oscActions = Utilities.actionsForPath("Actions/OSC");
+        return oscActions.toArray(new Action[oscActions.size()]);
+//        List<Action> actions = new ArrayList<Action>();
+//        actions.add(new AbstractAction("Add Default") {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                addDefault();
+//            }
+//        });
+////        actions.add(new Pre);
+//        return actions.toArray(new AbstractAction[actions.size()]);
     }
 
     @Override

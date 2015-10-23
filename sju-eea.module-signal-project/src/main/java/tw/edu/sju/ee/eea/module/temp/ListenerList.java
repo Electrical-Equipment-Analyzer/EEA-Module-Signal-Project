@@ -15,47 +15,48 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package tw.edu.sju.ee.eea.module.signal;
+package tw.edu.sju.ee.eea.module.temp;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import org.openide.nodes.Node;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 
 /**
  *
  * @author D10307009
  */
-public class NodeList<N extends Node> extends ArrayList<N> {
+public class ListenerList<E> extends ArrayList<E> {
 
-    private List<ChangeListener> listener = new ArrayList<ChangeListener>();
+    private List<ListDataListener> listener = new ArrayList<ListDataListener>();
 
-    public boolean addChangeListener(ChangeListener listener) {
+    public boolean addChangeListener(ListDataListener listener) {
         return this.listener.add(listener);
     }
 
-    public boolean removeChangeListener(ChangeListener listener) {
+    public boolean removeChangeListener(ListDataListener listener) {
         return this.listener.remove(listener);
     }
 
-    private void changed(Object source) {
-        for (ChangeListener listener : this.listener) {
-            listener.stateChanged(new ChangeEvent(source));
-        }
-    }
-
     @Override
-    public boolean add(N e) {
+    public boolean add(E e) {
         boolean add = super.add(e); //To change body of generated methods, choose Tools | Templates.
-        changed(e);
+        for (ListDataListener listener : this.listener) {
+            listener.intervalAdded(new ListDataEvent(e, ListDataEvent.INTERVAL_ADDED, 0, 0));
+        }
         return add;
     }
 
     @Override
     public boolean remove(Object o) {
         boolean remove = super.remove(o); //To change body of generated methods, choose Tools | Templates.
-        changed(o);
+        for (ListDataListener listener : this.listener) {
+            listener.intervalRemoved(new ListDataEvent(o, ListDataEvent.INTERVAL_ADDED, 0, 0));
+        }
         return remove;
     }
 

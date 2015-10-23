@@ -17,9 +17,10 @@
  */
 package tw.edu.sju.ee.eea.module.signal;
 
+import tw.edu.sju.ee.eea.module.temp.ListenerList;
 import java.util.List;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Node;
 
@@ -27,11 +28,11 @@ import org.openide.nodes.Node;
  *
  * @author D10307009
  */
-public class SignalChildFactory<N extends Node> extends ChildFactory<Node> implements ChangeListener {
+public class SignalChildFactory<N extends Node> extends ChildFactory<Node> implements ListDataListener {
 
-    private NodeList<N> list;
-    
-    SignalChildFactory(NodeList<N> list) {
+    private ListenerList<N> list;
+
+    SignalChildFactory(ListenerList<N> list) {
         this.list = list;
         list.addChangeListener(this);
     }
@@ -49,13 +50,23 @@ public class SignalChildFactory<N extends Node> extends ChildFactory<Node> imple
         }
         return true;
     }
-    
+
 //    public void u() {
 //        refresh(true);
 //    }
+    @Override
+    public void intervalAdded(ListDataEvent e) {
+
+        refresh(true);
+    }
 
     @Override
-    public void stateChanged(ChangeEvent e) {
+    public void intervalRemoved(ListDataEvent e) {
+        refresh(true);
+    }
+
+    @Override
+    public void contentsChanged(ListDataEvent e) {
         refresh(true);
     }
 

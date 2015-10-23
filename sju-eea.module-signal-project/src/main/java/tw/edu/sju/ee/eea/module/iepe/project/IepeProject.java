@@ -51,7 +51,7 @@ import tw.edu.sju.ee.eea.module.iepe.project.object.IepeAnalyzerObject;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.SignalOscillogramObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeHistoryObject;
 import tw.edu.sju.ee.eea.module.iepe.project.object.IepeRealtimeObject;
-import tw.edu.sju.ee.eea.module.signal.NodeList;
+import tw.edu.sju.ee.eea.module.temp.ListenerList;
 import tw.edu.sju.ee.eea.module.signal.SignalProjectLogicalView;
 import tw.edu.sju.ee.eea.module.signal.device.SignalDeviceObject;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.FourierTransformerRenderer;
@@ -78,8 +78,8 @@ public class IepeProject implements Project {
     private Child[] chield;
     private IepeProjectProperties properties;
 
-    private NodeList<SignalDeviceObject> deviceList = new NodeList<SignalDeviceObject>();
-    private NodeList<Node> oscillogramList = new NodeList<Node>();
+    private ListenerList<SignalDeviceObject> deviceList = new ListenerList<SignalDeviceObject>();
+    private ListenerList<Node> oscillogramList = new ListenerList<Node>();
 
     public IepeProject(FileObject projectDirectory, ProjectState state) {
         this.projectDirectory = projectDirectory;
@@ -112,11 +112,11 @@ public class IepeProject implements Project {
 
     }
 
-    public NodeList<SignalDeviceObject> getDeviceList() {
+    public ListenerList<SignalDeviceObject> getDeviceList() {
         return deviceList;
     }
 
-    public NodeList<Node> getOscillogramList() {
+    public ListenerList<Node> getOscillogramList() {
         return oscillogramList;
     }
 
