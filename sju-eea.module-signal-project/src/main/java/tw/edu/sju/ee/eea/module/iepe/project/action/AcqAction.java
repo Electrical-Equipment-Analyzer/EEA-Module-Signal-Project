@@ -24,11 +24,9 @@ import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionRegistration;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.RequestProcessor;
 import org.openide.util.TaskListener;
-import tw.edu.sju.ee.eea.module.iepe.project.IepeProject;
 import tw.edu.sju.ee.eea.module.signal.device.SignalDeviceObject;
 
 @ActionID(
@@ -40,10 +38,10 @@ import tw.edu.sju.ee.eea.module.signal.device.SignalDeviceObject;
 )
 @ActionReference(path = "Menu/Analyzers", position = 500)
 @Messages("CTL_AcqAction=Acq")
-public final class AcqAction implements ActionListener, Runnable {
+public final class AcqAction implements ActionListener {
 
     private final SignalDeviceObject context;
-    private final static RequestProcessor RP = new RequestProcessor("interruptible tasks", 1, true);
+    private final RequestProcessor RP = new RequestProcessor("interruptible tasks", 1, true);
     private ProgressHandle progr;
 
     public AcqAction(SignalDeviceObject context) {
@@ -53,8 +51,8 @@ public final class AcqAction implements ActionListener, Runnable {
     @Override
     public void actionPerformed(ActionEvent ev) {
         // TODO use context
-        RequestProcessor.Task task = RP.create(this);
-        progr = ProgressHandleFactory.createHandle("Input task", task);
+        RequestProcessor.Task task = RP.create(context.getInput());
+        progr = ProgressHandleFactory.createHandle("Input task - " + context.getDisplayName(), task);
         task.addTaskListener(new TaskListener() {
             public void taskFinished(org.openide.util.Task task) {
                 System.out.println("input task finished");
@@ -63,25 +61,6 @@ public final class AcqAction implements ActionListener, Runnable {
         });
         progr.start();
         task.schedule(0);
-    }
-
-    Thread thread;
-
-    @Override
-    public void run() {
-//        thread = new Thread();
-//        for (int i = 0; i < context.getInput().length; i++) {
-            thread = new Thread(context.getInput());
-            thread.setPriority(Thread.MAX_PRIORITY);
-            thread.start();
-//        }
-        try {
-            thread.join();
-        } catch (InterruptedException ex) {
-//            for (int i = 0; i < context.getInput().length; i++) {
-                thread.interrupt();
-//            }
-        }
     }
 
 }
