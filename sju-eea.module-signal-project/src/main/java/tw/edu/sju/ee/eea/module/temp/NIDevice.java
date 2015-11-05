@@ -27,6 +27,7 @@ import java.util.List;
 import org.openide.nodes.Node;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import tw.edu.sju.ee.eea.jni.modinst.NIModinstUtils;
 import tw.edu.sju.ee.eea.jni.scope.NIScope;
@@ -46,7 +47,6 @@ public class NIDevice implements EEADevice {
     private NIScope niScope;
 
     private NIModinstUtils.Device device;
-    private int samplerate;
 
     public void setDevice(NIModinstUtils.Device device) {
         this.device = device;
@@ -77,12 +77,13 @@ public class NIDevice implements EEADevice {
         return device.getSerialNumber();
     }
 
-    public void setSamplerate(int samplerate) {
-        this.samplerate = samplerate;
-    }
-
     public int getSamplerate() {
-        return samplerate;
+        try {
+            return (int) niScope.sampleRate();
+        } catch (NIScopeException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return 0;
     }
 
     public NIDevice() {
@@ -97,6 +98,7 @@ public class NIDevice implements EEADevice {
         List<Sheet.Set> properties = new ArrayList<Sheet.Set>();
         properties.add(setDevice(listener));
         properties.add(setTrigger(listener));
+        properties.add(setHorizontal(listener));
         return properties;
     }
 
@@ -176,22 +178,6 @@ public class NIDevice implements EEADevice {
                         return getSerialNumber();
                     }
                 });
-        set.put(new PropertySupport.ReadWrite<Integer>(
-                Bundle.LBL_samplerate(),
-                Integer.class,
-                Bundle.LBL_samplerate(),
-                Bundle.LBL_samplerate()) {
-                    @Override
-                    public Integer getValue() throws IllegalAccessException, InvocationTargetException {
-                        return getSamplerate();
-                    }
-
-                    @Override
-                    public void setValue(Integer val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-                        setSamplerate(val);
-                    }
-
-                });
         return set;
     }
 
@@ -243,6 +229,32 @@ public class NIDevice implements EEADevice {
         return set;
     }
 
+    private Sheet.Set setHorizontal(PropertyChangeListener listener) {
+        Sheet.Set set = new Sheet.Set();
+        set.setName("Horizontal");
+        Field[] fields = horizontalTiming.getClass().getFields();
+        System.out.println(Arrays.toString(fields));
+        for (Field field : fields) {
+            System.out.println(field.getType());
+            set.put(new PropertySupport.ReadWrite(
+                    field.getName(),
+                    field.getType(),
+                    field.getName(),
+                    field.getName()) {
+                        @Override
+                        public Object getValue() throws IllegalAccessException, InvocationTargetException {
+                            return field.get(horizontalTiming).toString();
+                        }
+
+                        @Override
+                        public void setValue(Object val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+                            field.set(horizontalTiming, val);
+                        }
+                    });
+        }
+        return set;
+    }
+
     @Override
     public void openDevice() throws EEAException {
         System.out.println("open");
@@ -271,17 +283,17 @@ public class NIDevice implements EEADevice {
 
     String channelList = "0,1";
     NIScope.Trigger trigger;
+    NIScope.HorizontalTiming horizontalTiming = new NIScope.HorizontalTiming();
 
-    public NIScope.Trigger getTrigger() {
-        return trigger;
-    }
-
-    public void setTrigger(NIScope.Trigger trigger) {
-        this.trigger = trigger;
-        Field[] fields = trigger.getClass().getFields();
-        System.out.println(Arrays.toString(fields));
-    }
-
+//    public NIScope.Trigger getTrigger() {
+//        return trigger;
+//    }
+//
+//    public void setTrigger(NIScope.Trigger trigger) {
+//        this.trigger = trigger;
+//        Field[] fields = trigger.getClass().getFields();
+//        System.out.println(Arrays.toString(fields));
+//    }
     @Override
     public void configure() throws EEAException {
         try {
@@ -296,7 +308,7 @@ public class NIDevice implements EEADevice {
             niScope.configureChanCharacteristics(channelList, NIScope.VAL_1_MEG_OHM, 0);
 
             // Configure the horizontal parameters
-            niScope.configureHorizontalTiming(1000000, 1024, 50.0, 1, true);
+            niScope.configureHorizontalTiming(horizontalTiming);
 
             niScope.setAttributeViBoolean(channelList, NIScope.ATTR_ENABLE_TIME_INTERLEAVED_SAMPLING, false);
 
