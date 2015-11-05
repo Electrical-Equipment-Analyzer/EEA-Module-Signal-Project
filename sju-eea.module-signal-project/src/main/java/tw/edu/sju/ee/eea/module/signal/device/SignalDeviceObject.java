@@ -45,7 +45,7 @@ public class SignalDeviceObject extends AbstractNode implements ChannelList<Devi
         setIconBaseWithExtension("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
         input = new EEAInput(device);
         for (int i = 0; i < input.getIOChannel().length; i++) {
-            channels.add(new DeviceChannel(input.getIOChannel(i), this.device.toString(), i));
+            channels.add(new DeviceChannel(input.getIOChannel(i), this.device, i));
         }
     }
 

@@ -18,17 +18,13 @@
 package tw.edu.sju.ee.eea.module.signal.temp;
 
 import java.awt.Color;
-import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
-import org.openide.util.Exceptions;
-import tw.edu.sju.ee.eea.core.math.SineSimulator;
 import tw.edu.sju.ee.eea.module.signal.io.Channel;
-import tw.edu.sju.ee.eea.module.signal.oscillogram.FourierTransformerRenderer;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.SignalRenderer;
-import tw.edu.sju.ee.eea.module.signal.oscillogram.ZoomRenderer;
 import tw.edu.sju.ee.eea.utils.io.ValueInput;
+import tw.edu.sju.ee.eea.utils.io.tools.DeviceInfo;
 
 /**
  *
@@ -38,18 +34,19 @@ public class OscillogramChannel implements Channel {
 
     private XYChart.Series<Number, Number> series = new LineChart.Series<Number, Number>();
     private ConcurrentLinkedQueue<XYChart.Data> queue = new ConcurrentLinkedQueue<XYChart.Data>();
-    private String device;
+    private DeviceInfo device;
+//    private String device;
     private int channel;
     private Color color;
     private SignalRenderer renderer;
-    int samplerate = 10000;
+//    int samplerate = 10000;
     private ValueInput vi;
 
-    public OscillogramChannel(String device, int channel, SignalRenderer renderer, ValueInput vi) {
+    public OscillogramChannel(DeviceInfo device, int channel, SignalRenderer renderer, ValueInput vi) {
         this.device = device;
         this.channel = channel;
         this.renderer = renderer;
-        this.setName(device + "/" + channel);
+        this.setName(device.getDeviceName() + "/" + channel);
 //        SineSimulator s = new SineSimulator(samplerate, f[getChannel()], 5);
 //        vi = new SineInputStream(s);
         this.vi = vi;
@@ -58,7 +55,7 @@ public class OscillogramChannel implements Channel {
     private static final int[] f = {100, 200, 300};
 
     public void update(double t) {
-        renderer.renderer(queue, t, vi, samplerate);
+        renderer.renderer(queue, t, vi, device.getSamplerate());
 //        try {
 //            vi.skip(vi.available());
 //        } catch (IOException ex) {
@@ -75,7 +72,7 @@ public class OscillogramChannel implements Channel {
     }
 
     public String getDevice() {
-        return device;
+        return device.getDeviceName();
     }
 
     public int getChannel() {

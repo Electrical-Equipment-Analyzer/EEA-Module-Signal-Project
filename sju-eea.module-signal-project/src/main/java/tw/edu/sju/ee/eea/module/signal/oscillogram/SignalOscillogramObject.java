@@ -44,6 +44,7 @@ import tw.edu.sju.ee.eea.module.signal.temp.OscillogramChannel;
 import tw.edu.sju.ee.eea.module.signal.io.ChannelList;
 import tw.edu.sju.ee.eea.module.temp.ListenerList;
 import tw.edu.sju.ee.eea.utils.io.ChannelInputStream;
+import tw.edu.sju.ee.eea.utils.io.tools.DeviceInfo;
 
 /**
  *
@@ -76,7 +77,18 @@ public class SignalOscillogramObject extends AbstractNode implements ChannelList
                 ChannelInputStream ci = new ChannelInputStream(163840, i);
 //            ((SignalDeviceObject) project.getDeviceList().get(0)).getChannels().get(0).getInput().addStream(c0);
                 project.getDeviceList().get(0).getChannels().get(i).getInput().addStream(ci);
-                channels.add(new OscillogramChannel("MDES", i, renderer, ci));
+                channels.add(new OscillogramChannel(new DeviceInfo() {
+
+                    @Override
+                    public int getSamplerate() {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+
+                    @Override
+                    public String getDeviceName() {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+                }, i, renderer, ci));
             }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
@@ -94,7 +106,7 @@ public class SignalOscillogramObject extends AbstractNode implements ChannelList
         try {
             ci = new ChannelInputStream(163840, 0);
             channel.getInput().addStream(ci);
-            channels.add(new OscillogramChannel(channel.getDevice(), channel.getChannel(), renderer, ci));
+            channels.add(new OscillogramChannel(channel.getInfo(), channel.getChannel(), renderer, ci));
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }

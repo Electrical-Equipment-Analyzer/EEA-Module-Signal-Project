@@ -17,7 +17,9 @@
  */
 package tw.edu.sju.ee.eea.module.signal.device;
 
+import tw.edu.sju.ee.eea.utils.io.tools.DeviceInfo;
 import java.awt.Color;
+import java.lang.reflect.Method;
 import tw.edu.sju.ee.eea.module.signal.io.Channel;
 import tw.edu.sju.ee.eea.utils.io.tools.InputChannel;
 
@@ -28,13 +30,18 @@ import tw.edu.sju.ee.eea.utils.io.tools.InputChannel;
 public class DeviceChannel implements Channel {
 
     private InputChannel ic;
-    private String device;
+    private DeviceInfo device;
+//    private String device;
     private int channel;
 
-    public DeviceChannel(InputChannel ic, String device, int channel) {
+    public DeviceChannel(InputChannel ic, DeviceInfo device, int channel) {
         this.ic = ic;
         this.device = device;
         this.channel = channel;
+    }
+    
+    public DeviceInfo getInfo() {
+        return device;
     }
 
     public InputChannel getInput() {
@@ -52,7 +59,7 @@ public class DeviceChannel implements Channel {
 
     @Override
     public String getDevice() {
-        return this.device;
+        return this.device.getDeviceName();
     }
 
     @Override
