@@ -4,26 +4,22 @@
  */
 package tw.edu.sju.ee.eea.module.signal.device;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import org.netbeans.core.api.multiview.MultiViews;
+import javax.swing.JOptionPane;
 import org.netbeans.spi.navigator.NavigatorLookupHint;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
-import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
-import tw.edu.sju.ee.eea.jni.mps.MPS140801;
 import tw.edu.sju.ee.eea.module.signal.io.ChannelList;
-import tw.edu.sju.ee.eea.module.temp.MDESDevice;
-import tw.edu.sju.ee.eea.module.temp.NIDevice;
 import tw.edu.sju.ee.eea.utils.io.tools.EEADevice;
 import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
 
@@ -31,7 +27,7 @@ import tw.edu.sju.ee.eea.utils.io.tools.EEAInput;
  *
  * @author 薛聿明
  */
-public class SignalDeviceObject extends AbstractNode implements ChannelList<DeviceChannel>, NavigatorLookupHint, Serializable {
+public class SignalDeviceObject extends AbstractNode implements ChannelList<DeviceChannel>, NavigatorLookupHint, PropertyChangeListener, Serializable {
 
     public static final String MIMETYPE = "application/device";
     private TopComponent tc;
@@ -44,11 +40,12 @@ public class SignalDeviceObject extends AbstractNode implements ChannelList<Devi
         super(Children.LEAF);
         this.device = device;
         this.list = list;
-        setName(this.device.getDeviceName());
+        String showInputDialog = JOptionPane.showInputDialog(tc, "Device Name", "Message", JOptionPane.QUESTION_MESSAGE);
+        setName(showInputDialog);
         setIconBaseWithExtension("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
         input = new EEAInput(device);
         for (int i = 0; i < input.getIOChannel().length; i++) {
-            channels.add(new DeviceChannel(input.getIOChannel(i), this.device.getDeviceName(), i));
+            channels.add(new DeviceChannel(input.getIOChannel(i), this.device.toString(), i));
         }
     }
 
@@ -80,11 +77,11 @@ public class SignalDeviceObject extends AbstractNode implements ChannelList<Devi
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (tc == null) {
-                    tc = MultiViews.createMultiView("application/function", SignalDeviceObject.this);
-                }
-                tc.open();
-                tc.requestActive();
+//                if (tc == null) {
+//                    tc = MultiViews.createMultiView("application/function", SignalDeviceObject.this);
+//                }
+//                tc.open();
+//                tc.requestActive();
             }
         };
     }
@@ -103,56 +100,22 @@ public class SignalDeviceObject extends AbstractNode implements ChannelList<Devi
     })
     @Override
     protected Sheet createSheet() {
-        Sheet.Set set = new Sheet.Set();
-        set.setName(Bundle.LBL_title());
-        set.put(new PropertySupport.ReadOnly(
-                Bundle.LBL_name(),
-                String.class,
-                Bundle.LBL_name(),
-                Bundle.LBL_name()) {
-                    @Override
-                    public String getValue() throws IllegalAccessException, InvocationTargetException {
-                        return SignalDeviceObject.this.device.getDeviceName();
-                    }
-                });
-        set.put(new PropertySupport.ReadOnly(
-                Bundle.LBL_model(),
-                String.class,
-                Bundle.LBL_model(),
-                Bundle.LBL_model()) {
-                    @Override
-                    public String getValue() throws IllegalAccessException, InvocationTargetException {
-                        return SignalDeviceObject.this.device.getDeviceModel();
-                    }
-                });
-        set.put(new PropertySupport.ReadOnly(
-                Bundle.LBL_serialnumber(),
-                String.class,
-                Bundle.LBL_serialnumber(),
-                Bundle.LBL_serialnumber()) {
-                    @Override
-                    public String getValue() throws IllegalAccessException, InvocationTargetException {
-                        return SignalDeviceObject.this.device.getSerialNumber();
-                    }
-                });
-        set.put(new PropertySupport.ReadWrite<Integer>(
-                Bundle.LBL_samplerate(),
-                Integer.class,
-                Bundle.LBL_samplerate(),
-                Bundle.LBL_samplerate()) {
-                    @Override
-                    public Integer getValue() throws IllegalAccessException, InvocationTargetException {
-                        return 10000;
-                    }
-
-                    @Override
-                    public void setValue(Integer val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-
-                    }
-
-                });
         Sheet sheet = super.createSheet();
-        sheet.put(set);
+        for (Sheet.Set property : device.getProperties(this)) {
+            sheet.put(property);
+        }
         return sheet;
     }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        System.out.println("update..........");
+        System.out.println(evt);
+        if (evt.getPropertyName() == null) {
+            return ;
+        }
+        setSheet(createSheet());
+    }
+    
+  
 }
