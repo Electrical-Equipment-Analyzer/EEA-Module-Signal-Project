@@ -321,7 +321,7 @@ public class NIDevice implements EEADevice {
     }
 
     @Override
-    public double[][] read(int length) throws EEAException {
+    public double[][] read(int length) throws EEAException, InterruptedException {
         double[][] data = new double[2][];
         try {
             // Initiate the acquisition
@@ -329,7 +329,9 @@ public class NIDevice implements EEADevice {
             // Get the actual record length and actual sample rate that will be used
             int actualRecordLength = niScope.actualRecordLength();
             double sampleRate = niScope.sampleRate();
-
+            while (niScope.getAcquisitionStatus().equals(NIScope.acquisitionStatus.IN_PROGRESS)) {
+                Thread.sleep((long) (actualRecordLength / sampleRate));
+            }
             // Read the data (Initiate the acquisition, and fetch the data)
             double waveform[] = new double[actualRecordLength * 2];
             NIScope.WFMInfo wfmInfo[] = new NIScope.WFMInfo[2];
