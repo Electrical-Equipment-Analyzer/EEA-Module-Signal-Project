@@ -31,16 +31,18 @@ public class DeviceChannel implements Channel {
 
     private InputChannel ic;
     private DeviceInfo device;
-//    private String device;
+    private String name;
     private int channel;
 
     public DeviceChannel(InputChannel ic, DeviceInfo device, int channel) {
         this.ic = ic;
         this.device = device;
         this.channel = channel;
+        this.name = this.device.getDeviceName() + "/" + this.channel;
     }
     
-    public DeviceInfo getInfo() {
+    @Override
+    public DeviceInfo getDeviceInfo() {
         return device;
     }
 
@@ -50,11 +52,12 @@ public class DeviceChannel implements Channel {
 
     @Override
     public String getName() {
-        return this.device + "/" + this.channel;
+        return name;
     }
 
     @Override
     public void setName(String name) {
+        this.name = name;
     }
 
     @Override

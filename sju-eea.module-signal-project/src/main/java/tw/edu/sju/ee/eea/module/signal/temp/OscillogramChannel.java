@@ -19,9 +19,11 @@ package tw.edu.sju.ee.eea.module.signal.temp;
 
 import java.awt.Color;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import javafx.application.Platform;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import tw.edu.sju.ee.eea.module.signal.io.Channel;
+import tw.edu.sju.ee.eea.module.signal.io.ChannelInfo;
 import tw.edu.sju.ee.eea.module.signal.oscillogram.SignalRenderer;
 import tw.edu.sju.ee.eea.utils.io.ValueInput;
 import tw.edu.sju.ee.eea.utils.io.tools.DeviceInfo;
@@ -34,28 +36,34 @@ public class OscillogramChannel implements Channel {
 
     private XYChart.Series<Number, Number> series = new LineChart.Series<Number, Number>();
     private ConcurrentLinkedQueue<XYChart.Data> queue = new ConcurrentLinkedQueue<XYChart.Data>();
-    private DeviceInfo device;
+//    private DeviceInfo device;
+    private ChannelInfo channel;
 //    private String device;
-    private int channel;
+//    private int channel;
     private Color color;
     private SignalRenderer renderer;
 //    int samplerate = 10000;
     private ValueInput vi;
 
-    public OscillogramChannel(DeviceInfo device, int channel, SignalRenderer renderer, ValueInput vi) {
-        this.device = device;
+    public OscillogramChannel(ChannelInfo channel, SignalRenderer renderer, ValueInput vi) {
+//        this.device = device;
         this.channel = channel;
         this.renderer = renderer;
-        this.setName(device.getDeviceName() + "/" + channel);
+        this.setName(channel.getName());
 //        SineSimulator s = new SineSimulator(samplerate, f[getChannel()], 5);
 //        vi = new SineInputStream(s);
         this.vi = vi;
     }
 
+    @Override
+    public DeviceInfo getDeviceInfo() {
+        return channel.getDeviceInfo();
+    }
+
     private static final int[] f = {100, 200, 300};
 
     public void update(double t) {
-        renderer.renderer(queue, t, vi, device.getSamplerate());
+        renderer.renderer(queue, t, vi, channel.getDeviceInfo().getSamplerate());
 //        try {
 //            vi.skip(vi.available());
 //        } catch (IOException ex) {
@@ -72,15 +80,15 @@ public class OscillogramChannel implements Channel {
     }
 
     public String getDevice() {
-        return device.getDeviceName();
+        return channel.getDeviceInfo().getDeviceName();
     }
 
     public int getChannel() {
-        return channel;
+        return channel.getChannel();
     }
 
     public String getName() {
-        return this.series.getName();
+        return this.channel.getName();
     }
 
     public Color getColor() {
@@ -88,7 +96,14 @@ public class OscillogramChannel implements Channel {
     }
 
     public void setName(String name) {
-        this.series.setName(name);
+        this.channel.setName(name);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                series.setName(name);
+
+            }
+        });
     }
 
     public void setColor(Color color) {

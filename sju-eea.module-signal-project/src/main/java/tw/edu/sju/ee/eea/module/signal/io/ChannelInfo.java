@@ -17,14 +17,14 @@
  */
 package tw.edu.sju.ee.eea.module.signal.io;
 
-import java.awt.Color;
+import tw.edu.sju.ee.eea.utils.io.tools.DeviceInfo;
 
 /**
  *
  * @author D10307009
  */
-public interface Channel extends ChannelInfo {
-
+public interface ChannelInfo {
+    
     public String getName();
 
     public void setName(String name);
@@ -32,8 +32,6 @@ public interface Channel extends ChannelInfo {
     public String getDevice();
 
     public int getChannel();
-
-    public Color getColor();
-
-    public void setColor(Color color);
+    
+    public DeviceInfo getDeviceInfo();
 }
