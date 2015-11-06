@@ -77,13 +77,14 @@ public class NIDevice implements EEADevice {
         return device.getSerialNumber();
     }
 
+    private double samplerate;
+    
     public int getSamplerate() {
         try {
-            return (int) niScope.sampleRate();
-        } catch (NIScopeException ex) {
-            Exceptions.printStackTrace(ex);
+            samplerate = niScope.sampleRate();
+        } catch (Exception ex) {
         }
-        return 0;
+        return (int) samplerate;
     }
 
     public NIDevice() {
@@ -269,6 +270,8 @@ public class NIDevice implements EEADevice {
 
     @Override
     public void closeDevice() throws EEAException {
+        niScope.close();
+        niScope = null;
     }
 
     @Override
