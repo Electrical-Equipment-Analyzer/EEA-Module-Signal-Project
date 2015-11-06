@@ -58,7 +58,7 @@ public class NIDevice implements EEADevice {
 
     public String getDeviceName() {
         if (device == null) {
-            return null;
+            return "UnNamed";
         }
         return device.getDeviceName();
     }
@@ -100,6 +100,7 @@ public class NIDevice implements EEADevice {
         properties.add(setDevice(listener));
         properties.add(setTrigger(listener));
         properties.add(setHorizontal(listener));
+        properties.add(setVertical(listener));
         return properties;
     }
 
@@ -256,6 +257,32 @@ public class NIDevice implements EEADevice {
         return set;
     }
 
+    private Sheet.Set setVertical(PropertyChangeListener listener) {
+        Sheet.Set set = new Sheet.Set();
+        set.setName("Vertical");
+        Field[] fields = vertial.getClass().getFields();
+        System.out.println(Arrays.toString(fields));
+        for (Field field : fields) {
+            System.out.println(field.getType());
+            set.put(new PropertySupport.ReadWrite(
+                    field.getName(),
+                    field.getType(),
+                    field.getName(),
+                    field.getName()) {
+                        @Override
+                        public Object getValue() throws IllegalAccessException, InvocationTargetException {
+                            return field.get(vertial).toString();
+                        }
+
+                        @Override
+                        public void setValue(Object val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+                            field.set(vertial, val);
+                        }
+                    });
+        }
+        return set;
+    }
+
     @Override
     public void openDevice() throws EEAException {
         System.out.println("open");
@@ -285,6 +312,7 @@ public class NIDevice implements EEADevice {
     }
 
     String channelList = "0,1";
+    NIScope.Vertical vertial = new NIScope.Vertical();
     NIScope.Trigger trigger;
     NIScope.HorizontalTiming horizontalTiming = new NIScope.HorizontalTiming();
 
@@ -305,7 +333,8 @@ public class NIDevice implements EEADevice {
             niScope.configureAcquisition(NIScope.VAL_NORMAL);
 
             // Configure the vertical parameters
-            niScope.configureVertical(channelList, 10, 0, NIScope.VAL_DC, 1, true);
+//            niScope.configureVertical(channelList, 10, 0, NIScope.VAL_DC, 1, true);
+            niScope.configureVertical(vertial);
 
             // Configure the channel characteristics
             niScope.configureChanCharacteristics(channelList, NIScope.VAL_1_MEG_OHM, 0);
