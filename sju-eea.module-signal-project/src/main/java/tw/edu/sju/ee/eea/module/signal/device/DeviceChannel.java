@@ -38,9 +38,13 @@ public class DeviceChannel implements Channel {
         this.ic = ic;
         this.device = device;
         this.channel = channel;
+        setDefaultName();
+    }
+
+    public void setDefaultName() {
         this.name = this.device.getDeviceName() + "/" + this.channel;
     }
-    
+
     @Override
     public DeviceInfo getDeviceInfo() {
         return device;

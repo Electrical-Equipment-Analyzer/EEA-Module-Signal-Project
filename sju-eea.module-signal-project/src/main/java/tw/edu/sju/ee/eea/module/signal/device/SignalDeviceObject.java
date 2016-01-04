@@ -101,6 +101,9 @@ public class SignalDeviceObject extends AbstractNode implements ChannelList<Devi
     @Override
     protected Sheet createSheet() {
         setName(device.getDeviceName());
+        for (DeviceChannel channel : channels) {
+            channel.setDefaultName();
+        }
         Sheet sheet = super.createSheet();
         for (Sheet.Set property : device.getProperties(this)) {
             sheet.put(property);
