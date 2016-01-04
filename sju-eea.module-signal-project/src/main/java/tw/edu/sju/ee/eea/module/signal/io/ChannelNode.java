@@ -18,29 +18,50 @@
 package tw.edu.sju.ee.eea.module.signal.io;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.util.NbBundle;
+import tw.edu.sju.ee.eea.module.signal.device.SignalDeviceObject;
+import tw.edu.sju.ee.eea.module.signal.temp.OscillogramChannel;
 
 /**
  *
  * @author D10307009
  */
 public class ChannelNode extends AbstractNode {
-
+    
     private Channel channel;
-
+    
     public ChannelNode(Channel channel) {
         super(Children.LEAF);
         this.channel = channel;
-
+        
         setName(channel.getName());
         setIconBaseWithExtension("tw/edu/sju/ee/eea/module/iepe/project/iepe_project.png");
     }
-
+    
+    @Override
+    public Action[] getActions(boolean context) {
+        List<Action> actions = new ArrayList<Action>();
+        if (channel instanceof OscillogramChannel) {
+            actions.add(new AbstractAction("Delete") {
+                
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                }
+            });
+        }
+        return actions.toArray(new AbstractAction[actions.size()]);
+    }
+    
     @NbBundle.Messages({
         "LBL_CH_title=Properties",
         "LBL_CH_device=Device",
@@ -85,7 +106,7 @@ public class ChannelNode extends AbstractNode {
                     public String getValue() throws IllegalAccessException, InvocationTargetException {
                         return channel.getName();
                     }
-
+                    
                     @Override
                     public void setValue(String name) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
                         channel.setName(name);
@@ -100,7 +121,7 @@ public class ChannelNode extends AbstractNode {
                     public Color getValue() throws IllegalAccessException, InvocationTargetException {
                         return channel.getColor();
                     }
-
+                    
                     @Override
                     public void setValue(Color color) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
                         channel.setColor(color);
